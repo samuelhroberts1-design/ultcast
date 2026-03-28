@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms & Privacy — UltCast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0d1b2e;
+    --navy-mid: #112035;
+    --navy-card: #152640;
+    --navy-border: #1f3655;
+    --gold: #f5c518;
+    --white: #ffffff;
+    --text: #e8eef5;
+    --muted: #6b84a0;
+    --font-title: 'Bebas Neue', cursive;
+    --font-body: 'Source Sans 3', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--navy-mid);
+    border-bottom: 1px solid var(--navy-border);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .header a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .header-logo {
+    height: 28px;
+    width: auto;
+  }
+
+  .back-link {
+    font-size: 13px;
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .back-link:hover { opacity: 0.8; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(180deg, rgba(245,197,24,0.06) 0%, transparent 100%);
+    border-bottom: 1px solid var(--navy-border);
+    padding: 48px 24px 40px;
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .hero h1 {
+    font-family: var(--font-title);
+    font-size: 48px;
+    letter-spacing: 3px;
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+
+  .hero p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .hero .effective-date {
+    display: inline-block;
+    margin-top: 12px;
+    background: var(--navy-card);
+    border: 1px solid var(--navy-border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ── NAV TABS ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--navy-border);
+    position: sticky;
+    top: 65px;
+    background: var(--navy);
+    z-index: 9;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 14px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .tab.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    display: none;
+  }
+  .content.active { display: block; }
+
+  h2 {
+    font-family: var(--font-title);
+    font-size: 26px;
+    letter-spacing: 1.5px;
+    color: var(--gold);
+    margin: 40px 0 12px;
+    padding-top: 8px;
+  }
+
+  h2:first-child { margin-top: 0; }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+    margin: 24px 0 8px;
+  }
+
+  p {
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  ul, ol {
+    margin: 0 0 14px 20px;
+  }
+
+  li {
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .callout {
+    background: var(--navy-card);
+    border: 1px solid var(--navy-border);
+    border-left: 3px solid var(--gold);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin: 20px 0;
+  }
+
+  .callout p { margin: 0; color: var(--muted); font-size: 14px; }
+  .callout strong { color: var(--text); }
+
+  .warning {
+    background: rgba(229,62,62,0.06);
+    border: 1px solid rgba(229,62,62,0.2);
+    border-left: 3px solid #e53e3e;
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin: 20px 0;
+  }
+  .warning p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--navy-border);
+    margin: 40px 0;
+  }
+
+  a {
+    color: var(--gold);
+    text-decoration: none;
+  }
+  a:hover { text-decoration: underline; }
+
+  .contact-box {
+    background: var(--navy-card);
+    border: 1px solid var(--navy-border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-top: 40px;
+    text-align: center;
+  }
+  .contact-box h3 { margin: 0 0 8px; }
+  .contact-box p { margin: 0; font-size: 14px; color: var(--muted); }
+  .contact-box a { font-weight: 700; }
+
+  /* ── FOOTER ── */
+  .footer {
+    border-top: 1px solid var(--navy-border);
+    padding: 24px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 760px;
+    margin: 0 auto;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="https://ultcast.live">
+    <img class="header-logo" src="https://samuelhroberts1-design.github.io/ultcast/logo-horizontal.png" alt="UltCast" />
+  </a>
+  <a href="https://ultcast.live" class="back-link">← Back to App</a>
+</div>
+
+<div class="hero">
+  <h1>Terms & Privacy</h1>
+  <p>Please read these documents carefully before using UltCast.<br>By creating an account or using the platform, you agree to these terms.</p>
+  <span class="effective-date">Effective Date: 28 March 2026 · Australian Law Applies</span>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('terms', this)">Terms of Service</div>
+  <div class="tab" onclick="switchTab('privacy', this)">Privacy Policy</div>
+  <div class="tab" onclick="switchTab('creator', this)">Creator Guidelines</div>
+</div>
+
+<!-- ════════════════════════════
+     TERMS OF SERVICE
+════════════════════════════ -->
+<div class="content active" id="terms">
+
+  <h2>1. About UltCast</h2>
+  <p>UltCast Pty Ltd ("UltCast", "we", "us", or "our") operates a live audio marketplace at <a href="https://ultcast.live">ultcast.live</a> (the "Platform"). The Platform enables registered users ("Creators") to broadcast live audio commentary on sporting events, and other registered users ("Listeners") to discover and listen to those broadcasts. UltCast also facilitates a voluntary tipping system through which Listeners may send monetary tips directly to Creators.</p>
+  <p>These Terms of Service ("Terms") govern your access to and use of the Platform. By registering an account or using any part of the Platform, you agree to be bound by these Terms and our Privacy Policy. If you do not agree, do not use the Platform.</p>
+
+  <hr class="section-divider" />
+
+  <h2>2. Eligibility</h2>
+  <p>You must be at least 18 years of age to create an account and use the Platform. By registering, you represent and warrant that you are 18 or older and have the legal capacity to enter into a binding agreement.</p>
+  <p>UltCast is currently available in Australia. If you access the Platform from outside Australia, you do so at your own risk and are responsible for compliance with local laws.</p>
+
+  <hr class="section-divider" />
+
+  <h2>3. Accounts</h2>
+  <p>To use the Platform you must register an account with a valid email address and a unique username. You are responsible for maintaining the confidentiality of your login credentials and for all activities that occur under your account.</p>
+  <p>You must not create an account using false information, impersonate another person, or create multiple accounts for deceptive purposes. UltCast reserves the right to suspend or terminate accounts that breach these Terms.</p>
+
+  <hr class="section-divider" />
+
+  <h2>4. The Tipping System</h2>
+  <p>UltCast operates a voluntary tipping model. Listeners may choose to send a monetary tip to a Creator during or after a live broadcast. Tips are processed through Stripe, a third-party payment processor. By making or receiving a tip, you also agree to Stripe's Terms of Service.</p>
+  <p>UltCast deducts a platform fee of 20–30% from each tip before the remainder is disbursed to the Creator. Tips are non-refundable except in cases of fraud or processing error as determined by UltCast in its sole discretion.</p>
+  <p>UltCast does not guarantee a minimum income to any Creator. The receipt of tips is voluntary and depends entirely on Listener choice.</p>
+
+  <hr class="section-divider" />
+
+  <h2>5. User-Generated Content</h2>
+  <p>Creators are solely responsible for all audio content they broadcast through the Platform ("Creator Content"). UltCast operates as a user-generated content platform and does not pre-screen broadcasts. By broadcasting on UltCast, you represent and warrant that your Creator Content:</p>
+  <ul>
+    <li>Does not infringe any third-party intellectual property rights, including broadcast rights, copyrights, or trademarks;</li>
+    <li>Does not reproduce, retransmit, or include any audio from an official broadcast, stadium feed, venue PA system, or any other copyrighted audio source;</li>
+    <li>Does not constitute a functional substitute for the official broadcast of the event (see Creator Guidelines for detail);</li>
+    <li>Complies with Australian law, including defamation law and the Australian Consumer Law;</li>
+    <li>Does not include content that is unlawful, harassing, abusive, threatening, obscene, or otherwise objectionable.</li>
+  </ul>
+
+  <div class="callout">
+    <p><strong>Creator Liability:</strong> You indemnify UltCast, its officers, directors, employees, and agents against any claim, liability, damage, loss, or expense arising from your Creator Content or your breach of these Terms.</p>
+  </div>
+
+  <hr class="section-divider" />
+
+  <h2>6. Broadcasting Rights & Copyright</h2>
+  <p>Sports events and the factual information within them (scores, player names, match results) are public information and cannot be copyrighted. However, the official broadcast of a sporting event — including its audio commentary, video footage, studio segments, and replays — is protected by copyright and broadcast rights held by leagues, broadcasters, and rights-holders.</p>
+  <p>UltCast's platform is built on the principle of <strong>transformative, non-substitutive commentary</strong>. This means:</p>
+  <ul>
+    <li>You may watch or listen to the official broadcast while commentating;</li>
+    <li>Your commentary must add new expression — analysis, reaction, humour, personality, or perspective;</li>
+    <li>Your commentary must not reproduce any broadcast audio, stadium noise, PA announcements, or other protected material;</li>
+    <li>Your commentary must not serve as a functional substitute for the official broadcast — that is, a Listener should not be able to follow the full game moment-by-moment through your commentary alone without needing access to the official broadcast.</li>
+  </ul>
+
+  <div class="warning">
+    <p><strong>The Replicate Experience Test:</strong> If your audio could be swapped with an official radio broadcast and a listener would have the same understanding of every moment of the game, your commentary is not permitted on UltCast. Continuous, moment-accurate play-by-play that reconstructs the broadcast requires a broadcasting licence and is prohibited on this platform.</p>
+  </div>
+
+  <p>UltCast reserves the right to remove any broadcast that it reasonably believes infringes third-party rights. Repeat offenders will be permanently banned from the Platform.</p>
+
+  <hr class="section-divider" />
+
+  <h2>7. Trademarks & Official Affiliation</h2>
+  <p>You may refer to factual information such as team names, competition names, and match results. You must not use protected logos, imply any official affiliation with any sports league, club, broadcaster, or sponsor, or present your UltCast as an officially endorsed broadcast. If you include advertising, sponsorships, or paid promotions in your broadcasts, you must ensure they do not conflict with exclusive sponsorship categories held by leagues or broadcasters.</p>
+
+  <hr class="section-divider" />
+
+  <h2>8. Defamation & On-Air Conduct</h2>
+  <p>Australian defamation law is strict and athlete-protective. Commentary that includes false statements of fact about players, officials, coaches, or other individuals — including speculation about injuries, private conduct, or off-field matters — may expose you to legal liability. UltCast may remove content and cooperate with any defamation complaint or legal process.</p>
+  <p>You must not broadcast content that is discriminatory, vilifying, sexually explicit, or designed to harass any individual.</p>
+
+  <hr class="section-divider" />
+
+  <h2>9. Moderation & Enforcement</h2>
+  <p>UltCast operates a strike-based enforcement system. Breaches of these Terms or the Creator Guidelines may result in:</p>
+  <ol>
+    <li>A formal warning;</li>
+    <li>Temporary suspension of broadcasting privileges;</li>
+    <li>Permanent account termination.</li>
+  </ol>
+  <p>UltCast will respond to takedown requests from rights-holders, regulatory bodies, and law enforcement in accordance with applicable Australian law.</p>
+
+  <hr class="section-divider" />
+
+  <h2>10. Platform Availability</h2>
+  <p>UltCast is provided on an "as is" and "as available" basis. We do not guarantee uninterrupted access to the Platform and are not liable for any loss resulting from downtime, technical failure, or service interruption. We reserve the right to modify, suspend, or discontinue any part of the Platform at any time.</p>
+
+  <hr class="section-divider" />
+
+  <h2>11. Limitation of Liability</h2>
+  <p>To the maximum extent permitted by Australian law, UltCast's total liability to you for any claim arising out of or relating to these Terms or the Platform is limited to the amount of fees you have paid to UltCast in the 12 months preceding the claim, or AUD $100, whichever is greater. UltCast is not liable for any indirect, incidental, special, consequential, or punitive damages.</p>
+  <p>Nothing in these Terms limits any rights you may have under the Australian Consumer Law that cannot be excluded or limited by contract.</p>
+
+  <hr class="section-divider" />
+
+  <h2>12. Changes to These Terms</h2>
+  <p>We may update these Terms from time to time. We will notify you of material changes by posting a notice on the Platform or emailing your registered address. Continued use of the Platform after notice constitutes your acceptance of the updated Terms.</p>
+
+  <hr class="section-divider" />
+
+  <h2>13. Governing Law</h2>
+  <p>These Terms are governed by the laws of Victoria, Australia. Any dispute arising out of or in connection with these Terms will be subject to the exclusive jurisdiction of the courts of Victoria, Australia.</p>
+
+  <div class="contact-box">
+    <h3>Questions about these Terms?</h3>
+    <p>Contact us at <a href="mailto:legal@ultcast.live">legal@ultcast.live</a></p>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     PRIVACY POLICY
+════════════════════════════ -->
+<div class="content" id="privacy">
+
+  <h2>1. Introduction</h2>
+  <p>UltCast Pty Ltd ("UltCast", "we", "us") is committed to protecting your personal information. This Privacy Policy explains what information we collect, how we use it, who we share it with, and your rights under the <em>Privacy Act 1988</em> (Cth) and the Australian Privacy Principles.</p>
+  <p>By using the Platform you consent to the collection and use of your information as described in this Policy.</p>
+
+  <hr class="section-divider" />
+
+  <h2>2. Information We Collect</h2>
+
+  <h3>Information you provide directly</h3>
+  <ul>
+    <li><strong>Account information:</strong> email address, username, display name, bio, and profile photo when you register or edit your profile.</li>
+    <li><strong>Payment information:</strong> when you tip a Creator, payment details are processed by Stripe. UltCast does not store your full card details — only a transaction reference and amount.</li>
+    <li><strong>Broadcasts:</strong> audio content you broadcast through the Platform is transmitted in real time via LiveKit. UltCast does not store recordings of broadcasts unless required by law or for moderation purposes.</li>
+    <li><strong>Communications:</strong> any messages you send to UltCast support or via the Platform.</li>
+  </ul>
+
+  <h3>Information collected automatically</h3>
+  <ul>
+    <li><strong>Usage data:</strong> pages visited, features used, time spent, cast history, and interactions with the Platform.</li>
+    <li><strong>Device information:</strong> browser type, operating system, device identifiers, and IP address.</li>
+    <li><strong>Log data:</strong> server logs including access times, error reports, and referring URLs.</li>
+  </ul>
+
+  <hr class="section-divider" />
+
+  <h2>3. How We Use Your Information</h2>
+  <p>We use your information to:</p>
+  <ul>
+    <li>Provide, operate, and improve the Platform;</li>
+    <li>Process tips and facilitate payouts to Creators;</li>
+    <li>Verify your identity and maintain account security;</li>
+    <li>Send you service-related notifications including password resets and account alerts;</li>
+    <li>Moderate content and enforce these Terms;</li>
+    <li>Respond to legal requests and comply with applicable law;</li>
+    <li>Analyse usage patterns to improve the Platform (in aggregated or de-identified form);</li>
+    <li>With your consent, send you marketing communications about UltCast — you may opt out at any time.</li>
+  </ul>
+
+  <hr class="section-divider" />
+
+  <h2>4. Third-Party Services</h2>
+  <p>UltCast uses the following third-party services to operate the Platform:</p>
+
+  <div class="callout">
+    <p><strong>Supabase</strong> — database and authentication. Your account data, profile information, and cast records are stored in Supabase's infrastructure hosted in Singapore (Southeast Asia). Supabase complies with SOC 2 Type II standards.</p>
+  </div>
+
+  <div class="callout">
+    <p><strong>LiveKit</strong> — real-time audio streaming infrastructure. Your audio broadcasts are transmitted through LiveKit's servers. LiveKit processes audio in real time and does not retain recordings beyond the duration of a session unless a recording feature is explicitly activated.</p>
+  </div>
+
+  <div class="callout">
+    <p><strong>Stripe</strong> — payment processing. Tips you send or receive are processed by Stripe. Stripe is PCI DSS compliant. UltCast never has access to your full card number. By making a payment you agree to <a href="https://stripe.com/au/legal" target="_blank">Stripe's Terms of Service</a>.</p>
+  </div>
+
+  <div class="callout">
+    <p><strong>Vercel</strong> — serverless infrastructure for token generation and API services. No personal data is stored on Vercel beyond transient request logs.</p>
+  </div>
+
+  <p>We may also use analytics tools to understand Platform usage. Any such data is aggregated and de-identified.</p>
+
+  <hr class="section-divider" />
+
+  <h2>5. Information We Share</h2>
+  <p>We do not sell your personal information. We share it only in the following circumstances:</p>
+  <ul>
+    <li><strong>Service providers:</strong> with third-party vendors (as listed above) who process data on our behalf under appropriate data processing agreements;</li>
+    <li><strong>Legal compliance:</strong> when required to by law, court order, or government authority;</li>
+    <li><strong>Rights-holder requests:</strong> in response to valid copyright or defamation complaints where we are legally required to disclose Creator information;</li>
+    <li><strong>Business transfers:</strong> if UltCast is acquired or merges with another entity, your information may be transferred as part of that transaction — we will notify you beforehand;</li>
+    <li><strong>With your consent:</strong> in any other circumstances where you have given explicit permission.</li>
+  </ul>
+
+  <hr class="section-divider" />
+
+  <h2>6. Public Information</h2>
+  <p>Your display name, username, bio, profile photo, and broadcast history are visible to other users of the Platform. Your email address is never made public. Listener counts and tips received by Creators may be displayed publicly on the Platform.</p>
+
+  <hr class="section-divider" />
+
+  <h2>7. Data Retention</h2>
+  <p>We retain your account information for as long as your account is active. If you delete your account, we will delete your personal information within 30 days, subject to any legal obligations that require us to retain it for longer (such as financial records related to tips, which we retain for 7 years as required under Australian tax law).</p>
+
+  <hr class="section-divider" />
+
+  <h2>8. Security</h2>
+  <p>We take reasonable steps to protect your information from unauthorised access, loss, misuse, and disclosure. These include encryption in transit (HTTPS), secure authentication (Supabase Auth), and access controls. However, no system is completely secure and we cannot guarantee absolute security.</p>
+  <p>If you become aware of any breach of your account security, please notify us immediately at <a href="mailto:security@ultcast.live">security@ultcast.live</a>.</p>
+
+  <hr class="section-divider" />
+
+  <h2>9. Your Rights</h2>
+  <p>Under the Australian Privacy Principles, you have the right to:</p>
+  <ul>
+    <li>Access the personal information we hold about you;</li>
+    <li>Request correction of inaccurate or outdated information;</li>
+    <li>Request deletion of your account and associated data;</li>
+    <li>Opt out of marketing communications;</li>
+    <li>Lodge a complaint with the Office of the Australian Information Commissioner (OAIC) if you believe we have breached your privacy.</li>
+  </ul>
+  <p>To exercise any of these rights, contact us at <a href="mailto:privacy@ultcast.live">privacy@ultcast.live</a>. We will respond within 30 days.</p>
+
+  <hr class="section-divider" />
+
+  <h2>10. Cookies</h2>
+  <p>UltCast uses session tokens (stored in your browser's local storage) to maintain your logged-in state. We do not use third-party advertising cookies. You may clear your browser's local storage at any time, which will log you out of the Platform.</p>
+
+  <hr class="section-divider" />
+
+  <h2>11. Children's Privacy</h2>
+  <p>The Platform is not directed at individuals under 18 years of age. We do not knowingly collect personal information from anyone under 18. If we become aware that we have collected such information, we will delete it promptly.</p>
+
+  <hr class="section-divider" />
+
+  <h2>12. International Users</h2>
+  <p>If you access the Platform from outside Australia, your information may be transferred to and processed in Australia and other countries where our service providers operate (including Singapore and the United States). By using the Platform you consent to such transfers.</p>
+
+  <hr class="section-divider" />
+
+  <h2>13. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy periodically. We will notify you of material changes via the Platform or email. The effective date at the top of this page will always reflect the most recent version.</p>
+
+  <div class="contact-box">
+    <h3>Privacy Enquiries</h3>
+    <p>Contact our Privacy Officer at <a href="mailto:privacy@ultcast.live">privacy@ultcast.live</a></p>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════
+     CREATOR GUIDELINES
+════════════════════════════ -->
+<div class="content" id="creator">
+
+  <h2>Welcome, Creator</h2>
+  <p>UltCast exists because sports fans deserve more than the same polished, corporate commentary on repeat. You're here to add something new — your voice, your take, your personality. These guidelines exist not to limit you, but to protect you and ensure UltCast remains a sustainable, legal platform for everyone.</p>
+
+  <hr class="section-divider" />
+
+  <h2>1. The Golden Rule — Transformative Commentary</h2>
+  <p>The most important principle on UltCast is this: <strong>your commentary must be transformative, not substitutive.</strong></p>
+  <p>A transformative cast adds something new — your personality, analysis, humour, reactions, or unique perspective. It does not reconstruct the official broadcast. A listener to your cast should need legitimate access to the official broadcast to follow the game. You are their companion, not their broadcaster.</p>
+
+  <div class="callout">
+    <p><strong>Allowed styles:</strong> Analytical breakdowns · Fan reactions · Humorous commentary · Tactical discussion · Historical context · Conversational watch-alongs · Passionate supporter casts · Fantasy sports commentary</p>
+  </div>
+
+  <div class="warning">
+    <p><strong>The Replicate Experience Test:</strong> Ask yourself — if someone listened only to your cast, would they have the same understanding of every moment of the game as if they were listening to official radio commentary? If yes, your cast is not permitted on UltCast. Continuous play-by-play that describes every moment as it happens, from start to finish, requires a broadcasting licence. It is not allowed here.</p>
+  </div>
+
+  <hr class="section-divider" />
+
+  <h2>2. What You Can Do</h2>
+  <ul>
+    <li>Watch or listen to the official broadcast while you commentate — this is perfectly legal;</li>
+    <li>React to goals, big moments, and key plays as they happen;</li>
+    <li>Discuss tactics, player performance, and team strategy;</li>
+    <li>Share your opinions, predictions, and analysis freely;</li>
+    <li>Be funny, passionate, biased, crass, or conversational — your style is your product;</li>
+    <li>Reference public facts: team names, scores, player names, competition names;</li>
+    <li>Cast from your home, car, pub, or wherever you watch the game.</li>
+  </ul>
+
+  <hr class="section-divider" />
+
+  <h2>3. What You Cannot Do</h2>
+  <ul>
+    <li><strong>No broadcast audio:</strong> Do not retransmit any audio from the official broadcast, including commentary, studio segments, crowd noise from the broadcast feed, or PA announcements;</li>
+    <li><strong>No venue audio:</strong> If you attend the game in person, do not stream from inside the venue or transmit audio captured at the ground — ticket terms for commercial reporting almost universally prohibit this;</li>
+    <li><strong>No continuous play-by-play:</strong> Do not provide a moment-by-moment description of every play throughout the entire game in a way that replicates the official radio experience;</li>
+    <li><strong>No official affiliation claims:</strong> Do not use team logos, league logos, or any language that implies your cast is officially endorsed by a league, club, or broadcaster;</li>
+    <li><strong>No defamatory content:</strong> Do not make false statements of fact about players, officials, or public figures. Opinion is fine; false factual claims are not;</li>
+    <li><strong>No illegal or harmful content:</strong> No content that is unlawful, harassing, discriminatory, sexually explicit, or designed to harm any individual.</li>
+  </ul>
+
+  <hr class="section-divider" />
+
+  <h2>4. Advertising & Sponsorship</h2>
+  <p>You may include advertising, sponsorships, or paid promotions in your casts, subject to the following:</p>
+  <ul>
+    <li>Any advertising must be clearly disclosed to your audience;</li>
+    <li>It must not imply official affiliation with any league, club, or official broadcaster;</li>
+    <li>It must not use protected sponsor branding or conflict with exclusive sponsorship categories held by the relevant league (commonly: betting, alcohol, telecommunications, apparel);</li>
+    <li>UltCast reserves the right to restrict certain ad categories if required to maintain platform compliance.</li>
+  </ul>
+
+  <hr class="section-divider" />
+
+  <h2>5. Tipping & Income</h2>
+  <p>Tips sent to you by Listeners are processed via Stripe. UltCast deducts a platform fee of 20–30% before disbursing the remainder to you. You are responsible for declaring any income you receive through tips for tax purposes in accordance with Australian tax law. UltCast does not provide tax advice.</p>
+
+  <hr class="section-divider" />
+
+  <h2>6. Enforcement</h2>
+  <p>UltCast monitors content through a combination of user reports and active moderation. Violations of these guidelines may result in:</p>
+  <ol>
+    <li>A formal warning and content removal;</li>
+    <li>Temporary suspension of your broadcasting privileges;</li>
+    <li>Permanent account ban for serious or repeat violations.</li>
+  </ol>
+  <p>If you receive a takedown request or legal notice relating to your cast, notify us immediately at <a href="mailto:legal@ultcast.live">legal@ultcast.live</a>.</p>
+
+  <hr class="section-divider" />
+
+  <h2>7. Your Responsibility</h2>
+  <p>By broadcasting on UltCast, you take full legal responsibility for your content. You indemnify UltCast against any claim arising from your broadcasts. UltCast provides the platform — you own what you say.</p>
+
+  <div class="callout">
+    <p><strong>In plain English:</strong> Be yourself. Add value. Don't reproduce the broadcast. Don't pretend to be official. Don't defame anyone. Everything else is fair game — that's what UltCast is for.</p>
+  </div>
+
+  <div class="contact-box">
+    <h3>Questions about these guidelines?</h3>
+    <p>Contact us at <a href="mailto:creators@ultcast.live">creators@ultcast.live</a></p>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>© 2026 UltCast Pty Ltd · ABN pending · Victoria, Australia</p>
+  <p style="margin-top:6px"><a href="https://ultcast.live">ultcast.live</a> · <a href="mailto:legal@ultcast.live">legal@ultcast.live</a></p>
+</div>
+
+<script>
+function switchTab(id, el) {
+  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
