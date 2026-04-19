@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UltCast — Your Game. Your Voice. Your Choice.</title>
+<meta name="description" content="The world's first alternative live sports audio marketplace. Listen to fan-led commentary on any game, any time. Coming soon to app stores.">
+<meta property="og:title" content="UltCast — Finally. Your Game. Your Voice. Your Choice.">
+<meta property="og:description" content="The world's first user-generated live sports audio marketplace.">
+<meta property="og:image" content="https://samuelhroberts1-design.github.io/ultcast/logo-vertical.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════
+   RESET & VARS
+══════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:       #080f1e;
+  --navy-2:     #0c1628;
+  --navy-3:     #101f38;
+  --navy-4:     #162843;
+  --gold:       #f5c518;
+  --gold-dim:   rgba(245,197,24,0.15);
+  --gold-glow:  rgba(245,197,24,0.06);
+  --white:      #ffffff;
+  --text:       #d8e4f0;
+  --muted:      #6b84a0;
+  --border:     rgba(255,255,255,0.07);
+  --font-head:  'Barlow Condensed', sans-serif;
+  --font-body:  'Barlow', sans-serif;
+  --max:        1160px;
+  --radius:     16px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--navy);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── NOISE TEXTURE ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.4;
+}
+
+/* ══════════════════════════════════════════════════
+   NAV
+══════════════════════════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 18px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(8,15,30,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.3s;
+}
+
+.nav-logo { height: 28px; width: auto; }
+
+.nav-links { display: flex; align-items: center; gap: 32px; }
+.nav-link {
+  color: var(--muted); font-size: 14px; font-weight: 500;
+  text-decoration: none; letter-spacing: 0.3px;
+  transition: color 0.2s;
+}
+.nav-link:hover { color: var(--white); }
+
+.nav-cta {
+  background: var(--gold); color: var(--navy);
+  border: none; padding: 10px 22px; border-radius: 8px;
+  font-family: var(--font-head); font-size: 15px;
+  font-weight: 700; letter-spacing: 0.5px;
+  cursor: pointer; text-decoration: none;
+  transition: opacity 0.2s, transform 0.2s;
+  display: inline-block;
+}
+.nav-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* ══════════════════════════════════════════════════
+   HERO
+══════════════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 140px 24px 80px;
+  position: relative; overflow: hidden;
+}
+
+/* Stadium atmosphere */
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(41,98,255,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(245,197,24,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 30% at 10% 60%, rgba(41,98,255,0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Subtle grid */
+.hero::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
+
+.hero-inner { position: relative; z-index: 1; max-width: 900px; }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--gold-dim); border: 1px solid rgba(245,197,24,0.3);
+  border-radius: 100px; padding: 7px 16px;
+  font-size: 13px; font-weight: 600; color: var(--gold);
+  letter-spacing: 0.5px; margin-bottom: 32px;
+  animation: fadeUp 0.6s ease both;
+}
+
+.pill-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--gold);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.5; transform:scale(0.7); }
+}
+
+.hero-title {
+  font-family: var(--font-head);
+  font-size: clamp(56px, 10vw, 110px);
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: -1px;
+  color: var(--white);
+  margin-bottom: 8px;
+  animation: fadeUp 0.7s 0.1s ease both;
+}
+
+.hero-title .gold { color: var(--gold); }
+
+.hero-sub-title {
+  font-family: var(--font-head);
+  font-size: clamp(16px, 3vw, 22px);
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  animation: fadeUp 0.7s 0.2s ease both;
+}
+
+.hero-desc {
+  font-size: clamp(16px, 2vw, 19px);
+  color: rgba(216,228,240,0.75);
+  max-width: 580px;
+  margin: 0 auto 48px;
+  line-height: 1.65;
+  animation: fadeUp 0.7s 0.3s ease both;
+}
+
+.hero-actions {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px; flex-wrap: wrap;
+  margin-bottom: 80px;
+  animation: fadeUp 0.7s 0.4s ease both;
+}
+
+.btn-primary {
+  background: var(--gold); color: var(--navy);
+  border: none; padding: 16px 36px; border-radius: 10px;
+  font-family: var(--font-head); font-size: 17px;
+  font-weight: 800; letter-spacing: 0.5px;
+  cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 10px;
+  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0 40px rgba(245,197,24,0.25);
+}
+.btn-primary:hover {
+  opacity: 0.9; transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(245,197,24,0.35);
+}
+
+.btn-secondary {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border); padding: 16px 36px; border-radius: 10px;
+  font-family: var(--font-head); font-size: 17px;
+  font-weight: 700; letter-spacing: 0.5px;
+  cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 10px;
+  transition: border-color 0.2s, color 0.2s, transform 0.2s;
+}
+.btn-secondary:hover {
+  border-color: var(--gold); color: var(--gold);
+  transform: translateY(-2px);
+}
+
+/* App store badges */
+.store-badges {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  animation: fadeUp 0.7s 0.5s ease both;
+  margin-bottom: 72px;
+}
+
+.store-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 18px;
+  font-size: 13px; color: var(--muted); font-weight: 500;
+  letter-spacing: 0.2px;
+}
+.store-badge svg { opacity: 0.6; }
+
+/* Phone mockups in hero */
+.hero-phones {
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: -20px; position: relative;
+  animation: fadeUp 0.9s 0.5s ease both;
+}
+
+.hero-phone-main {
+  width: min(380px, 80vw);
+  filter: drop-shadow(0 40px 80px rgba(0,0,0,0.6)) drop-shadow(0 0 60px rgba(245,197,24,0.12));
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════════════
+   SECTION STRUCTURE
+══════════════════════════════════════════════════ */
+section { position: relative; z-index: 1; }
+
+.container {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.section-label {
+  font-family: var(--font-head); font-size: 12px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-label::before {
+  content: ''; display: block; width: 24px; height: 2px;
+  background: var(--gold);
+}
+
+.section-title {
+  font-family: var(--font-head);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 900; line-height: 0.95;
+  color: var(--white); letter-spacing: -0.5px;
+  margin-bottom: 20px;
+}
+
+.section-title .gold { color: var(--gold); }
+
+.section-body {
+  font-size: 17px; color: rgba(216,228,240,0.7);
+  line-height: 1.7; max-width: 560px;
+}
+
+/* ══════════════════════════════════════════════════
+   DIVIDER
+══════════════════════════════════════════════════ */
+.section-divider {
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 0;
+}
+
+/* ══════════════════════════════════════════════════
+   WHAT IS AN ALTCAST
+══════════════════════════════════════════════════ */
+.altcast-section {
+  padding: 120px 0;
+  background: var(--navy-2);
+}
+
+.altcast-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: center;
+}
+
+.altcast-phones {
+  display: flex; gap: 16px; justify-content: center; align-items: flex-end;
+}
+
+.phone-img {
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+}
+
+.phone-img-lg { width: 200px; }
+.phone-img-sm { width: 170px; margin-bottom: 20px; }
+
+.altcast-tags {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px;
+}
+
+.tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 100px; padding: 6px 14px;
+  font-size: 13px; color: var(--text); font-weight: 500;
+}
+.tag.gold {
+  background: var(--gold-dim); border-color: rgba(245,197,24,0.3);
+  color: var(--gold);
+}
+
+/* ══════════════════════════════════════════════════
+   THE PROBLEM
+══════════════════════════════════════════════════ */
+.problem-section {
+  padding: 120px 0;
+  background: var(--navy);
+}
+
+.problem-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 24px; margin-top: 60px;
+}
+
+.problem-card {
+  background: var(--navy-3);
+  border: 1px solid var(--border);
+  border-radius: 20px; padding: 36px;
+  position: relative; overflow: hidden;
+}
+.problem-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(245,197,24,0.4), transparent);
+}
+
+.problem-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px; font-size: 22px;
+}
+
+.problem-card h3 {
+  font-family: var(--font-head); font-size: 24px; font-weight: 800;
+  color: var(--white); letter-spacing: 0.3px; margin-bottom: 10px;
+}
+
+.problem-card p { font-size: 15px; color: var(--muted); line-height: 1.65; }
+
+.stat-big {
+  font-family: var(--font-head); font-size: 72px; font-weight: 900;
+  color: var(--gold); line-height: 1; margin-bottom: 8px; display: block;
+}
+
+/* ══════════════════════════════════════════════════
+   HOW IT WORKS
+══════════════════════════════════════════════════ */
+.how-section {
+  padding: 120px 0;
+  background: linear-gradient(180deg, var(--navy-2) 0%, var(--navy) 100%);
+}
+
+.how-tabs {
+  display: flex; gap: 4px; margin-bottom: 60px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 4px; width: fit-content;
+}
+
+.how-tab {
+  padding: 10px 28px; border-radius: 9px;
+  font-family: var(--font-head); font-size: 15px; font-weight: 700;
+  letter-spacing: 0.5px; cursor: pointer; transition: all 0.2s;
+  color: var(--muted); background: transparent; border: none;
+}
+.how-tab.active { background: var(--gold); color: var(--navy); }
+
+.how-content { display: none; }
+.how-content.active { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+
+.how-steps { display: flex; flex-direction: column; gap: 32px; }
+
+.how-step {
+  display: flex; gap: 20px; align-items: flex-start;
+}
+
+.step-num {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: var(--gold); color: var(--navy);
+  font-family: var(--font-head); font-size: 18px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.how-step h3 {
+  font-family: var(--font-head); font-size: 22px; font-weight: 800;
+  color: var(--white); margin-bottom: 6px;
+}
+.how-step p { font-size: 15px; color: var(--muted); line-height: 1.6; }
+
+.how-phone { display: flex; justify-content: center; }
+.how-phone img { width: 260px; border-radius: 28px; box-shadow: 0 30px 80px rgba(0,0,0,0.5); }
+
+/* ══════════════════════════════════════════════════
+   WHY ULTCAST
+══════════════════════════════════════════════════ */
+.why-section {
+  padding: 120px 0;
+  background: var(--navy-2);
+}
+
+.compare-table {
+  width: 100%; border-collapse: collapse;
+  margin-top: 60px; border-radius: 20px; overflow: hidden;
+}
+
+.compare-table th {
+  padding: 18px 24px;
+  font-family: var(--font-head); font-size: 14px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--muted); background: rgba(255,255,255,0.03);
+  text-align: center; border-bottom: 1px solid var(--border);
+}
+
+.compare-table th.highlight {
+  background: rgba(245,197,24,0.1);
+  color: var(--gold);
+  border: 1px solid rgba(245,197,24,0.25);
+}
+
+.compare-table td {
+  padding: 16px 24px;
+  font-size: 15px; color: var(--muted);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  text-align: center; background: var(--navy-3);
+}
+
+.compare-table tr:last-child td { border-bottom: none; }
+
+.compare-table td:first-child {
+  text-align: left; color: var(--text); font-weight: 500;
+  padding-left: 28px;
+}
+
+.compare-table td.highlight {
+  background: rgba(245,197,24,0.06);
+  color: var(--gold); font-weight: 700;
+  border-left: 1px solid rgba(245,197,24,0.15);
+  border-right: 1px solid rgba(245,197,24,0.15);
+}
+
+.check { color: #4ade80; font-size: 18px; }
+.cross { color: #f87171; font-size: 18px; }
+.partial { color: #fbbf24; font-size: 14px; }
+
+/* ══════════════════════════════════════════════════
+   CREATOR MODEL
+══════════════════════════════════════════════════ */
+.creator-section {
+  padding: 120px 0;
+  background: var(--navy);
+}
+
+.creator-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: center; margin-top: 60px;
+}
+
+.split-bar {
+  display: flex; height: 12px; border-radius: 100px; overflow: hidden;
+  margin: 28px 0;
+}
+.split-bar-creator { flex: 80; background: var(--gold); }
+.split-bar-platform { flex: 20; background: rgba(245,197,24,0.25); }
+
+.split-labels { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+.split-label { font-family: var(--font-head); font-size: 15px; font-weight: 700; }
+.split-label.big { font-size: 48px; color: var(--gold); line-height: 1; }
+
+.creator-features { display: flex; flex-direction: column; gap: 16px; margin-top: 28px; }
+.creator-feature {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 15px; color: var(--text);
+}
+.creator-feature::before {
+  content: '✓'; color: var(--gold); font-weight: 800;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--gold-dim); display: flex; align-items: center;
+  justify-content: center; font-size: 12px; flex-shrink: 0;
+}
+
+.creator-phones { display: flex; justify-content: center; }
+.creator-phones img { width: 280px; border-radius: 28px; box-shadow: 0 30px 80px rgba(0,0,0,0.5); }
+
+/* ══════════════════════════════════════════════════
+   THE VISION
+══════════════════════════════════════════════════ */
+.vision-section {
+  padding: 140px 0;
+  background: var(--navy-2);
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+
+.vision-section::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(245,197,24,0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.vision-quote {
+  font-family: var(--font-head);
+  font-size: clamp(32px, 5vw, 64px);
+  font-weight: 900; line-height: 1.05;
+  color: var(--white); max-width: 800px;
+  margin: 0 auto 60px; letter-spacing: -0.5px;
+}
+
+.vision-quote .gold { color: var(--gold); }
+
+.evolution-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; flex-wrap: wrap; margin-top: 60px;
+}
+
+.evo-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 10px; padding: 20px 24px;
+}
+
+.evo-icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+}
+
+.evo-name { font-family: var(--font-head); font-size: 14px; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.evo-desc { font-size: 12px; color: var(--muted); opacity: 0.7; }
+
+.evo-arrow {
+  color: var(--muted); font-size: 24px; opacity: 0.4;
+  padding: 0 8px;
+}
+
+.evo-item.final .evo-icon {
+  background: var(--gold-dim); border-color: rgba(245,197,24,0.4);
+  font-size: 28px;
+}
+.evo-item.final .evo-name { color: var(--gold); }
+
+/* ══════════════════════════════════════════════════
+   BETA SECTION
+══════════════════════════════════════════════════ */
+.beta-section {
+  padding: 120px 0;
+  background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%);
+  text-align: center;
+}
+
+.beta-card {
+  background: var(--navy-3);
+  border: 1px solid rgba(245,197,24,0.2);
+  border-radius: 28px;
+  padding: 72px 48px;
+  max-width: 700px; margin: 0 auto;
+  position: relative; overflow: hidden;
+}
+
+.beta-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.beta-card h2 {
+  font-family: var(--font-head); font-size: clamp(36px, 5vw, 56px);
+  font-weight: 900; color: var(--white); margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+.beta-card p { font-size: 17px; color: var(--muted); margin-bottom: 40px; line-height: 1.6; }
+
+.beta-note {
+  margin-top: 20px; font-size: 13px; color: var(--muted);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.beta-note::before { content: '⚠️'; font-size: 12px; }
+
+/* ══════════════════════════════════════════════════
+   SIGNUP FORM
+══════════════════════════════════════════════════ */
+.signup-section {
+  padding: 120px 0;
+  background: var(--navy);
+}
+
+.signup-inner {
+  max-width: 640px; margin: 0 auto; text-align: center;
+}
+
+.role-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px; margin: 36px 0;
+}
+
+.role-card {
+  border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px 16px;
+  cursor: pointer; transition: all 0.2s;
+  background: transparent; text-align: center;
+  position: relative;
+}
+
+.role-card input[type="radio"] { display: none; }
+
+.role-card:has(input:checked) {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+}
+
+.role-card:has(input:checked) .role-title { color: var(--gold); }
+
+.role-icon { font-size: 28px; display: block; margin-bottom: 8px; }
+.role-title { font-family: var(--font-head); font-size: 17px; font-weight: 800; color: var(--white); letter-spacing: 0.3px; margin-bottom: 4px; }
+.role-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+.role-perk {
+  margin-top: 8px; padding: 5px 8px;
+  background: rgba(245,197,24,0.1); border-radius: 6px;
+  font-size: 11px; color: var(--gold); font-weight: 600;
+  display: none;
+}
+
+.role-card:has(input[value="caster"]:checked) .role-perk { display: block; }
+
+.form-field {
+  width: 100%; padding: 14px 18px;
+  background: var(--navy-3); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--white);
+  font-family: var(--font-body); font-size: 15px;
+  outline: none; transition: border-color 0.2s;
+  margin-bottom: 12px;
+}
+.form-field:focus { border-color: rgba(245,197,24,0.4); }
+.form-field::placeholder { color: var(--muted); }
+
+textarea.form-field { min-height: 100px; resize: vertical; }
+
+.form-submit {
+  width: 100%; padding: 16px;
+  background: var(--gold); color: var(--navy);
+  border: none; border-radius: 10px;
+  font-family: var(--font-head); font-size: 18px; font-weight: 800;
+  letter-spacing: 0.5px; cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+  margin-top: 8px;
+}
+.form-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+.form-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.form-legal {
+  margin-top: 16px; font-size: 12px; color: var(--muted);
+  line-height: 1.5;
+}
+.form-legal a { color: var(--gold); }
+
+.form-success {
+  background: rgba(74,222,128,0.08);
+  border: 1px solid rgba(74,222,128,0.25);
+  border-radius: 12px; padding: 24px;
+  font-size: 16px; color: #4ade80;
+  display: none; margin-top: 16px;
+}
+
+/* ══════════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════════ */
+footer {
+  padding: 48px 24px;
+  background: var(--navy-2);
+  border-top: 1px solid var(--border);
+}
+
+.footer-inner {
+  max-width: var(--max); margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 20px;
+}
+
+.footer-logo { height: 22px; opacity: 0.7; }
+
+.footer-links {
+  display: flex; gap: 24px;
+}
+.footer-link { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+.footer-link:hover { color: var(--text); }
+
+.footer-copy { font-size: 13px; color: var(--muted); }
+
+/* ══════════════════════════════════════════════════
+   SCROLL ANIMATIONS
+══════════════════════════════════════════════════ */
+.reveal {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  nav { padding: 16px 20px; }
+  .nav-links { display: none; }
+  .altcast-grid,
+  .how-content.active,
+  .creator-grid { grid-template-columns: 1fr; }
+  .altcast-phones { order: -1; }
+  .how-phone { display: none; }
+  .creator-phones { display: none; }
+  .problem-grid { grid-template-columns: 1fr; }
+  .evolution-row { gap: 0; }
+  .evo-arrow { display: none; }
+  .role-grid { grid-template-columns: 1fr; }
+  .beta-card { padding: 48px 24px; }
+  .compare-table { font-size: 13px; }
+  .compare-table td, .compare-table th { padding: 12px 12px; }
+}
+
+@media (max-width: 500px) {
+  .hero-title { font-size: 52px; }
+  .store-badges { flex-direction: column; }
+  .compare-table { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════ NAV ════ -->
+<nav>
+  <a href="#hero">
+    <img class="nav-logo" src="https://samuelhroberts1-design.github.io/ultcast/logo-horizontal.png" alt="UltCast" />
+  </a>
+  <div class="nav-links">
+    <a href="#how" class="nav-link">How It Works</a>
+    <a href="#creator" class="nav-link">For Creators</a>
+    <a href="#signup" class="nav-link">Sign Up</a>
+  </div>
+  <a href="https://ultcast.live/demo" class="nav-cta">Try Beta →</a>
+</nav>
+
+<!-- ════ HERO ════ -->
+<section class="hero" id="hero">
+  <div class="hero-inner">
+    <div class="pill">
+      <span class="pill-dot"></span>
+      Coming Soon to App Stores
+    </div>
+
+    <h1 class="hero-title">
+      FINALLY.<br>
+      <span class="gold">YOUR GAME.</span><br>
+      YOUR VOICE.<br>
+      YOUR CHOICE.
+    </h1>
+
+    <p class="hero-sub-title">UltCast — The World's First Alternative Live Sports Audio Marketplace</p>
+
+    <p class="hero-desc">
+      Listen to fan-led commentary on any game, any time — or go live yourself. 
+      Real voices. Real takes. Sports the way fans actually talk about it.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#signup" class="btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+        Get Early Access
+      </a>
+      <a href="https://ultcast.live/demo" class="btn-secondary">
+        Try the Beta →
+      </a>
+    </div>
+
+    <div class="store-badges">
+      <div class="store-badge">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" opacity="0.7"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        App Store — Coming Soon
+      </div>
+      <div class="store-badge">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" opacity="0.7"><path d="M3.18 23.76c.37.21.8.22 1.18.04L14.31 12 4.36.2C3.98.01 3.55.02 3.18.24 2.8.46 2.57.88 2.57 1.37v21.26c0 .49.23.91.61 1.13zM16.54 9.73l2.5-1.44-10.4-8.08L16.54 9.73zm2.5 6.97-2.5-1.44-7.9 9.52 10.4-8.08zM21.43 10.73l-3.05-1.76-3.31 3.03 3.31 3.03 3.05-1.76c.87-.5.87-1.54 0-2.04l.0-.5z"/></svg>
+        Google Play — Coming Soon
+      </div>
+    </div>
+
+    <div class="hero-phones">
+      <img
+        class="hero-phone-main"
+        src="https://samuelhroberts1-design.github.io/ultcast/mockup-player.png"
+        alt="UltCast app — live player screen"
+      />
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════ WHAT IS AN ALT-CAST ════ -->
+<section class="altcast-section reveal" id="what">
+  <div class="container">
+    <div class="altcast-grid">
+      <div>
+        <div class="section-label">What is UltCast</div>
+        <h2 class="section-title">Sports<br>your way.<br><span class="gold">Finally.</span></h2>
+        <p class="section-body">
+          An Alt-Cast is an alternative broadcast — fan-led audio commentary that runs alongside the live game. Think of it like a group chat with your most passionate friends, but anyone can tune in.
+        </p>
+        <p class="section-body" style="margin-top:14px">
+          Top-performing Alt-Casts attract tens of thousands of viewers. Until now, that space has been reserved for celebrities and networks. UltCast opens it to everyone.
+        </p>
+        <div class="altcast-tags" style="margin-top:28px">
+          <span class="tag gold">🎙️ Live Commentary</span>
+          <span class="tag">Fan Reactions</span>
+          <span class="tag">Tactical Analysis</span>
+          <span class="tag">Supporter Casts</span>
+          <span class="tag">Watch-Alongs</span>
+        </div>
+      </div>
+      <div class="altcast-phones">
+        <img class="phone-img phone-img-sm" src="https://samuelhroberts1-design.github.io/ultcast/mockup-browse.png" alt="Browse screen" />
+        <img class="phone-img phone-img-lg" src="https://samuelhroberts1-design.github.io/ultcast/mockup-home.png" alt="Home screen" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════ THE PROBLEM ════ -->
+<section class="problem-section reveal" id="problem">
+  <div class="container">
+    <div class="section-label">The Problem</div>
+    <h2 class="section-title">One game.<br><span class="gold">One voice.</span><br>That's the problem.</h2>
+    <p class="section-body" style="margin-top:16px">
+      No matter how you watch, you get the same broadcaster, the same takes, the same format. Sports audio is the last major media category yet to be democratised.
+    </p>
+    <div class="problem-grid" style="margin-top:60px">
+      <div class="problem-card">
+        <div class="problem-icon">📻</div>
+        <h3>Broadcasting is Gatekept</h3>
+        <p>There is no pathway for everyday commentators, analysts, or passionate fans to build an audience and earn from their knowledge. The industry is closed to outsiders.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🔒</div>
+        <h3>Top-Down Only</h3>
+        <p>Alt-Casts exist — but only for celebrities and insiders. The everyday sports fan who knows more than the panel has nowhere to go.</p>
+      </div>
+      <div class="problem-card" style="grid-column: span 2">
+        <div style="display:flex;align-items:center;gap:40px;flex-wrap:wrap">
+          <div>
+            <span class="stat-big">40%</span>
+            <p style="color:var(--muted);font-size:15px">of sports audio listeners want more variety and unique perspectives for the sports they love. The demand exists. The platform didn't.<br><br><em style="font-size:13px;opacity:0.7">— Edison Research, Sports Audio Report 2024</em></p>
+          </div>
+          <div style="flex:1;min-width:240px;border-left:1px solid var(--border);padding-left:40px">
+            <h3>Until Now</h3>
+            <p>UltCast is the first platform built from the ground up for alternative live sports commentary — rights-safe, open to all, and built for creators to earn.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════ HOW IT WORKS ════ -->
+<section class="how-section reveal" id="how">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">Simple for fans.<br><span class="gold">Powerful for creators.</span></h2>
+    <p class="section-body" style="margin-top:16px">Whether you're here to listen or to be heard, UltCast gets out of the way.</p>
+
+    <div style="margin-top:48px">
+      <div class="how-tabs">
+        <button class="how-tab active" onclick="switchTab('listener', this)">🎧 I want to Listen</button>
+        <button class="how-tab" onclick="switchTab('caster', this)">🎙️ I want to Cast</button>
+      </div>
+
+      <div class="how-content active" id="tab-listener">
+        <div class="how-steps">
+          <div class="how-step">
+            <div class="step-num">1</div>
+            <div>
+              <h3>Find Your Game</h3>
+              <p>Browse live casts by sport, league, or team. See who's live right now — from AFL to the Premier League to the NBA.</p>
+            </div>
+          </div>
+          <div class="how-step">
+            <div class="step-num">2</div>
+            <div>
+              <h3>Tap & Listen</h3>
+              <p>One tap to join. Audio plays in the background while you watch the game on TV, or anywhere else you are. No subscriptions. Free forever.</p>
+            </div>
+          </div>
+          <div class="how-step">
+            <div class="step-num">3</div>
+            <div>
+              <h3>Tip if You Love It</h3>
+              <p>Found your favourite caster? Send them a tip directly. 100% optional, instant, and goes straight to the creator.</p>
+            </div>
+          </div>
+        </div>
+        <div class="how-phone">
+          <img src="https://samuelhroberts1-design.github.io/ultcast/mockup-browse.png" alt="Browse casts" />
+        </div>
+      </div>
+
+      <div class="how-content" id="tab-caster">
+        <div class="how-steps">
+          <div class="how-step">
+            <div class="step-num">1</div>
+            <div>
+              <h3>Pick Your Game</h3>
+              <p>Select your sport, league, and the two teams playing. Takes seconds. If it's on, you can cast it.</p>
+            </div>
+          </div>
+          <div class="how-step">
+            <div class="step-num">2</div>
+            <div>
+              <h3>Go Live</h3>
+              <p>Tap Go Live and start talking. Your cast appears instantly in the discovery feed for listeners worldwide. No equipment needed — just your voice.</p>
+            </div>
+          </div>
+          <div class="how-step">
+            <div class="step-num">3</div>
+            <div>
+              <h3>Earn from Your Passion</h3>
+              <p>Listeners tip you directly during the cast. You keep 80% of every tip. The better your cast, the more you earn.</p>
+            </div>
+          </div>
+        </div>
+        <div class="how-phone">
+          <img src="https://samuelhroberts1-design.github.io/ultcast/mockup-start.png" alt="Start a cast" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════ WHY ULTCAST ════ -->
+<section class="why-section reveal" id="why">
+  <div class="container">
+    <div class="section-label">Why UltCast</div>
+    <h2 class="section-title">Built for this.<br><span class="gold">Nothing else is.</span></h2>
+    <p class="section-body" style="margin-top:16px">Every other platform is a workaround. UltCast is built from scratch for live sports audio.</p>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th style="text-align:left;padding-left:28px">Feature</th>
+          <th>Traditional Radio / TV</th>
+          <th>Streaming Platforms</th>
+          <th>General Live Apps</th>
+          <th class="highlight">UltCast</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Free to Listen</td>
+          <td><span class="partial">Sometimes</span></td>
+          <td><span class="partial">Subscription</span></td>
+          <td><span class="check">✓</span></td>
+          <td class="highlight"><span class="check">✓</span> Always</td>
+        </tr>
+        <tr>
+          <td>No Ads</td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td class="highlight"><span class="check">✓</span> Ad-free</td>
+        </tr>
+        <tr>
+          <td>Open to All Creators</td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="partial">Limited</span></td>
+          <td class="highlight"><span class="check">✓</span> Anyone</td>
+        </tr>
+        <tr>
+          <td>Built for Live Sport</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td class="highlight"><span class="check">✓</span> Purpose-built</td>
+        </tr>
+        <tr>
+          <td>Creator Earnings</td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="partial">Ads only</span></td>
+          <td class="highlight"><span class="check">✓</span> Direct tipping</td>
+        </tr>
+        <tr>
+          <td>Background Audio</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="partial">Limited</span></td>
+          <td class="highlight"><span class="check">✓</span> Lock screen controls</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════ CREATOR MODEL ════ -->
+<section class="creator-section reveal" id="creator">
+  <div class="container">
+    <div class="creator-grid">
+      <div>
+        <div class="section-label">For Creators</div>
+        <h2 class="section-title">Your voice.<br><span class="gold">Your earnings.</span></h2>
+        <p class="section-body" style="margin-top:16px">
+          If you're a sports person with opinions, there has never been a place built for you. Until now.
+        </p>
+
+        <div class="split-bar" style="margin:36px 0 8px">
+          <div class="split-bar-creator"></div>
+          <div class="split-bar-platform"></div>
+        </div>
+        <div class="split-labels">
+          <div>
+            <div class="split-label big">80%</div>
+            <div class="split-label" style="color:var(--gold)">Goes to You</div>
+          </div>
+          <div style="text-align:right">
+            <div class="split-label" style="font-size:24px;color:var(--muted)">20%</div>
+            <div class="split-label" style="font-size:13px;color:var(--muted)">Platform</div>
+          </div>
+        </div>
+
+        <div class="creator-features" style="margin-top:32px">
+          <div class="creator-feature">No upfront cost. No gear needed. Just your voice.</div>
+          <div class="creator-feature">Tips from listeners paid directly and instantly.</div>
+          <div class="creator-feature">Earn more as your audience grows.</div>
+          <div class="creator-feature">Full control over every cast you do.</div>
+          <div class="creator-feature">Discovery built in — listeners find you automatically.</div>
+        </div>
+
+        <div style="margin-top:36px;padding:20px;background:var(--gold-dim);border:1px solid rgba(245,197,24,0.25);border-radius:14px">
+          <div style="font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--gold);margin-bottom:6px">Early Creator Offer</div>
+          <p style="font-size:14px;color:var(--text);line-height:1.6">The first 100 creators to express interest get <strong style="color:var(--gold)">50% off</strong> the platform's take — permanently. Sign up below to secure your spot.</p>
+        </div>
+      </div>
+      <div class="creator-phones">
+        <img src="https://samuelhroberts1-design.github.io/ultcast/mockup-hub.png" alt="Cast Hub" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════ THE VISION ════ -->
+<section class="vision-section reveal" id="vision">
+  <div class="container">
+    <div class="section-label" style="justify-content:center">The Bigger Picture</div>
+    <div class="vision-quote">
+      "In 10 years, every game will have<br>
+      <span class="gold">a thousand voices."</span>
+    </div>
+    <p style="font-size:18px;color:var(--muted);max-width:560px;margin:0 auto;line-height:1.7">
+      Sports broadcasting is the last major media category yet to be democratised by the creator economy. Every other category already has its platform.
+    </p>
+
+    <div class="evolution-row" style="margin-top:60px">
+      <div class="evo-item">
+        <div class="evo-icon">🎵</div>
+        <div class="evo-name">Spotify</div>
+        <div class="evo-desc">Music</div>
+      </div>
+      <div class="evo-arrow">→</div>
+      <div class="evo-item">
+        <div class="evo-icon">🎬</div>
+        <div class="evo-name">Netflix</div>
+        <div class="evo-desc">Film & TV</div>
+      </div>
+      <div class="evo-arrow">→</div>
+      <div class="evo-item">
+        <div class="evo-icon">📰</div>
+        <div class="evo-name">X / Substack</div>
+        <div class="evo-desc">News & Opinion</div>
+      </div>
+      <div class="evo-arrow">→</div>
+      <div class="evo-item">
+        <div class="evo-icon">📹</div>
+        <div class="evo-name">YouTube</div>
+        <div class="evo-desc">Video</div>
+      </div>
+      <div class="evo-arrow">→</div>
+      <div class="evo-item final">
+        <div class="evo-icon">🎙️</div>
+        <div class="evo-name">UltCast</div>
+        <div class="evo-desc">Live Sport</div>
+      </div>
+    </div>
+
+    <p style="margin-top:48px;font-family:var(--font-head);font-size:20px;font-weight:700;color:var(--muted);letter-spacing:1px">
+      Sports broadcasting is a dinosaur.<br>
+      <span style="color:var(--white)">UltCast is what comes next.</span>
+    </p>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════ TRY BETA ════ -->
+<section class="beta-section reveal" id="beta">
+  <div class="container">
+    <div class="beta-card">
+      <div class="section-label" style="justify-content:center">Beta — Available Now</div>
+      <h2>Try It Now</h2>
+      <p>The beta is live. No download required — runs right in your browser. Go live, listen to a cast, or send a tip. See what the future of sports sounds like.</p>
+      <a href="https://ultcast.live/demo" class="btn-primary" style="display:inline-flex">
+        Open the Beta →
+      </a>
+      <p class="beta-note">This is an early beta. Some features are still in development. Your feedback shapes the app.</p>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════ SIGN UP ════ -->
+<section class="signup-section reveal" id="signup">
+  <div class="container">
+    <div class="signup-inner">
+      <div class="section-label" style="justify-content:center">Stay in the Loop</div>
+      <h2 class="section-title">Be part of<br><span class="gold">something first.</span></h2>
+      <p class="section-body" style="margin:16px auto;max-width:480px">
+        Sign up to hear about the app launch, early access, and creator opportunities. No spam. Ever.
+      </p>
+
+      <div class="role-grid">
+        <label class="role-card">
+          <input type="radio" name="role" value="listener">
+          <span class="role-icon">🎧</span>
+          <div class="role-title">I'm a Fan</div>
+          <div class="role-desc">I want to listen to great sports commentary</div>
+        </label>
+        <label class="role-card">
+          <input type="radio" name="role" value="caster">
+          <input type="hidden" name="is-caster" value="true">
+          <span class="role-icon">🎙️</span>
+          <div class="role-title">I'm a Creator</div>
+          <div class="role-desc">I want to go live and build an audience</div>
+          <div class="role-perk">🏆 First 100 get 50% off platform fee</div>
+        </label>
+        <label class="role-card">
+          <input type="radio" name="role" value="both">
+          <span class="role-icon">⚡</span>
+          <div class="role-title">Both</div>
+          <div class="role-desc">I want to listen and cast</div>
+        </label>
+      </div>
+
+      <form id="waitlist-form" onsubmit="submitForm(event)">
+        <input class="form-field" id="form-email" type="email" placeholder="Your email address" required />
+        <textarea class="form-field" id="form-message" placeholder="Anything you want to tell us? (optional — your sport, team, questions, thoughts)" rows="3"></textarea>
+        <button type="submit" class="form-submit" id="form-btn">Count Me In →</button>
+        <p class="form-legal">
+          By signing up you agree to our <a href="https://ultcast.live/terms.html">Terms & Privacy Policy</a>. 
+          We'll only contact you about UltCast.
+        </p>
+        <div class="form-success" id="form-success">
+          🎉 You're in! We'll be in touch when it's time. Keep an ear out.
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ════ FOOTER ════ -->
+<footer>
+  <div class="footer-inner">
+    <img class="footer-logo" src="https://samuelhroberts1-design.github.io/ultcast/logo-horizontal.png" alt="UltCast" />
+    <div class="footer-links">
+      <a href="https://ultcast.live/demo" class="footer-link">Beta App</a>
+      <a href="https://ultcast.live/terms.html" class="footer-link">Terms & Privacy</a>
+    </div>
+    <div class="footer-copy">© 2026 UltCast · Melbourne, Australia</div>
+  </div>
+</footer>
+
+<script>
+// ── Tab switcher ──
+function switchTab(tab, el) {
+  document.querySelectorAll('.how-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.how-content').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// ── Scroll reveal ──
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('visible');
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── Waitlist form ──
+const SUPABASE_URL = 'https://xkkeupfaxcccmwcyebcc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhra2V1cGZheGNjY213Y3llYmNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjk1NTcsImV4cCI6MjA4OTYwNTU1N30.TJM2llMp3S6g7W2KrzyASZmQAvsvJacaL6T4M_LvXVc';
+
+async function submitForm(e) {
+  e.preventDefault();
+  const btn = document.getElementById('form-btn');
+  const successEl = document.getElementById('form-success');
+  const email = document.getElementById('form-email').value.trim();
+  const message = document.getElementById('form-message').value.trim();
+  const roleEl = document.querySelector('input[name="role"]:checked');
+  const role = roleEl ? roleEl.value : 'unspecified';
+
+  if (!email) return;
+
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({ email, role, message: message || null }),
+    });
+
+    if (res.ok || res.status === 201) {
+      successEl.style.display = 'block';
+      document.getElementById('form-email').value = '';
+      document.getElementById('form-message').value = '';
+      btn.textContent = '✓ You\'re In';
+    } else {
+      throw new Error('Failed');
+    }
+  } catch(err) {
+    btn.textContent = 'Try Again';
+    btn.disabled = false;
+    alert('Something went wrong. Please try again or email us at hello@ultcast.live');
+  }
+}
+
+// ── Smooth nav background on scroll ──
+window.addEventListener('scroll', () => {
+  const nav = document.querySelector('nav');
+  if (window.scrollY > 60) {
+    nav.style.background = 'rgba(8,15,30,0.97)';
+  } else {
+    nav.style.background = 'rgba(8,15,30,0.85)';
+  }
+});
+</script>
+
+</body>
+</html>
