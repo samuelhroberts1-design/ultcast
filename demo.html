@@ -573,6 +573,7 @@ body::after {
   padding:10px 14px; display:flex; align-items:center; gap:10px;
   z-index:88; cursor:pointer; box-shadow:0 -4px 24px rgba(0,0,0,0.4); transition:all 0.3s;
 }
+body.mini-on .scroll { padding-bottom:150px; }
 .mini-player.hidden { transform:translateX(-50%) translateY(100px); opacity:0; pointer-events:none; }
 .mini-wave { display:flex; align-items:center; gap:2px; }
 .mini-bar { width:2px; background:var(--accent); border-radius:2px; animation:barAnim 1s ease-in-out infinite; }
@@ -727,11 +728,6 @@ body::after {
 
   </div>
 
-  <div class="mini-player hidden" id="miniPlayer" onclick="openPlayerFromMini()">
-    <div class="mini-wave"><div class="mini-bar"></div><div class="mini-bar"></div><div class="mini-bar"></div><div class="mini-bar"></div><div class="mini-bar"></div></div>
-    <div class="mini-info"><div class="mini-game" id="miniGame">—</div><div class="mini-caster" id="miniCaster">—</div></div>
-    <div class="mini-play"><svg width="13" height="13" viewBox="0 0 24 24" fill="#0F0E0D"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></div>
-  </div>
 
   <nav class="bottom-nav">
     <div class="nav-item active" onclick="switchMain('home')"><div class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>HOME</div>
@@ -741,10 +737,17 @@ body::after {
   </nav>
 </div>
 
+<!-- ═══ MINI PLAYER (shows on Home / Browse / Cast / Profile while listening) ═══ -->
+<div class="mini-player hidden" id="miniPlayer" onclick="openPlayerFromMini()">
+  <div class="mini-wave"><div class="mini-bar"></div><div class="mini-bar"></div><div class="mini-bar"></div><div class="mini-bar"></div><div class="mini-bar"></div></div>
+  <div class="mini-info"><div class="mini-game" id="miniGame">—</div><div class="mini-caster" id="miniCaster">—</div></div>
+  <div class="mini-play" id="miniMuteBtn" onclick="event.stopPropagation(); miniToggleMute()" title="Mute / unmute"><svg width="15" height="15" viewBox="0 0 24 24" fill="#0F0E0D"><path id="miniMuteIcon" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></div>
+</div>
+
 <!-- ═══ PLAYER ═══ -->
 <div class="screen" id="player-screen">
   <div class="player-topbar">
-    <button class="back-btn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></button>
+    <button class="back-btn" onclick="minimizePlayer()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></button>
     <div class="player-caster-row">
       <div id="pAvatarWrap" style="width:44px;height:44px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#3a2a1e,#1A1816);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--cream)">
         <span id="pAvatar">SS</span>
@@ -1328,6 +1331,7 @@ async function handleAuth() {
 }
 
 async function signOut() {
+  if (window._listeningRoom) { await stopListeningQuietly(); }
   try { await sb.auth.signOut(); } catch(e) {}
   currentUser = null;
   currentUserProfile = null;
@@ -1487,6 +1491,68 @@ function confirmUnofficialAndGoLive() {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  try { updateMiniPlayer(); } catch(e) {}
+}
+
+// ════════════════════════════════════════════════
+// MINI PLAYER — keep listening while browsing
+// ════════════════════════════════════════════════
+const MINI_SCREENS = ['home-screen', 'browse-screen', 'startcast-screen', 'profile-screen'];
+const MINI_TAB = { 'home-screen':'home', 'browse-screen':'browse', 'startcast-screen':'cast', 'profile-screen':'profile' };
+window._miniActive = false;
+window._listeningRoom = null;
+
+function setMiniActive(on) {
+  window._miniActive = !!on;
+  updateMiniPlayer();
+}
+
+function updateMiniPlayer() {
+  const mp = document.getElementById('miniPlayer');
+  if (!mp) return;
+  const active = document.querySelector('.screen.active')?.id;
+  const show = window._miniActive && MINI_SCREENS.includes(active);
+  mp.classList.toggle('hidden', !show);
+  document.body.classList.toggle('mini-on', show);
+  if (show) refreshMiniIcon();
+}
+
+function refreshMiniIcon() {
+  const icon = document.getElementById('miniMuteIcon');
+  if (!icon) return;
+  icon.setAttribute('d', listenerMuted
+    ? 'M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z'
+    : 'M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z');
+  const btn = document.getElementById('miniMuteBtn');
+  if (btn) btn.style.background = listenerMuted ? 'var(--live-red)' : '';
+}
+
+function miniToggleMute() {
+  toggleListenerMute();
+  refreshMiniIcon();
+}
+
+// Back arrow on the player: keep the audio going and drop back to where you were.
+// If nothing is actually playing (no caster / cast ended / failed), it fully stops like before.
+function minimizePlayer() {
+  const status = document.getElementById('audioStatus')?.textContent || '';
+  if (!window._listeningRoom || status.includes('🔇')) { goBack(); return; }
+  const dest = MINI_SCREENS.includes(prevScreen) ? prevScreen : 'home-screen';
+  showScreen(dest);
+  setTimeout(() => setActiveNav(MINI_TAB[dest] || 'home'), 10);
+}
+
+// Stops listening without changing screen (used when switching casts, going live, logging out, or a cast ends)
+async function stopListeningQuietly() {
+  if (window._listenerPollInterval) { clearInterval(window._listenerPollInterval); window._listenerPollInterval = null; }
+  window._listeningRoom = null;
+  const old = lkRoom;
+  lkRoom = null;
+  if (old) { try { await old.disconnect(); } catch(e) {} }
+  stopAudioKeepalive();
+  if (navigator.mediaSession) navigator.mediaSession.playbackState = 'none';
+  window._currentCastRow = null;
+  setMiniActive(false);
 }
 
 function setActiveNav(tab) {
@@ -1516,8 +1582,8 @@ async function goBack() {
   stopAudioKeepalive();
   if (navigator.mediaSession) navigator.mediaSession.playbackState = 'none';
   window._currentCastRow = null;
-  const mp = document.getElementById('miniPlayer');
-  if (mp) mp.classList.add('hidden');
+  window._listeningRoom = null;
+  setMiniActive(false);
   showScreen(prevScreen || 'home-screen');
 }
 // Tapping the logo on Home reloads the page. If audio is connected, just refresh the list instead
@@ -1655,18 +1721,13 @@ function subscribeToLiveCasts() {
 
         // If the cast the user is currently listening to just ended, hide mini player
         const changed = payload.new;
-        if (changed && changed.is_live === false && window._currentCastRow) {
-          if (changed.room_name === window._currentCastRow.room_name) {
-            // Cast ended — go back to home and hide mini player
-            document.getElementById('miniPlayer').classList.add('hidden');
-            window._currentCastRow = null;
-            stopAudioKeepalive();
-            if (navigator.mediaSession) navigator.mediaSession.playbackState = 'none';
-            if (document.getElementById('player-screen').classList.contains('active')) {
-              showScreen('home-screen');
-              showToast('📻 This cast has ended');
-            }
-          }
+        const listeningTo = window._listeningRoom || window._currentCastRow?.room_name;
+        if (changed && changed.is_live === false && listeningTo && changed.room_name === listeningTo) {
+          // Cast ended — stop listening, hide mini player, and let them know
+          const onPlayer = document.getElementById('player-screen').classList.contains('active');
+          stopListeningQuietly();
+          if (onPlayer) showScreen('home-screen');
+          showToast('📻 This cast has ended');
         }
       })
       .subscribe();
@@ -1691,6 +1752,11 @@ function openBrowseCastByIndex(i) {
 }
 
 async function openPlayer(game, league, caster, sport, roomName) {
+  const _room = roomName || game.replace(/\s+/g,'-').toLowerCase();
+  // Already listening to this exact cast: just bring the player back up
+  if (window._listeningRoom === _room && lkRoom && lkRoom.state !== 'disconnected') { openPlayerFromMini(); return; }
+  // Listening to a different cast: stop that one first so two never play at once
+  if (window._listeningRoom && window._listeningRoom !== _room) { await stopListeningQuietly(); }
   prevScreen = document.querySelector('.screen.active').id;
   currentGame = game; currentLeague = league; currentCaster = caster; currentSport = sport;
   const room = roomName || game.replace(/\s+/g,'-').toLowerCase();
@@ -1751,7 +1817,7 @@ async function openPlayer(game, league, caster, sport, roomName) {
   // Mini player
   document.getElementById('miniGame').textContent = game;
   document.getElementById('miniCaster').textContent = caster + ' · ' + sport;
-  document.getElementById('miniPlayer').classList.remove('hidden');
+  setMiniActive(true);
 
   isPlaying = true; isFollowing = false; listenerMuted = false;
   document.getElementById('followBtn').classList.remove('following');
@@ -1759,6 +1825,7 @@ async function openPlayer(game, league, caster, sport, roomName) {
   showScreen('player-screen');
 
   // Only connect if not already in this room
+  window._listeningRoom = room;
   if (!lkRoom || lkRoom.state === 'disconnected') {
     connectAsListener(room);
   }
@@ -1766,7 +1833,8 @@ async function openPlayer(game, league, caster, sport, roomName) {
 
 function openPlayerFromMini() {
   // Just show the player screen — don't reconnect audio, it's already streaming
-  prevScreen = 'home-screen';
+  const cur = document.querySelector('.screen.active')?.id;
+  prevScreen = MINI_SCREENS.includes(cur) ? cur : 'home-screen';
   showScreen('player-screen');
 }
 
@@ -1801,6 +1869,7 @@ async function connectAsListener(roomName) {
     if (lkRoom) { await lkRoom.disconnect(); lkRoom = null; }
 
     const token = await getListenerToken(roomName);
+    if (window._listeningRoom !== roomName) return; // they stopped or switched casts while connecting
     if (!token) {
       statusEl.className = 'audio-connecting';
       statusEl.textContent = '🔇 No active caster for this game';
@@ -1893,6 +1962,7 @@ function setupMediaSession() {
 }
 
 function updateMuteIcon(muted) {
+  try { refreshMiniIcon(); } catch(e) {}
   const btn = document.getElementById('muteListenerBtn');
   const icon = document.getElementById('muteListenerIcon');
   if (!btn || !icon) return;
@@ -2208,6 +2278,7 @@ async function onLeagueChange() {
 
 async function goLive() {
   if (guestBlocked('cast')) return;
+  if (window._listeningRoom) { await stopListeningQuietly(); showToast('🎧 Stopped listening so you can go live'); }
   startCasterBackground(); // background casting helper (separate from the mic)
   const home = document.getElementById('cast-home').value.trim() || 'Team A';
   const away = document.getElementById('cast-away').value.trim() || 'Team B';
