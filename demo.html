@@ -298,8 +298,8 @@ body::after {
   font-size:12px; font-weight:700; color:var(--cream); flex-shrink:0;
 }
 .player-caster-row { flex:1; display:flex; align-items:center; gap:10px; }
-.player-caster-name { font-size:14px; font-weight:600; }
-.player-listeners-label { font-size:11px; color:var(--muted); }
+.player-caster-name { font-size:18px; font-weight:700; color:var(--cream); line-height:1.2; }
+.player-listeners-label { font-size:14px; font-weight:600; color:var(--muted2); margin-top:3px; }
 .player-tip-btn {
   display:flex; flex-direction:column; align-items:center; gap:2px;
   cursor:pointer; padding:4px 8px; border:1px solid var(--line);
@@ -650,7 +650,7 @@ body::after {
     <div class="uc-sheet-handle"></div>
     <div class="uc-sheet-title">BEFORE YOU GO LIVE</div>
     <div class="uc-sheet-sub">Every cast on UltCast is <strong style="color:var(--cream)">unofficial and independent</strong>. Tick to confirm.</div>
-    <div class="uc-check" onclick="toggleUnofficialItem(this)"><div class="uc-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0E0D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="uc-check-text"><strong>This cast is unofficial and in my own words</strong>No logos or "official" claims, no TV or radio audio in my mic, not from inside the ground, and bet-free.</div></div>
+    <div class="uc-check" onclick="toggleUnofficialItem(this)"><div class="uc-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0E0D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="uc-check-text"><strong>This cast is unofficial and in my own words</strong>I will not claim to be official or use league or club logos. No TV or radio audio in my mic, not from inside the ground, and bet-free.</div></div>
     <a class="uc-sheet-link" href="https://ultcast.live/terms.html" target="_blank" rel="noopener">Read the Creator Guidelines ›</a>
     <button class="btn-primary-full" id="unofficial-go-btn" disabled onclick="confirmUnofficialAndGoLive()">GO LIVE</button>
     <button class="btn-ghost-full" onclick="closeUnofficialCheck()">Cancel</button>
@@ -696,7 +696,7 @@ body::after {
 <!-- ═══ HOME ═══ -->
 <div class="screen" id="home-screen">
   <div class="topbar">
-    <a class="topbar-wordmark" onclick="switchMain('home')" style="cursor:pointer;text-decoration:none">
+    <a class="topbar-wordmark" onclick="refreshHome()" style="cursor:pointer;text-decoration:none">
       <svg viewBox="0 0 3481 700" style="height:28px;width:auto;display:block" role="img" aria-label="UltCast"><use href="#uc-wordmark"/></svg>
     </a>
     <div class="topbar-right">
@@ -746,7 +746,7 @@ body::after {
   <div class="player-topbar">
     <button class="back-btn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></button>
     <div class="player-caster-row">
-      <div id="pAvatarWrap" style="width:32px;height:32px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#3a2a1e,#1A1816);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--cream)">
+      <div id="pAvatarWrap" style="width:44px;height:44px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#3a2a1e,#1A1816);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--cream)">
         <span id="pAvatar">SS</span>
       </div>
       <div>
@@ -941,6 +941,7 @@ body::after {
           <div class="tag-toggle" onclick="this.classList.toggle('on')">Fan View</div>
         </div>
       </div>
+      <div id="cast-form-error" style="display:none;margin:-6px 0 14px;padding:11px 14px;border-radius:10px;background:rgba(240,54,74,0.1);border:1px solid rgba(240,54,74,0.45);color:#FF8A96;font-size:13px;font-weight:600;line-height:1.45"></div>
       <button class="go-live-btn" onclick="openUnofficialCheck()"><svg width="20" height="20" viewBox="0 0 24 24" fill="#0F0E0D"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/></svg>GO LIVE</button>
     </div>
   </div>
@@ -1417,8 +1418,45 @@ function gateToAuth(mode) {
 // ════════════════════════════════════════════════
 // UNOFFICIAL CHECK — shown every time before going live
 // ════════════════════════════════════════════════
+// Checks the Start a Cast form. Returns true if everything is filled in correctly.
+function validateCastForm() {
+  const fields = [
+    ['cast-sport',  'a sport'],
+    ['cast-league', 'a league'],
+    ['cast-home',   'a home team'],
+    ['cast-away',   'an away team'],
+  ];
+  fields.forEach(([id]) => { const el = document.getElementById(id); if (el) el.style.borderColor = ''; });
+  const missing = fields.filter(([id]) => !(document.getElementById(id)?.value || '').trim());
+  let msg = '';
+  if (missing.length) {
+    missing.forEach(([id]) => { const el = document.getElementById(id); if (el) el.style.borderColor = 'var(--live-red)'; });
+    const names = missing.map(m => m[1]);
+    msg = 'Please select ' + (names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0]) + ' before going live.';
+  } else if (document.getElementById('cast-home').value === document.getElementById('cast-away').value) {
+    ['cast-home', 'cast-away'].forEach(id => { document.getElementById(id).style.borderColor = 'var(--live-red)'; });
+    msg = 'The home and away teams can\'t be the same. Please pick two different teams.';
+  }
+  const box = document.getElementById('cast-form-error');
+  if (box) {
+    box.textContent = msg ? '⚠️ ' + msg : '';
+    box.style.display = msg ? 'block' : 'none';
+    if (msg) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  return !msg;
+}
+
+// Clear the warning as soon as the caster changes a dropdown
+document.addEventListener('change', (e) => {
+  if (!['cast-sport','cast-league','cast-home','cast-away'].includes(e.target?.id)) return;
+  e.target.style.borderColor = '';
+  const box = document.getElementById('cast-form-error');
+  if (box) box.style.display = 'none';
+});
+
 function openUnofficialCheck() {
   if (guestBlocked('cast')) return;
+  if (!validateCastForm()) return;
   document.querySelectorAll('#unofficial-overlay .uc-check').forEach(el => el.classList.remove('on'));
   document.getElementById('unofficial-go-btn').disabled = true;
   document.getElementById('unofficial-overlay').classList.add('show');
@@ -1481,6 +1519,11 @@ async function goBack() {
   const mp = document.getElementById('miniPlayer');
   if (mp) mp.classList.add('hidden');
   showScreen(prevScreen || 'home-screen');
+}
+// Tapping the logo on Home reloads the page. If audio is connected, just refresh the list instead
+function refreshHome() {
+  if (lkRoom && lkRoom.state !== 'disconnected') { fetchLiveCasts(); showToast('🔄 Refreshed'); return; }
+  window.location.reload();
 }
 function showCastHub() { showStartCast(); } // Cast Hub removed — go straight to Start a Cast
 function showStartCast() {
@@ -1675,10 +1718,7 @@ async function openPlayer(game, league, caster, sport, roomName) {
       fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${window._currentCastRow.caster_id}&select=bio,avatar_url`, {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
       }).then(r => r.json()).then(d => {
-        if (d?.[0]?.bio) {
-          bioEl.textContent = d[0].bio;
-          bioEl.style.display = 'block';
-        }
+        // Bio is no longer shown on the listening screen
         // Reset avatar first
         const wrap = document.getElementById('pAvatarWrap');
         const avatarText = document.getElementById('pAvatar');
@@ -1876,6 +1916,40 @@ function updateMuteIcon(muted) {
 // OFF SWITCH: change true to false below, or open ultcast.live/demo?bg=off to test without it.
 // ════════════════════════════════════════════════
 const BG_AUDIO_ENABLED = true;
+// Caster version (experiment). Change true to false, or open ultcast.live/demo?castbg=off, to switch it off.
+const CASTER_BG_ENABLED = true;
+const _castBgOffByUrl = (() => { try { return new URLSearchParams(location.search).get('castbg') === 'off'; } catch(e) { return false; } })();
+
+function startCasterBackground() {
+  if (!CASTER_BG_ENABLED || _castBgOffByUrl) return;
+  startAudioKeepalive();
+  try {
+    if (!('mediaSession' in navigator)) return;
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: "🔴 You're live on UltCast",
+      artist: document.getElementById('onairGame')?.textContent || 'Live cast',
+      album: 'UltCast',
+      artwork: [{ src: 'https://samuelhroberts1-design.github.io/ultcast/logo-icon.png', sizes: '512x512', type: 'image/png' }]
+    });
+    // Pause/play on the notification must never stop a live cast. Just keep the helper going.
+    const keepGoing = () => { if (_bgAudio && _bgAudio.paused) _bgAudio.play().catch(() => {}); navigator.mediaSession.playbackState = 'playing'; };
+    navigator.mediaSession.setActionHandler('play', keepGoing);
+    navigator.mediaSession.setActionHandler('pause', keepGoing);
+    try { navigator.mediaSession.setActionHandler('stop', null); } catch(e) {}
+    navigator.mediaSession.playbackState = 'playing';
+  } catch(e) {}
+}
+
+function stopCasterBackground() {
+  stopAudioKeepalive();
+  try {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('play', null);
+      navigator.mediaSession.setActionHandler('pause', null);
+      navigator.mediaSession.playbackState = 'none';
+    }
+  } catch(e) {}
+}
 const _bgOffByUrl = (() => { try { return new URLSearchParams(location.search).get('bg') === 'off'; } catch(e) { return false; } })();
 let _bgAudio = null, _bgAudioUrl = null, _bgWanted = false, _bgRetryArmed = false;
 
@@ -2134,6 +2208,7 @@ async function onLeagueChange() {
 
 async function goLive() {
   if (guestBlocked('cast')) return;
+  startCasterBackground(); // background casting helper (separate from the mic)
   const home = document.getElementById('cast-home').value.trim() || 'Team A';
   const away = document.getElementById('cast-away').value.trim() || 'Team B';
 
@@ -2219,12 +2294,14 @@ async function connectAsBroadcaster(roomName) {
       window._localMicStream = stream;
     } catch(permErr) {
       showToast('⚠️ Microphone access denied. Please allow mic in browser settings.');
+      stopCasterBackground();
       return;
     }
 
     const token = await getBroadcasterToken(roomName);
     if (!token) {
       showToast('⚠️ Could not get broadcast token');
+      stopCasterBackground();
       return;
     }
 
@@ -2286,6 +2363,7 @@ async function connectAsBroadcaster(roomName) {
   } catch(err) {
     console.error('Broadcaster connect error:', err.message);
     showToast('⚠️ Could not connect: ' + err.message);
+    stopCasterBackground();
   }
 }
 
@@ -2326,6 +2404,7 @@ function toggleMute() {
 }
 async function endBroadcast() {
   clearInterval(broadcastInterval);
+  stopCasterBackground();
   if (window._casterCountInterval) { clearInterval(window._casterCountInterval); window._casterCountInterval = null; }
   if (lkRoom) { await lkRoom.disconnect(); lkRoom = null; }
   window._localAudioTrack = null;
