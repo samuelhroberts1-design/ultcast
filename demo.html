@@ -1617,6 +1617,8 @@ function subscribeToLiveCasts() {
             // Cast ended — go back to home and hide mini player
             document.getElementById('miniPlayer').classList.add('hidden');
             window._currentCastRow = null;
+            stopAudioKeepalive();
+            if (navigator.mediaSession) navigator.mediaSession.playbackState = 'none';
             if (document.getElementById('player-screen').classList.contains('active')) {
               showScreen('home-screen');
               showToast('📻 This cast has ended');
@@ -1653,6 +1655,8 @@ async function openPlayer(game, league, caster, sport, roomName) {
   // Store the full cast row for tipping and listener count
   window._currentCastRow = (window._allLiveCasts || []).find(c => c.room_name === roomName) || null;
   const currentCastData = window._currentCastRow;
+
+  startAudioKeepalive(); // background play helper (separate from live audio)
 
   // Update UI
   document.getElementById('pGameTitle').textContent = game;
@@ -1760,6 +1764,7 @@ async function connectAsListener(roomName) {
     if (!token) {
       statusEl.className = 'audio-connecting';
       statusEl.textContent = '🔇 No active caster for this game';
+      stopAudioKeepalive();
       return;
     }
 
@@ -1862,32 +1867,71 @@ function updateMuteIcon(muted) {
   }
 }
 
-// ── Audio keepalive: silent audio loop prevents browser from suspending ──
-let _keepaliveAudio = null;
+// ════════════════════════════════════════════════
+// BACKGROUND PLAY HELPER (listeners)
+// Plays an inaudible, very low hum through its own hidden player so Android
+// treats UltCast as a real audio app: keeps it running with the screen locked
+// and shows the lock-screen / notification controls.
+// It NEVER touches the live cast audio — it is completely separate.
+// OFF SWITCH: change true to false below, or open ultcast.live/demo?bg=off to test without it.
+// ════════════════════════════════════════════════
+const BG_AUDIO_ENABLED = true;
+const _bgOffByUrl = (() => { try { return new URLSearchParams(location.search).get('bg') === 'off'; } catch(e) { return false; } })();
+let _bgAudio = null, _bgAudioUrl = null, _bgWanted = false, _bgRetryArmed = false;
+
+function bgAudioAllowed() { return BG_AUDIO_ENABLED && !_bgOffByUrl; }
+
+// Builds a 10-second looping sound file in memory: a 30 Hz hum far too quiet to hear,
+// but loud enough that the phone counts it as "playing audio".
+function makeBgAudioUrl() {
+  const rate = 8000, secs = 10, n = rate * secs;
+  const buf = new ArrayBuffer(44 + n * 2);
+  const v = new DataView(buf);
+  const str = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  str(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); str(8, 'WAVE');
+  str(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  str(36, 'data'); v.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++) {
+    v.setInt16(44 + i * 2, Math.round(Math.sin(2 * Math.PI * 30 * i / rate) * 66), true);
+  }
+  return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+}
+
 function startAudioKeepalive() {
-  if (_keepaliveAudio) return;
+  if (!bgAudioAllowed()) return;
+  _bgWanted = true;
   try {
-    // Create a silent audio source using Web Audio API
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const buf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    src.loop = true;
-    src.connect(ctx.destination);
-    src.start();
-    _keepaliveAudio = { ctx, src };
+    if (!_bgAudio) {
+      if (!_bgAudioUrl) _bgAudioUrl = makeBgAudioUrl();
+      // Deliberately NOT added to the page, so mute buttons and other audio code never see it
+      _bgAudio = new Audio(_bgAudioUrl);
+      _bgAudio.loop = true;
+      _bgAudio.preload = 'auto';
+      _bgAudio.setAttribute('playsinline', '');
+    }
+    if (_bgAudio.paused) {
+      const p = _bgAudio.play();
+      if (p && p.catch) p.catch(() => armBgAudioRetry());
+    }
   } catch(e) {
-    console.warn('Keepalive audio failed:', e.message);
+    console.warn('Background helper could not start (live audio unaffected):', e.message);
   }
 }
 
+// If the phone blocked the helper, try again on the next tap anywhere
+function armBgAudioRetry() {
+  if (_bgRetryArmed) return;
+  _bgRetryArmed = true;
+  document.addEventListener('pointerdown', () => {
+    _bgRetryArmed = false;
+    if (_bgWanted && _bgAudio && _bgAudio.paused) _bgAudio.play().catch(() => {});
+  }, { once: true });
+}
+
 function stopAudioKeepalive() {
-  if (!_keepaliveAudio) return;
-  try {
-    _keepaliveAudio.src.stop();
-    _keepaliveAudio.ctx.close();
-  } catch(e) {}
-  _keepaliveAudio = null;
+  _bgWanted = false;
+  try { if (_bgAudio) { _bgAudio.pause(); _bgAudio.currentTime = 0; } } catch(e) {}
 }
 
 // Resume audio if browser throttled it when coming back to foreground
@@ -1896,9 +1940,7 @@ document.addEventListener('visibilitychange', () => {
     document.querySelectorAll('audio').forEach(el => {
       if (!el.muted && el.paused) el.play().catch(() => {});
     });
-    if (_keepaliveAudio?.ctx?.state === 'suspended') {
-      _keepaliveAudio.ctx.resume();
-    }
+    if (_bgWanted && _bgAudio && _bgAudio.paused) _bgAudio.play().catch(() => {});
   }
 });
 
