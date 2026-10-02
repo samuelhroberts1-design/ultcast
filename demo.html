@@ -649,11 +649,8 @@ body::after {
   <div class="uc-sheet">
     <div class="uc-sheet-handle"></div>
     <div class="uc-sheet-title">BEFORE YOU GO LIVE</div>
-    <div class="uc-sheet-sub">Every cast on UltCast is <strong style="color:var(--cream)">unofficial and independent</strong>. Tick each one to confirm.</div>
-    <div class="uc-check" onclick="toggleUnofficialItem(this)"><div class="uc-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0E0D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="uc-check-text"><strong>This cast is unofficial</strong>I won't use league or club logos, or suggest I'm an official broadcaster.</div></div>
-    <div class="uc-check" onclick="toggleUnofficialItem(this)"><div class="uc-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0E0D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="uc-check-text"><strong>Every word is my own</strong>No TV, radio or stream audio in my mic. I'll use headphones or turn the TV down.</div></div>
-    <div class="uc-check" onclick="toggleUnofficialItem(this)"><div class="uc-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0E0D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="uc-check-text"><strong>I'm not at the ground</strong>I'm not casting from inside the venue.</div></div>
-    <div class="uc-check" onclick="toggleUnofficialItem(this)"><div class="uc-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0E0D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="uc-check-text"><strong>Bet-free</strong>I won't promote gambling or read out odds.</div></div>
+    <div class="uc-sheet-sub">Every cast on UltCast is <strong style="color:var(--cream)">unofficial and independent</strong>. Tick to confirm.</div>
+    <div class="uc-check" onclick="toggleUnofficialItem(this)"><div class="uc-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0E0D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="uc-check-text"><strong>This cast is unofficial and in my own words</strong>No logos or "official" claims, no TV or radio audio in my mic, not from inside the ground, and bet-free.</div></div>
     <a class="uc-sheet-link" href="https://ultcast.live/terms.html" target="_blank" rel="noopener">Read the Creator Guidelines ›</a>
     <button class="btn-primary-full" id="unofficial-go-btn" disabled onclick="confirmUnofficialAndGoLive()">GO LIVE</button>
     <button class="btn-ghost-full" onclick="closeUnofficialCheck()">Cancel</button>
@@ -967,7 +964,6 @@ body::after {
   </div>
   <div class="onair-stats">
     <div class="ostat"><div class="ostat-num" id="oa-listeners">—</div><div class="ostat-label">Listeners</div></div>
-    <div class="ostat"><div class="ostat-num" id="oa-tips">$0</div><div class="ostat-label">Tips</div></div>
     <div class="ostat"><div class="ostat-num" id="oa-time">0:00</div><div class="ostat-label">Duration</div></div>
   </div>
   <div class="onair-controls">
@@ -1730,6 +1726,28 @@ function openPlayerFromMini() {
   showScreen('player-screen');
 }
 
+// ── Live listener count ──
+// LiveKit v1.15.4 keeps other people in room.participants (v2 renamed it remoteParticipants).
+// A "caster" is anyone allowed to publish audio; everyone else counts as a listener.
+function isCasterParticipant(p) {
+  if (!p) return false;
+  if (p.permissions && p.permissions.canPublish) return true;
+  return !!(p.audioTracks && p.audioTracks.size > 0);
+}
+function countLiveListeners(room, includeSelf) {
+  if (!room) return 0;
+  const others = room.participants || room.remoteParticipants;
+  let n = 0;
+  if (others) others.forEach(p => { if (!isCasterParticipant(p)) n++; });
+  if (includeSelf) n++;
+  return n;
+}
+function updateListenerLabel() {
+  const el = document.getElementById('pListeners');
+  if (!el || !lkRoom) return;
+  el.textContent = '👥 ' + countLiveListeners(lkRoom, true) + ' listening';
+}
+
 async function connectAsListener(roomName) {
   const statusEl = document.getElementById('audioStatus');
   statusEl.className = 'audio-connecting';
@@ -1753,7 +1771,11 @@ async function connectAsListener(roomName) {
       statusEl.textContent = '🔊 Connected — listening live';
       setupMediaSession();
       startAudioKeepalive();
+      updateListenerLabel();
     });
+
+    lkRoom.on(RoomEvent.ParticipantConnected, () => updateListenerLabel());
+    lkRoom.on(RoomEvent.ParticipantDisconnected, () => updateListenerLabel());
 
     lkRoom.on(RoomEvent.Disconnected, () => {
       statusEl.className = 'audio-connecting';
@@ -1775,20 +1797,11 @@ async function connectAsListener(roomName) {
 
     await lkRoom.connect(LK_URL, token);
 
-    // Poll for real listener count every 15 seconds
-    window._listenerPollInterval = setInterval(async () => {
-      if (!window._currentCastRow?.room_name) return;
-      try {
-        const r = await fetch(
-          `${SUPABASE_URL}/rest/v1/casts?room_name=eq.${encodeURIComponent(window._currentCastRow.room_name)}&select=listener_count`,
-          { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
-        );
-        const d = await r.json();
-        if (d?.[0]?.listener_count !== undefined) {
-          document.getElementById('pListeners').textContent = '👥 ' + d[0].listener_count + ' listening';
-        }
-      } catch(e) {}
-    }, 15000);
+    // Live listener count straight from the audio room (no database needed).
+    // Events update it instantly; this 5-second check is a safety net.
+    updateListenerLabel();
+    if (window._listenerPollInterval) clearInterval(window._listenerPollInterval);
+    window._listenerPollInterval = setInterval(updateListenerLabel, 5000);
 
   } catch(err) {
     console.error('Listener connect error:', err.message);
@@ -2142,7 +2155,6 @@ async function goLive() {
   bSecs = 0;
   clearInterval(broadcastInterval);
   document.getElementById('oa-listeners').textContent = '—';
-  document.getElementById('oa-tips').textContent = '$0';
   broadcastInterval = setInterval(() => {
     bSecs++;
     const m = Math.floor(bSecs/60), s = bSecs%60;
@@ -2181,9 +2193,12 @@ async function connectAsBroadcaster(roomName) {
 
     // Real listener count from LiveKit participants
     function updateListenerCount() {
-      const count = lkRoom.remoteParticipants ? lkRoom.remoteParticipants.size : 0;
+      if (!lkRoom) return;
+      const count = countLiveListeners(lkRoom, false);
       document.getElementById('oa-listeners').textContent = count;
-      // Save real count to database
+      // Save to database (only when the number changes) so Home/Browse show it too
+      if (count === window._lastSavedListenerCount) return;
+      window._lastSavedListenerCount = count;
       if (window._activeCastId) {
         fetch(`${SUPABASE_URL}/rest/v1/casts?id=eq.${window._activeCastId}`, {
           method: 'PATCH',
@@ -2219,7 +2234,12 @@ async function connectAsBroadcaster(roomName) {
     lkRoom.on(RoomEvent.ParticipantConnected, () => updateListenerCount());
     lkRoom.on(RoomEvent.ParticipantDisconnected, () => updateListenerCount());
 
+    window._lastSavedListenerCount = null;
     await lkRoom.connect(LK_URL, token);
+
+    // Safety net: re-check every 5 seconds in case an event is missed
+    if (window._casterCountInterval) clearInterval(window._casterCountInterval);
+    window._casterCountInterval = setInterval(updateListenerCount, 5000);
 
   } catch(err) {
     console.error('Broadcaster connect error:', err.message);
@@ -2264,6 +2284,7 @@ function toggleMute() {
 }
 async function endBroadcast() {
   clearInterval(broadcastInterval);
+  if (window._casterCountInterval) { clearInterval(window._casterCountInterval); window._casterCountInterval = null; }
   if (lkRoom) { await lkRoom.disconnect(); lkRoom = null; }
   window._localAudioTrack = null;
   window._rawMicTrack = null;
