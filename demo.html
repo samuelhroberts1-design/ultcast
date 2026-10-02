@@ -583,6 +583,43 @@ body::after {
 .mini-game { font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .mini-caster { font-size:10px; color:var(--muted); }
 .mini-play { width:32px; height:32px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+/* ─── GUEST MODE ─── */
+.guest-divider { display:flex; align-items:center; gap:12px; margin:22px 0 14px; color:var(--muted); font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+.guest-divider::before, .guest-divider::after { content:''; flex:1; height:1px; background:var(--line); }
+.guest-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:10px; background:var(--accent-glow); border:2px solid var(--accent); color:var(--cream); border-radius:12px; padding:15px; font-family:var(--font-body); font-size:15px; font-weight:800; cursor:pointer; transition:all 0.2s; }
+.guest-btn:active { background:rgba(255,107,26,0.3); }
+.guest-btn svg { color:var(--accent); flex-shrink:0; }
+.guest-note { font-size:12px; color:var(--muted); margin-top:9px; text-align:center; line-height:1.5; }
+.guest-pill { display:none; background:var(--accent); color:var(--bg); border:none; border-radius:999px; padding:8px 14px; font-family:var(--font-body); font-size:12px; font-weight:800; letter-spacing:0.3px; cursor:pointer; white-space:nowrap; }
+.guest-banner { display:none; margin:14px 16px 0; padding:12px 14px; border-radius:12px; background:var(--accent-glow); border:1px solid rgba(255,107,26,0.35); align-items:center; gap:12px; }
+.guest-banner-text { flex:1; font-size:12px; color:var(--muted2); line-height:1.45; }
+.guest-banner-text strong { color:var(--cream); display:block; font-size:13px; margin-bottom:1px; }
+.guest-banner button { background:var(--accent); color:var(--bg); border:none; border-radius:10px; padding:9px 12px; font-family:var(--font-body); font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap; }
+.guest-cta { display:none; margin:4px 0 18px; padding:16px; border-radius:14px; background:var(--accent-glow); border:1px solid rgba(255,107,26,0.35); text-align:center; }
+.guest-cta-title { font-family:var(--font-title); font-size:20px; letter-spacing:1.5px; color:var(--cream); margin-bottom:4px; }
+.guest-cta-sub { font-size:12px; color:var(--muted2); line-height:1.5; margin-bottom:12px; }
+.btn-primary-full { width:100%; background:var(--accent); color:var(--bg); border:none; border-radius:12px; padding:14px; font-family:var(--font-body); font-size:14px; font-weight:800; cursor:pointer; }
+.btn-primary-full:disabled { opacity:0.35; cursor:not-allowed; }
+.btn-ghost-full { width:100%; background:transparent; border:1px solid var(--line); color:var(--muted); border-radius:12px; padding:13px; font-family:var(--font-body); font-size:13px; cursor:pointer; margin-top:10px; }
+
+/* ─── BOTTOM SHEETS (guest gate + unofficial check) ─── */
+.uc-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:300; display:none; align-items:flex-end; justify-content:center; }
+.uc-overlay.show { display:flex; }
+.uc-sheet { width:100%; max-width:430px; max-height:92vh; overflow-y:auto; background:var(--surface); border:1px solid var(--line); border-bottom:none; border-radius:20px 20px 0 0; padding:22px 20px calc(22px + env(safe-area-inset-bottom, 0px)); animation:ucSheetUp 0.22s ease-out; }
+@keyframes ucSheetUp { from { transform:translateY(40px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+.uc-sheet-handle { width:40px; height:4px; border-radius:2px; background:var(--line); margin:-8px auto 16px; }
+.uc-sheet-title { font-family:var(--font-title); font-size:24px; letter-spacing:2px; color:var(--cream); margin-bottom:6px; }
+.uc-sheet-sub { font-size:13px; color:var(--muted2); line-height:1.55; margin-bottom:18px; }
+.uc-check { display:flex; gap:12px; align-items:flex-start; padding:12px; border:1px solid var(--line); border-radius:12px; margin-bottom:10px; cursor:pointer; background:var(--bg-2); transition:border-color 0.15s, background 0.15s; }
+.uc-check.on { border-color:var(--accent); background:var(--accent-glow); }
+.uc-box { width:22px; height:22px; border-radius:6px; border:2px solid var(--muted); flex-shrink:0; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+.uc-check.on .uc-box { background:var(--accent); border-color:var(--accent); }
+.uc-box svg { display:none; }
+.uc-check.on .uc-box svg { display:block; }
+.uc-check-text { font-size:13px; color:var(--muted2); line-height:1.5; }
+.uc-check-text strong { color:var(--cream); display:block; font-size:14px; margin-bottom:1px; }
+.uc-sheet-link { display:block; text-align:center; font-size:12px; color:var(--accent); margin:6px 0 16px; cursor:pointer; text-decoration:none; }
 </style>
 </head>
 <body>
@@ -593,6 +630,34 @@ body::after {
 <div id="loading-overlay">
   <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:12px" role="img" aria-label="UltCast"><svg viewBox="0 0 80 83" style="width:50px;height:auto" role="img" aria-label="UltCast"><use href="#uc-mono"/></svg><svg viewBox="0 0 3481 700" style="width:120px;height:auto;display:block" role="img" aria-label="UltCast"><use href="#uc-wordmark"/></svg></div>
   <div class="loading-spin"></div>
+</div>
+
+<!-- ═══ GUEST GATE SHEET ═══ -->
+<div class="uc-overlay" id="gate-overlay" onclick="if(event.target===this)closeGate()">
+  <div class="uc-sheet">
+    <div class="uc-sheet-handle"></div>
+    <div class="uc-sheet-title" id="gate-title">CREATE A FREE ACCOUNT</div>
+    <div class="uc-sheet-sub" id="gate-sub">You need an account for this.</div>
+    <button class="btn-primary-full" onclick="gateToAuth('signup')">Create free account</button>
+    <button class="btn-ghost-full" onclick="gateToAuth('login')">Log in</button>
+    <button class="btn-ghost-full" style="border:none" onclick="closeGate()">Keep listening as a guest</button>
+  </div>
+</div>
+
+<!-- ═══ UNOFFICIAL CHECK SHEET (before going live) ═══ -->
+<div class="uc-overlay" id="unofficial-overlay" onclick="if(event.target===this)closeUnofficialCheck()">
+  <div class="uc-sheet">
+    <div class="uc-sheet-handle"></div>
+    <div class="uc-sheet-title">BEFORE YOU GO LIVE</div>
+    <div class="uc-sheet-sub">Every cast on UltCast is <strong style="color:var(--cream)">unofficial and independent</strong>. Tick each one to confirm.</div>
+    <div class="uc-check" onclick="toggleUnofficialItem(this)"><div class="uc-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0E0D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="uc-check-text"><strong>This cast is unofficial</strong>I won't use league or club logos, or suggest I'm an official broadcaster.</div></div>
+    <div class="uc-check" onclick="toggleUnofficialItem(this)"><div class="uc-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0E0D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="uc-check-text"><strong>Every word is my own</strong>No TV, radio or stream audio in my mic. I'll use headphones or turn the TV down.</div></div>
+    <div class="uc-check" onclick="toggleUnofficialItem(this)"><div class="uc-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0E0D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="uc-check-text"><strong>I'm not at the ground</strong>I'm not casting from inside the venue.</div></div>
+    <div class="uc-check" onclick="toggleUnofficialItem(this)"><div class="uc-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0E0D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="uc-check-text"><strong>Bet-free</strong>I won't promote gambling or read out odds.</div></div>
+    <a class="uc-sheet-link" href="https://ultcast.live/terms.html" target="_blank" rel="noopener">Read the Creator Guidelines ›</a>
+    <button class="btn-primary-full" id="unofficial-go-btn" disabled onclick="confirmUnofficialAndGoLive()">GO LIVE</button>
+    <button class="btn-ghost-full" onclick="closeUnofficialCheck()">Cancel</button>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -622,6 +687,12 @@ body::after {
     <button class="auth-btn" id="auth-submit" onclick="handleAuth()">Continue →</button>
     <p class="auth-note" id="auth-note">New to UltCast? <a onclick="setAuthTab('signup')">Create an account</a></p>
     <p class="auth-note" id="forgot-link" style="margin-top:8px"><a onclick="showForgotPassword()">Forgot your password?</a></p>
+    <div class="guest-divider">or</div>
+    <button class="guest-btn" type="button" onclick="enterGuestMode()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+      Just listen &mdash; continue as guest
+    </button>
+    <p class="guest-note">No account needed. Sign up any time to go live.</p>
   </div>
 </div>
 
@@ -632,6 +703,7 @@ body::after {
       <svg viewBox="0 0 3481 700" style="height:28px;width:auto;display:block" role="img" aria-label="UltCast"><use href="#uc-wordmark"/></svg>
     </a>
     <div class="topbar-right">
+      <button class="guest-pill" id="guest-signup-pill" onclick="gateToAuth('signup')">Sign up free</button>
       <div class="avatar-sm" id="home-avatar" onclick="switchMain('profile')" style="overflow:hidden;position:relative">
         <img id="home-avatar-img" src="" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;position:absolute;inset:0" />
         <span id="home-avatar-initials">?</span>
@@ -640,6 +712,10 @@ body::after {
   </div>
 
   <div class="scroll">
+    <div class="guest-banner" id="guest-banner">
+      <div class="guest-banner-text"><strong>You're listening as a guest</strong>Create a free account to go live and follow casters.</div>
+      <button onclick="gateToAuth('signup')">Sign up</button>
+    </div>
     <div style="padding:20px 20px 8px;display:flex;align-items:center;gap:10px">
       <span style="font-family:var(--font-title);font-size:22px;letter-spacing:2px;color:var(--accent)">LIVE NOW</span>
       <span style="width:8px;height:8px;border-radius:50%;background:var(--live-red);box-shadow:0 0 0 3px rgba(240,54,74,0.2);animation:pulse 1.5s ease-in-out infinite;display:inline-block"></span>
@@ -868,7 +944,7 @@ body::after {
           <div class="tag-toggle" onclick="this.classList.toggle('on')">Fan View</div>
         </div>
       </div>
-      <button class="go-live-btn" onclick="goLive()"><svg width="20" height="20" viewBox="0 0 24 24" fill="#0F0E0D"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/></svg>GO LIVE</button>
+      <button class="go-live-btn" onclick="openUnofficialCheck()"><svg width="20" height="20" viewBox="0 0 24 24" fill="#0F0E0D"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/></svg>GO LIVE</button>
     </div>
   </div>
   <nav class="bottom-nav">
@@ -912,27 +988,34 @@ body::after {
     <div class="profile-hero">
       <div style="position:relative;width:72px;margin:0 auto 12px;cursor:pointer" onclick="showEditProfile()">
         <div class="profile-avatar-lg" id="profileAvatarLg" style="margin:0">?</div>
-        <div style="position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px">✏️</div>
+        <div id="profileEditBadge" style="position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px">✏️</div>
       </div>
       <div class="profile-name" id="profileName">Loading...</div>
       <div class="profile-handle" id="profileHandle">@—</div>
       <div id="profileBio" style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5;display:none"></div>
-      <div class="profile-stats">
+      <div class="profile-stats" id="profileStats">
         <div class="pstat"><div class="pstat-num" id="stat-broadcasts">—</div><div class="pstat-lbl">Broadcasts</div></div>
         <div class="pstat"><div class="pstat-num" id="stat-listeners">—</div><div class="pstat-lbl">Total Listeners</div></div>
         <div class="pstat"><div class="pstat-num" id="stat-tips">$0</div><div class="pstat-lbl">Tips Earned</div></div>
       </div>
     </div>
     <div class="profile-rows">
+      <div class="guest-cta" id="guest-cta">
+        <div class="guest-cta-title">YOU'RE A GUEST</div>
+        <div class="guest-cta-sub">Create a free account to go live, follow your favourite casters and track your stats.</div>
+        <button class="btn-primary-full" onclick="gateToAuth('signup')">Create free account</button>
+        <button class="btn-ghost-full" onclick="gateToAuth('login')">I already have an account</button>
+      </div>
       <div class="p-section-title">Account</div>
-      <div class="p-row" onclick="showEditProfile()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>Edit Profile</div><div class="p-row-chev">›</div></div>
+      <div class="p-row" id="row-edit-profile" onclick="showEditProfile()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>Edit Profile</div><div class="p-row-chev">›</div></div>
       <div class="p-row" style="opacity:0.5"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>Payment & Payouts</div><div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.5px">COMING SOON</div></div>
       <div class="p-row" style="opacity:0.5"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>Notifications</div><div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.5px">COMING SOON</div></div>
       <div class="p-section-title">Support</div>
       <div class="p-row" style="opacity:0.5"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>Help Centre</div><div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.5px">COMING SOON</div></div>
       <div class="p-row" onclick="window.open('https://ultcast.live/terms.html','_blank')"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>Terms & Privacy</div><div class="p-row-chev">›</div></div>
       <div style="margin-top:20px">
-        <button style="width:100%;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:13px;font-family:var(--font-body);font-size:13px;cursor:pointer" onclick="signOut()">Log Out</button>
+        <button style="width:100%;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:13px;font-family:var(--font-body);font-size:13px;cursor:pointer" id="btn-logout" onclick="signOut()">Log Out</button>
+        <button class="btn-ghost-full" id="btn-guest-exit" style="display:none;margin-top:0" onclick="signOut()">Leave guest mode</button>
       </div>
     </div>
   </div>
@@ -980,6 +1063,7 @@ let tipSelected = '$5';
 let broadcastInterval, bSecs = 0;
 let lkRoom = null;
 let authMode = 'login';
+let isGuest = false;
 
 // ════════════════════════════════════════════════
 // BOOT — check session on load
@@ -999,7 +1083,13 @@ window.addEventListener('load', async () => {
       showScreen('home-screen');
     } else {
       hideLoading();
-      showScreen('auth-screen');
+      // Returning guests (and anyone opening a shared cast link) skip the login screen
+      const _bootParams = new URLSearchParams(window.location.search);
+      if (guestFlagSaved() || _bootParams.get('join')) {
+        enterGuestMode();
+      } else {
+        showScreen('auth-screen');
+      }
     }
   } catch(e) {
     hideLoading();
@@ -1045,6 +1135,7 @@ window.addEventListener('load', async () => {
   // Listen for auth changes
   sb.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session) {
+      exitGuestMode();
       currentUser = session.user;
       window._accessToken = session.access_token || '';
       await loadProfile();
@@ -1216,6 +1307,7 @@ async function handleAuth() {
         currentUserProfile = { username };
       }
 
+      exitGuestMode();
       showToast('✅ Account created! Welcome to UltCast.');
       updateProfileUI();
       showScreen('home-screen');
@@ -1225,6 +1317,7 @@ async function handleAuth() {
       if (error) throw error;
       currentUser = data.user;
       window._accessToken = data.session?.access_token || '';
+      exitGuestMode();
       await loadProfile();
       updateProfileUI();
       showScreen('home-screen');
@@ -1238,10 +1331,120 @@ async function handleAuth() {
 }
 
 async function signOut() {
-  await sb.auth.signOut();
+  try { await sb.auth.signOut(); } catch(e) {}
   currentUser = null;
   currentUserProfile = null;
+  exitGuestMode();
+  setAuthTab('login');
   showScreen('auth-screen');
+}
+
+// ════════════════════════════════════════════════
+// GUEST MODE — listen without an account
+// ════════════════════════════════════════════════
+const GUEST_ICON = '<svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" style="color:var(--muted)"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>';
+
+function guestFlagSaved() {
+  try { return localStorage.getItem('uc_guest') === '1'; } catch(e) { return false; }
+}
+
+function enterGuestMode() {
+  isGuest = true;
+  try { localStorage.setItem('uc_guest', '1'); } catch(e) {}
+  applyGuestUI();
+  showScreen('home-screen');
+  setTimeout(() => setActiveNav('home'), 10);
+}
+
+function exitGuestMode() {
+  isGuest = false;
+  try { localStorage.removeItem('uc_guest'); } catch(e) {}
+  applyGuestUI();
+}
+
+function applyGuestUI() {
+  const guest = isGuest && !currentUser;
+  const show = (id, on, type) => { const el = document.getElementById(id); if (el) el.style.display = on ? (type || 'block') : 'none'; };
+
+  // Home screen
+  show('guest-signup-pill', guest, 'inline-block');
+  show('home-avatar', !guest, 'flex');
+  show('guest-banner', guest, 'flex');
+
+  // Profile screen
+  show('guest-cta', guest);
+  show('profileEditBadge', !guest, 'flex');
+  show('btn-logout', !guest);
+  show('btn-guest-exit', guest);
+  const editRow = document.getElementById('row-edit-profile');
+  if (editRow) editRow.style.opacity = guest ? '0.4' : '';
+  const stats = document.getElementById('profileStats');
+  if (stats) stats.style.opacity = guest ? '0.35' : '';
+
+  if (guest) {
+    const pName = document.getElementById('profileName');
+    if (pName) pName.textContent = 'Guest';
+    show('profileHandle', false);
+    show('profileBio', false);
+    const lg = document.getElementById('profileAvatarLg');
+    if (lg) { lg.style.backgroundImage = ''; lg.innerHTML = GUEST_ICON; }
+    ['stat-broadcasts','stat-listeners'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '—'; });
+  } else {
+    show('profileHandle', true);
+  }
+}
+
+// Shows the "create an account" sheet. Returns true if the action should stop.
+function guestBlocked(kind) {
+  if (currentUser) return false;
+  const copy = {
+    cast:    ['GO LIVE WITH ULTCAST', 'Create a free account to start your own cast. It only takes a minute.'],
+    follow:  ['FOLLOW YOUR CASTERS', 'Create a free account to follow casters and find them again easily.'],
+    profile: ['MAKE IT YOURS', 'Create a free account to set up your profile, name and photo.'],
+  }[kind] || ['CREATE A FREE ACCOUNT', 'You need an account for this.'];
+  document.getElementById('gate-title').textContent = copy[0];
+  document.getElementById('gate-sub').textContent = copy[1];
+  document.getElementById('gate-overlay').classList.add('show');
+  return true;
+}
+
+function closeGate() {
+  document.getElementById('gate-overlay').classList.remove('show');
+}
+
+function gateToAuth(mode) {
+  closeGate();
+  setAuthTab(mode === 'signup' ? 'signup' : 'login');
+  showScreen('auth-screen');
+}
+
+// ════════════════════════════════════════════════
+// UNOFFICIAL CHECK — shown every time before going live
+// ════════════════════════════════════════════════
+function openUnofficialCheck() {
+  if (guestBlocked('cast')) return;
+  document.querySelectorAll('#unofficial-overlay .uc-check').forEach(el => el.classList.remove('on'));
+  document.getElementById('unofficial-go-btn').disabled = true;
+  document.getElementById('unofficial-overlay').classList.add('show');
+}
+
+function toggleUnofficialItem(el) {
+  el.classList.toggle('on');
+  const all = document.querySelectorAll('#unofficial-overlay .uc-check');
+  const ticked = document.querySelectorAll('#unofficial-overlay .uc-check.on');
+  document.getElementById('unofficial-go-btn').disabled = ticked.length !== all.length;
+}
+
+function closeUnofficialCheck() {
+  document.getElementById('unofficial-overlay').classList.remove('show');
+}
+
+function confirmUnofficialAndGoLive() {
+  const all = document.querySelectorAll('#unofficial-overlay .uc-check');
+  const ticked = document.querySelectorAll('#unofficial-overlay .uc-check.on');
+  if (ticked.length !== all.length) return;
+  closeUnofficialCheck();
+  goLive();
 }
 
 // ════════════════════════════════════════════════
@@ -1266,7 +1469,7 @@ function switchMain(tab) {
   const map = { home:'home-screen', browse:'browse-screen', profile:'profile-screen' };
   if (map[tab]) showScreen(map[tab]);
   if (tab === 'browse') renderBrowseCasts(window._allLiveCasts || []);
-  if (tab === 'profile') loadProfileStats();
+  if (tab === 'profile') { applyGuestUI(); loadProfileStats(); }
   setTimeout(() => setActiveNav(tab), 10);
 }
 
@@ -1285,6 +1488,7 @@ async function goBack() {
 }
 function showCastHub() { showStartCast(); } // Cast Hub removed — go straight to Start a Cast
 function showStartCast() {
+  if (guestBlocked('cast')) return;
   showScreen('startcast-screen');
   loadSportsData();
   setTimeout(() => setActiveNav('cast'), 10);
@@ -1720,6 +1924,7 @@ function toggleListenerMute() {
 }
 
 function toggleFollow() {
+  if (guestBlocked('follow')) return;
   isFollowing = !isFollowing;
   const btn = document.getElementById('followBtn');
   btn.classList.toggle('following', isFollowing);
@@ -1873,6 +2078,7 @@ async function onLeagueChange() {
 }
 
 async function goLive() {
+  if (guestBlocked('cast')) return;
   const home = document.getElementById('cast-home').value.trim() || 'Team A';
   const away = document.getElementById('cast-away').value.trim() || 'Team B';
 
@@ -2105,6 +2311,7 @@ function shareLiveLink() {
 // EDIT PROFILE
 // ════════════════════════════════════════════════
 async function showEditProfile() {
+  if (guestBlocked('profile')) return;
   showScreen('editprofile-screen');
 
   // Pre-fill current values
