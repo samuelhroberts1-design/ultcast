@@ -583,6 +583,15 @@ body.mini-on .scroll { padding-bottom:150px; }
 .tip-modal-sub { font-size:13px; color:var(--muted2); margin-bottom:18px; line-height:1.5; }
 .tip-modal .tip-amounts { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
 .tip-modal .tip-amt { padding:16px 6px; font-size:20px; border-radius:12px; }
+.tip-custom { display:flex; align-items:center; gap:6px; border:1.5px solid var(--line); background:var(--surface-2); border-radius:12px; padding:0 14px; margin:-6px 0 6px; transition:border-color 0.2s; }
+.tip-custom.active { border-color:var(--accent); background:var(--accent-glow); }
+.tip-custom.bad { border-color:var(--live-red); }
+.tip-custom span { font-size:18px; font-weight:700; color:var(--muted2); }
+.tip-custom input { flex:1; min-width:0; background:transparent; border:none; outline:none; color:var(--cream); font-family:var(--font-body); font-size:16px; font-weight:700; padding:14px 0; }
+.tip-custom input::placeholder { color:var(--muted); font-weight:600; }
+.tip-custom-hint { font-size:12px; color:var(--muted); margin-bottom:14px; min-height:16px; }
+.tip-custom-hint.bad { color:#FF8A96; }
+.tip-send:disabled { opacity:0.4; cursor:not-allowed; }
 .mini-player.hidden { transform:translateX(-50%) translateY(100px); opacity:0; pointer-events:none; }
 .mini-wave { display:flex; align-items:center; gap:2px; }
 .mini-bar { width:2px; background:var(--accent); border-radius:2px; animation:barAnim 1s ease-in-out infinite; }
@@ -680,6 +689,11 @@ body.mini-on .scroll { padding-bottom:150px; }
       <div class="tip-amt" onclick="selectTip(this,'$10')">$10</div>
       <div class="tip-amt" onclick="selectTip(this,'$20')">$20</div>
     </div>
+    <div class="tip-custom" id="tipCustomWrap">
+      <span>$</span>
+      <input id="tipCustom" type="text" inputmode="decimal" autocomplete="off" placeholder="Other amount" oninput="customTipInput()" onfocus="customTipInput()">
+    </div>
+    <div class="tip-custom-hint" id="tipCustomHint">Minimum $2</div>
     <button class="tip-send" id="tipSendBtn" onclick="sendTip()">Send $5 Tip 💰</button>
   </div>
 </div>
@@ -2240,13 +2254,55 @@ function selectTip(el, amount) {
   document.querySelectorAll('.tip-amt').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
   tipSelected = amount;
+  // Picking a preset clears any custom amount
+  const ci = document.getElementById('tipCustom');
+  if (ci) ci.value = '';
+  document.getElementById('tipCustomWrap')?.classList.remove('active', 'bad');
+  const hint = document.getElementById('tipCustomHint');
+  if (hint) { hint.textContent = 'Minimum $2'; hint.classList.remove('bad'); }
+  document.getElementById('tipSendBtn').disabled = false;
   document.getElementById('tipSendBtn').textContent = 'Send ' + amount + ' Tip 💰';
+}
+
+// ── Custom tip amount ($2 minimum, $500 maximum) ──
+const TIP_MIN = 2, TIP_MAX = 500;
+function customTipInput() {
+  const input = document.getElementById('tipCustom');
+  const wrap = document.getElementById('tipCustomWrap');
+  const hint = document.getElementById('tipCustomHint');
+  const btn = document.getElementById('tipSendBtn');
+  // Keep only numbers and one decimal point, max 2 decimals
+  let v = input.value.replace(/[^0-9.]/g, '');
+  const parts = v.split('.');
+  if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
+  if (v.includes('.')) v = v.split('.')[0] + '.' + v.split('.')[1].slice(0, 2);
+  if (input.value !== v) input.value = v;
+
+  document.querySelectorAll('.tip-amt').forEach(b => b.classList.remove('selected'));
+  wrap.classList.add('active');
+  const n = parseFloat(v);
+  if (!v || isNaN(n)) {
+    tipSelected = '';
+    hint.textContent = 'Minimum $2'; hint.classList.remove('bad'); wrap.classList.remove('bad');
+    btn.textContent = 'Enter an amount'; btn.disabled = true;
+    return;
+  }
+  if (n < TIP_MIN || n > TIP_MAX) {
+    tipSelected = '';
+    hint.textContent = n < TIP_MIN ? 'Minimum tip is $2' : 'Maximum tip is $500';
+    hint.classList.add('bad'); wrap.classList.add('bad');
+    btn.textContent = 'Send Tip 💰'; btn.disabled = true;
+    return;
+  }
+  tipSelected = '$' + (Number.isInteger(n) ? n : n.toFixed(2));
+  hint.textContent = 'Minimum $2'; hint.classList.remove('bad'); wrap.classList.remove('bad');
+  btn.textContent = 'Send ' + tipSelected + ' Tip 💰'; btn.disabled = false;
 }
 
 async function sendTip() {
   const btn = document.getElementById('tipSendBtn');
-  const amountCents = TIP_AMOUNTS[tipSelected];
-  if (!amountCents) return;
+  const amountCents = TIP_AMOUNTS[tipSelected] || Math.round(parseFloat(String(tipSelected).replace('$', '')) * 100);
+  if (!amountCents || amountCents < TIP_MIN * 100 || amountCents > TIP_MAX * 100) return;
 
   btn.textContent = 'Opening payment...';
   btn.disabled = true;
