@@ -2,6 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+/* Returning from Stripe (tip paid or cancelled) lands here; send them back into the app */
+(function(){try{
+  var p=new URLSearchParams(location.search), fresh=false;
+  try{var r=JSON.parse(localStorage.getItem('uc_tip_return')||'null');fresh=!!(r&&Date.now()-r.ts<3600000);}catch(e){}
+  if(p.get('tip')||(fresh&&/stripe\.com/.test(document.referrer||''))){location.replace('/demo'+location.search);}
+}catch(e){}})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>UltCast — Finally. Your Sport, Your Way.</title>
 <meta name="description" content="Live listen-alongs for sport. Hear fans call the game their way while you watch. Any sport, free and bet-free.">
