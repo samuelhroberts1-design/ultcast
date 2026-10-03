@@ -676,6 +676,17 @@ body.mini-on .scroll { padding-bottom:150px; }
   </div>
 </div>
 
+<!-- ═══ PAYOUTS SHEET ═══ -->
+<div class="uc-overlay" id="payouts-overlay" onclick="if(event.target===this)closePayouts()">
+  <div class="uc-sheet">
+    <div class="uc-sheet-handle"></div>
+    <div class="uc-sheet-title" id="payouts-title">GET PAID FOR YOUR CASTS</div>
+    <div class="uc-sheet-sub" id="payouts-sub">UltCast uses Stripe to send you 80% of every tip, straight to your bank account. Set-up takes about 5 minutes and you'll need photo ID and your bank details.</div>
+    <button class="btn-primary-full" id="payouts-go-btn" onclick="payoutsGo()">Set up payouts with Stripe</button>
+    <button class="btn-ghost-full" onclick="closePayouts()">Not now</button>
+  </div>
+</div>
+
 <!-- ═══ TIP POP-UP (centre of screen) ═══ -->
 <div class="uc-overlay uc-center" id="tipPanel" onclick="if(event.target===this)closeTip()">
   <div class="tip-modal">
@@ -1049,7 +1060,7 @@ body.mini-on .scroll { padding-bottom:150px; }
       </div>
       <div class="p-section-title">Account</div>
       <div class="p-row" id="row-edit-profile" onclick="showEditProfile()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>Edit Profile</div><div class="p-row-chev">›</div></div>
-      <div class="p-row" style="opacity:0.5"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>Payment & Payouts</div><div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.5px">COMING SOON</div></div>
+      <div class="p-row" id="row-payouts" onclick="openPayouts()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>Payment & Payouts</div><div id="payouts-badge" style="font-size:10px;font-weight:800;letter-spacing:0.5px;color:var(--accent)">SET UP ›</div></div>
       <div class="p-row" style="opacity:0.5"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>Notifications</div><div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.5px">COMING SOON</div></div>
       <div class="p-section-title">Support</div>
       <div class="p-row" style="opacity:0.5"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>Help Centre</div><div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.5px">COMING SOON</div></div>
@@ -1143,6 +1154,17 @@ window.addEventListener('load', async () => {
     hideLoading();
     showScreen('newpassword-screen');
     window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  const payoutsParam = params.get('payouts');
+  if (payoutsParam) {
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(() => {
+      if (currentUser) switchMain('profile');
+      showToast(payoutsParam === 'return'
+        ? '✅ Thanks! Stripe will confirm your payout details shortly.'
+        : '⏱️ That link expired. Tap Payment & Payouts to continue.');
+    }, 900);
   }
 
   const tipStatus = params.get('tip');
@@ -1422,6 +1444,8 @@ function applyGuestUI() {
   show('btn-guest-exit', guest);
   const editRow = document.getElementById('row-edit-profile');
   if (editRow) editRow.style.opacity = guest ? '0.4' : '';
+  const payRow = document.getElementById('row-payouts');
+  if (payRow) payRow.style.opacity = guest ? '0.4' : '';
   const stats = document.getElementById('profileStats');
   if (stats) stats.style.opacity = guest ? '0.35' : '';
 
@@ -1445,6 +1469,7 @@ function guestBlocked(kind) {
     cast:    ['GO LIVE WITH ULTCAST', 'Create a free account to start your own cast. It only takes a minute.'],
     follow:  ['FOLLOW YOUR CASTERS', 'Create a free account to follow casters and find them again easily.'],
     profile: ['MAKE IT YOURS', 'Create a free account to set up your profile, name and photo.'],
+    payouts: ['GET PAID TO CAST', 'Create a free account to go live and receive tips.'],
   }[kind] || ['CREATE A FREE ACCOUNT', 'You need an account for this.'];
   document.getElementById('gate-title').textContent = copy[0];
   document.getElementById('gate-sub').textContent = copy[1];
@@ -1612,7 +1637,7 @@ function switchMain(tab) {
   const map = { home:'home-screen', browse:'browse-screen', profile:'profile-screen' };
   if (map[tab]) showScreen(map[tab]);
   if (tab === 'browse') renderBrowseCasts(window._allLiveCasts || []);
-  if (tab === 'profile') { applyGuestUI(); loadProfileStats(); }
+  if (tab === 'profile') { applyGuestUI(); loadProfileStats(); loadPayoutStatus(); }
   setTimeout(() => setActiveNav(tab), 10);
 }
 
@@ -2262,6 +2287,90 @@ function selectTip(el, amount) {
   if (hint) { hint.textContent = 'Minimum $2'; hint.classList.remove('bad'); }
   document.getElementById('tipSendBtn').disabled = false;
   document.getElementById('tipSendBtn').textContent = 'Send ' + amount + ' Tip 💰';
+}
+
+// ════════════════════════════════════════════════
+// CASTER PAYOUTS — Stripe Connect (Stripe-hosted set-up + dashboard)
+// ════════════════════════════════════════════════
+window._payoutState = null;
+
+async function payoutsRequest(action) {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.access_token) window._accessToken = session.access_token;
+  } catch(e) {}
+  if (!window._accessToken) throw new Error('Please log out and log back in');
+  const res = await fetch(`${TOKEN_SERVER}/api/payouts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window._accessToken}` },
+    body: JSON.stringify({ action }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Something went wrong');
+  return data;
+}
+
+function setPayoutBadge(state) {
+  window._payoutState = state;
+  const b = document.getElementById('payouts-badge');
+  if (!b) return;
+  const look = {
+    active:     ['ACTIVE ✓', '#3DDC84'],
+    pending:    ['IN REVIEW', 'var(--muted2)'],
+    incomplete: ['FINISH SET-UP ›', 'var(--accent)'],
+    none:       ['SET UP ›', 'var(--accent)'],
+  }[state] || ['SET UP ›', 'var(--accent)'];
+  b.textContent = look[0];
+  b.style.color = look[1];
+}
+
+async function loadPayoutStatus() {
+  if (!currentUser) return;
+  try { const d = await payoutsRequest('status'); setPayoutBadge(d.state); } catch(e) { /* leave badge as is */ }
+}
+
+function openPayouts() {
+  if (guestBlocked('payouts')) return;
+  const state = window._payoutState || 'none';
+  const t = document.getElementById('payouts-title'), s = document.getElementById('payouts-sub'), b = document.getElementById('payouts-go-btn');
+  b.disabled = false;
+  if (state === 'active') {
+    t.textContent = "YOU'RE SET UP ✓";
+    s.textContent = 'You get 80% of every tip, paid to your bank by Stripe. Open your Stripe dashboard to see your earnings and payouts, or update your bank details.';
+    b.textContent = 'Open my Stripe dashboard';
+  } else if (state === 'pending') {
+    t.textContent = 'IN REVIEW';
+    s.textContent = "Thanks! Stripe is checking your details, which usually takes a few minutes. You'll start getting 80% of tips as soon as it's approved.";
+    b.textContent = 'Check or update my details';
+  } else if (state === 'incomplete') {
+    t.textContent = 'FINISH YOUR SET-UP';
+    s.textContent = "You've started setting up payouts but there's a bit left to do. It only takes a few minutes.";
+    b.textContent = 'Continue with Stripe';
+  } else {
+    t.textContent = 'GET PAID FOR YOUR CASTS';
+    s.textContent = "UltCast uses Stripe to send you 80% of every tip, straight to your bank account. Set-up takes about 5 minutes and you'll need photo ID and your bank details.";
+    b.textContent = 'Set up payouts with Stripe';
+  }
+  document.getElementById('payouts-overlay').classList.add('show');
+}
+
+function closePayouts() {
+  document.getElementById('payouts-overlay').classList.remove('show');
+}
+
+async function payoutsGo() {
+  const b = document.getElementById('payouts-go-btn');
+  const label = b.textContent;
+  b.disabled = true; b.textContent = 'Opening Stripe…';
+  try {
+    const action = window._payoutState === 'active' ? 'dashboard' : 'start';
+    const d = await payoutsRequest(action);
+    if (!d.url) throw new Error('Could not open Stripe');
+    window.location.href = d.url;
+  } catch(e) {
+    showToast('⚠️ ' + e.message);
+    b.disabled = false; b.textContent = label;
+  }
 }
 
 // ── Custom tip amount ($2 minimum, $500 maximum) ──
