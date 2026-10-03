@@ -592,6 +592,18 @@ body.mini-on .scroll { padding-bottom:150px; }
 .tip-custom-hint { font-size:12px; color:var(--muted); margin-bottom:14px; min-height:16px; }
 .tip-custom-hint.bad { color:#FF8A96; }
 .tip-send:disabled { opacity:0.4; cursor:not-allowed; }
+.uc-reason { display:flex; align-items:center; gap:12px; padding:12px; border:1px solid var(--line); border-radius:12px; margin-bottom:8px; cursor:pointer; background:var(--bg-2); font-size:14px; color:var(--cream); transition:border-color 0.15s, background 0.15s; }
+.uc-reason.on { border-color:var(--accent); background:var(--accent-glow); }
+.uc-radio { width:20px; height:20px; border-radius:50%; border:2px solid var(--muted); flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.uc-reason.on .uc-radio { border-color:var(--accent); }
+.uc-reason.on .uc-radio::after { content:''; width:10px; height:10px; border-radius:50%; background:var(--accent); }
+.uc-textarea { width:100%; min-height:72px; resize:vertical; background:var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:12px; color:var(--cream); font-family:var(--font-body); font-size:16px; outline:none; margin:6px 0 4px; box-sizing:border-box; }
+.uc-textarea:focus { border-color:var(--accent); }
+.uc-input { width:100%; background:var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:13px; color:var(--cream); font-family:var(--font-body); font-size:16px; font-weight:700; letter-spacing:2px; outline:none; margin-bottom:12px; box-sizing:border-box; text-align:center; }
+.uc-input:focus { border-color:var(--live-red); }
+.btn-danger-full { width:100%; background:var(--live-red); color:#fff; border:none; border-radius:12px; padding:14px; font-family:var(--font-body); font-size:14px; font-weight:800; cursor:pointer; }
+.btn-danger-full:disabled { opacity:0.35; cursor:not-allowed; }
+.delete-link { display:block; width:100%; background:none; border:none; color:var(--muted); font-family:var(--font-body); font-size:12px; text-decoration:underline; cursor:pointer; padding:14px 0 4px; }
 .mini-player.hidden { transform:translateX(-50%) translateY(100px); opacity:0; pointer-events:none; }
 .mini-wave { display:flex; align-items:center; gap:2px; }
 .mini-bar { width:2px; background:var(--accent); border-radius:2px; animation:barAnim 1s ease-in-out infinite; }
@@ -673,6 +685,46 @@ body.mini-on .scroll { padding-bottom:150px; }
     <a class="uc-sheet-link" href="https://ultcast.live/terms.html" target="_blank" rel="noopener">Read the Creator Guidelines ›</a>
     <button class="btn-primary-full" id="unofficial-go-btn" disabled onclick="confirmUnofficialAndGoLive()">GO LIVE</button>
     <button class="btn-ghost-full" onclick="closeUnofficialCheck()">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══ CAST OPTIONS (⋮ on player) ═══ -->
+<div class="uc-overlay" id="castmenu-overlay" onclick="if(event.target===this)closeCastMenu()">
+  <div class="uc-sheet">
+    <div class="uc-sheet-handle"></div>
+    <button class="btn-ghost-full" style="margin-top:0;color:var(--cream);font-weight:700;text-align:left;padding:15px 16px" onclick="closeCastMenu();openReport()">🚩&nbsp;&nbsp;Report this cast</button>
+    <button class="btn-ghost-full" style="border:none" onclick="closeCastMenu()">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══ REPORT A CAST ═══ -->
+<div class="uc-overlay" id="report-overlay" onclick="if(event.target===this)closeReport()">
+  <div class="uc-sheet">
+    <div class="uc-sheet-handle"></div>
+    <div class="uc-sheet-title">REPORT THIS CAST</div>
+    <div class="uc-sheet-sub" id="report-sub">What's the problem? Reports are private. The caster won't know who sent it.</div>
+    <div class="uc-reason" onclick="pickReportReason(this)" data-reason="TV, radio or stream audio in the background"><div class="uc-radio"></div>TV, radio or stream audio in the background</div>
+    <div class="uc-reason" onclick="pickReportReason(this)" data-reason="Claims to be official / uses league or club branding"><div class="uc-radio"></div>Claims to be official / uses league or club branding</div>
+    <div class="uc-reason" onclick="pickReportReason(this)" data-reason="Hate speech, harassment or bullying"><div class="uc-radio"></div>Hate speech, harassment or bullying</div>
+    <div class="uc-reason" onclick="pickReportReason(this)" data-reason="Promotes gambling or betting"><div class="uc-radio"></div>Promotes gambling or betting</div>
+    <div class="uc-reason" onclick="pickReportReason(this)" data-reason="Sexual or explicit content"><div class="uc-radio"></div>Sexual or explicit content</div>
+    <div class="uc-reason" onclick="pickReportReason(this)" data-reason="Spam, scam or misleading"><div class="uc-radio"></div>Spam, scam or misleading</div>
+    <div class="uc-reason" onclick="pickReportReason(this)" data-reason="Something else"><div class="uc-radio"></div>Something else</div>
+    <textarea class="uc-textarea" id="report-details" maxlength="500" placeholder="Anything else we should know? (optional)"></textarea>
+    <button class="btn-primary-full" id="report-send-btn" disabled onclick="sendReport()" style="margin-top:8px">Send report</button>
+    <button class="btn-ghost-full" onclick="closeReport()">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══ DELETE ACCOUNT ═══ -->
+<div class="uc-overlay" id="delete-overlay" onclick="if(event.target===this)closeDeleteAccount()">
+  <div class="uc-sheet">
+    <div class="uc-sheet-handle"></div>
+    <div class="uc-sheet-title" style="color:#FF8A96">DELETE YOUR ACCOUNT?</div>
+    <div class="uc-sheet-sub">This permanently deletes your login, profile, photo and cast history. <strong style="color:var(--cream)">It can't be undone.</strong><br><br>If you've set up payouts, your Stripe account stays with Stripe so you can still access any money owed to you.<br><br>Type <strong style="color:var(--cream)">DELETE</strong> to confirm.</div>
+    <input class="uc-input" id="delete-confirm" type="text" autocomplete="off" autocapitalize="characters" placeholder="DELETE" oninput="document.getElementById('delete-go-btn').disabled = this.value.trim().toUpperCase() !== 'DELETE'">
+    <button class="btn-danger-full" id="delete-go-btn" disabled onclick="deleteMyAccount()">Permanently delete my account</button>
+    <button class="btn-ghost-full" onclick="closeDeleteAccount()">Cancel</button>
   </div>
 </div>
 
@@ -821,7 +873,7 @@ body.mini-on .scroll { padding-bottom:150px; }
       </div>
     </div>
     <div class="player-tip-btn" onclick="toggleTip()"><div class="tip-icon">💰</div><div class="tip-label">TIP</div></div>
-    <div style="padding:4px;cursor:pointer;color:var(--muted)">⋮</div>
+    <div style="padding:4px 6px;cursor:pointer;color:var(--muted);font-size:18px" onclick="openCastMenu()" title="More options">⋮</div>
   </div>
 
   <div class="scroll">
@@ -1067,6 +1119,7 @@ body.mini-on .scroll { padding-bottom:150px; }
       <div class="p-row" onclick="window.open('https://ultcast.live/terms.html','_blank')"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>Terms & Privacy</div><div class="p-row-chev">›</div></div>
       <div style="margin-top:20px">
         <button style="width:100%;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:13px;font-family:var(--font-body);font-size:13px;cursor:pointer" id="btn-logout" onclick="signOut()">Log Out</button>
+        <button class="delete-link" id="btn-delete-account" onclick="openDeleteAccount()">Delete my account</button>
         <button class="btn-ghost-full" id="btn-guest-exit" style="display:none;margin-top:0" onclick="signOut()">Leave guest mode</button>
       </div>
     </div>
@@ -1441,6 +1494,7 @@ function applyGuestUI() {
   show('guest-cta', guest);
   show('profileEditBadge', !guest, 'flex');
   show('btn-logout', !guest);
+  show('btn-delete-account', !guest);
   show('btn-guest-exit', guest);
   const editRow = document.getElementById('row-edit-profile');
   if (editRow) editRow.style.opacity = guest ? '0.4' : '';
@@ -2287,6 +2341,134 @@ function selectTip(el, amount) {
   if (hint) { hint.textContent = 'Minimum $2'; hint.classList.remove('bad'); }
   document.getElementById('tipSendBtn').disabled = false;
   document.getElementById('tipSendBtn').textContent = 'Send ' + amount + ' Tip 💰';
+}
+
+// ════════════════════════════════════════════════
+// REPORT A CAST
+// ════════════════════════════════════════════════
+window._reportedRooms = window._reportedRooms || {};
+let _reportReason = null;
+
+function openCastMenu() { document.getElementById('castmenu-overlay').classList.add('show'); }
+function closeCastMenu() { document.getElementById('castmenu-overlay').classList.remove('show'); }
+
+function currentRoomForReport() {
+  return window._listeningRoom || window._currentCastRow?.room_name || null;
+}
+
+function openReport() {
+  const room = currentRoomForReport();
+  if (room && window._reportedRooms[room]) { showToast("✅ You've already reported this cast. Thanks."); return; }
+  _reportReason = null;
+  document.querySelectorAll('#report-overlay .uc-reason').forEach(el => el.classList.remove('on'));
+  document.getElementById('report-details').value = '';
+  const btn = document.getElementById('report-send-btn');
+  btn.disabled = true; btn.textContent = 'Send report';
+  document.getElementById('report-overlay').classList.add('show');
+}
+function closeReport() { document.getElementById('report-overlay').classList.remove('show'); }
+
+function pickReportReason(el) {
+  document.querySelectorAll('#report-overlay .uc-reason').forEach(r => r.classList.remove('on'));
+  el.classList.add('on');
+  _reportReason = el.dataset.reason;
+  document.getElementById('report-send-btn').disabled = false;
+}
+
+async function sendReport() {
+  if (!_reportReason) return;
+  const btn = document.getElementById('report-send-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  const row = window._currentCastRow || {};
+  const room = currentRoomForReport();
+  const details = document.getElementById('report-details').value.trim().slice(0, 500);
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/reports`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${window._accessToken || SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({
+        cast_id: row.id || null,
+        room_name: room,
+        caster_id: row.caster_id || null,
+        caster_name: row.caster_name || document.getElementById('pCasterName')?.textContent || null,
+        reporter_id: currentUser?.id || null,
+        reason: _reportReason,
+        details: details || null,
+      }),
+    });
+    if (!res.ok) throw new Error('Report failed (' + res.status + ')');
+    if (room) window._reportedRooms[room] = true;
+    closeReport();
+    showToast('🚩 Thanks. We review every report within 24 hours.');
+  } catch(e) {
+    console.error(e);
+    showToast('⚠️ Could not send report. Please try again.');
+    btn.disabled = false; btn.textContent = 'Send report';
+  }
+}
+
+// ════════════════════════════════════════════════
+// DELETE MY ACCOUNT
+// ════════════════════════════════════════════════
+function openDeleteAccount() {
+  if (!currentUser) return;
+  document.getElementById('delete-confirm').value = '';
+  const btn = document.getElementById('delete-go-btn');
+  btn.disabled = true; btn.textContent = 'Permanently delete my account';
+  document.getElementById('delete-overlay').classList.add('show');
+}
+function closeDeleteAccount() { document.getElementById('delete-overlay').classList.remove('show'); }
+
+async function deleteMyAccount() {
+  if (document.getElementById('delete-confirm').value.trim().toUpperCase() !== 'DELETE') return;
+  const btn = document.getElementById('delete-go-btn');
+  btn.disabled = true; btn.textContent = 'Deleting…';
+  try {
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session?.access_token) window._accessToken = session.access_token;
+    } catch(e) {}
+    if (!window._accessToken) throw new Error('Please log out and back in, then try again.');
+
+    // Profile photo first (best effort; the database step also tries)
+    try {
+      const { data: files } = await sb.storage.from('avatars').list(currentUser.id);
+      if (files && files.length) await sb.storage.from('avatars').remove(files.map(f => `${currentUser.id}/${f.name}`));
+    } catch(e) {}
+
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/delete_my_account`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${window._accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: '{}',
+    });
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error('Delete failed:', res.status, txt);
+      throw new Error('Could not delete your account. Please try again or email us.');
+    }
+    closeDeleteAccount();
+    if (window._listeningRoom) { try { await stopListeningQuietly(); } catch(e) {} }
+    try { await sb.auth.signOut({ scope: 'local' }); } catch(e) {}
+    currentUser = null;
+    currentUserProfile = null;
+    window._accessToken = '';
+    exitGuestMode();
+    setAuthTab('login');
+    showScreen('auth-screen');
+    showToast('Your account has been deleted. Sorry to see you go.');
+  } catch(e) {
+    showToast('⚠️ ' + e.message);
+    btn.disabled = false; btn.textContent = 'Permanently delete my account';
+  }
 }
 
 // ════════════════════════════════════════════════
