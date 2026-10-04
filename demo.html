@@ -604,6 +604,23 @@ body.mini-on .scroll { padding-bottom:150px; }
 .btn-danger-full { width:100%; background:var(--live-red); color:#fff; border:none; border-radius:12px; padding:14px; font-family:var(--font-body); font-size:14px; font-weight:800; cursor:pointer; }
 .btn-danger-full:disabled { opacity:0.35; cursor:not-allowed; }
 .delete-link { display:block; width:100%; background:none; border:none; color:var(--muted); font-family:var(--font-body); font-size:12px; text-decoration:underline; cursor:pointer; padding:14px 0 4px; }
+.tag.following-tag { color:var(--accent); border-color:rgba(255,107,26,0.45); background:var(--accent-glow); font-weight:700; }
+.cp-topbar { display:flex; align-items:center; justify-content:space-between; }
+.cp-follow { margin:16px auto 0; }
+.cp-section { padding:0 20px; }
+.cp-section-title { font-family:var(--font-title); font-size:18px; letter-spacing:1.5px; color:var(--cream); margin:22px 0 10px; }
+.cp-cast { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; margin-bottom:8px; background:var(--bg-2); }
+.cp-cast.live { border-color:rgba(255,107,26,0.5); background:var(--accent-glow); cursor:pointer; }
+.cp-cast-body { flex:1; min-width:0; }
+.cp-cast-game { font-size:14px; font-weight:700; color:var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cp-cast-meta { font-size:12px; color:var(--muted); margin-top:2px; }
+.cp-empty { font-size:13px; color:var(--muted); padding:6px 0 4px; }
+.cp-note { margin:18px 20px 0; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:var(--bg-2); font-size:13px; color:var(--muted2); line-height:1.5; text-align:center; }
+.player-caster-row { cursor:pointer; }
+.fl-row { display:flex; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px solid var(--line); cursor:pointer; }
+.fl-avatar { width:40px; height:40px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg,#3a2a1e,#1A1816) center/cover; border:1.5px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--cream); }
+.fl-name { flex:1; min-width:0; font-size:14px; font-weight:700; color:var(--cream); }
+.fl-name span { display:block; font-size:12px; font-weight:500; color:var(--muted); }
 .mini-player.hidden { transform:translateX(-50%) translateY(100px); opacity:0; pointer-events:none; }
 .mini-wave { display:flex; align-items:center; gap:2px; }
 .mini-bar { width:2px; background:var(--accent); border-radius:2px; animation:barAnim 1s ease-in-out infinite; }
@@ -685,6 +702,59 @@ body.mini-on .scroll { padding-bottom:150px; }
     <a class="uc-sheet-link" href="https://ultcast.live/terms.html" target="_blank" rel="noopener">Read the Creator Guidelines ›</a>
     <button class="btn-primary-full" id="unofficial-go-btn" disabled onclick="confirmUnofficialAndGoLive()">GO LIVE</button>
     <button class="btn-ghost-full" onclick="closeUnofficialCheck()">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══ CASTER PROFILE ═══ -->
+<div class="screen" id="caster-screen">
+  <div class="topbar cp-topbar">
+    <button class="back-btn" onclick="closeCasterProfile()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+    <button class="back-btn" onclick="shareCasterProfile()" title="Share profile"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
+  </div>
+  <div class="scroll">
+    <div class="profile-hero">
+      <div class="profile-avatar-lg" id="cpAvatar" style="margin:0 auto 12px">?</div>
+      <div class="profile-name" id="cpName">Loading…</div>
+      <div class="profile-handle" id="cpHandle"></div>
+      <div id="cpBio" style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5;display:none"></div>
+      <div class="profile-stats">
+        <div class="pstat"><div class="pstat-num" id="cpCasts">—</div><div class="pstat-lbl">Broadcasts</div></div>
+        <div class="pstat"><div class="pstat-num" id="cpFollowers">—</div><div class="pstat-lbl">Followers</div></div>
+      </div>
+      <button class="follow-btn cp-follow" id="cpFollowBtn" onclick="toggleCasterPageFollow()"><span id="cpFollowText">Follow</span></button>
+      <div id="cpSelfNote" style="display:none;font-size:12px;color:var(--muted);margin-top:12px">This is how other people see your profile.</div>
+    </div>
+    <div class="cp-note" id="cpBlockedNote" style="display:none">You've blocked this caster. Their casts are hidden from you.</div>
+    <div class="cp-section" id="cpContent">
+      <div class="cp-section-title">LIVE NOW</div>
+      <div id="cpLive"><div class="cp-empty">Not live right now.</div></div>
+      <div class="cp-section-title">RECENT CASTS</div>
+      <div id="cpRecent"><div class="cp-empty">Loading…</div></div>
+    </div>
+    <div style="padding:10px 20px 30px;text-align:center">
+      <button class="delete-link" id="cpBlockBtn" onclick="toggleBlockCaster()">Block this caster</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOLLOWING LIST ═══ -->
+<div class="uc-overlay" id="following-overlay" onclick="if(event.target===this)closeFollowingList()">
+  <div class="uc-sheet">
+    <div class="uc-sheet-handle"></div>
+    <div class="uc-sheet-title">FOLLOWING</div>
+    <div id="following-list"><div class="cp-empty">Loading…</div></div>
+    <button class="btn-ghost-full" onclick="closeFollowingList()">Close</button>
+  </div>
+</div>
+
+<!-- ═══ CONFIRM (shared) ═══ -->
+<div class="uc-overlay" id="confirm-overlay" onclick="if(event.target===this)closeConfirm()">
+  <div class="uc-sheet">
+    <div class="uc-sheet-handle"></div>
+    <div class="uc-sheet-title" id="confirm-title">ARE YOU SURE?</div>
+    <div class="uc-sheet-sub" id="confirm-sub"></div>
+    <button class="btn-danger-full" id="confirm-yes" onclick="confirmYes()">Yes</button>
+    <button class="btn-ghost-full" onclick="closeConfirm()">Cancel</button>
   </div>
 </div>
 
@@ -862,7 +932,7 @@ body.mini-on .scroll { padding-bottom:150px; }
 <div class="screen" id="player-screen">
   <div class="player-topbar">
     <button class="back-btn" onclick="minimizePlayer()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></button>
-    <div class="player-caster-row">
+    <div class="player-caster-row" onclick="openCasterFromPlayer()" title="View caster profile">
       <div id="pAvatarWrap" style="width:44px;height:44px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#3a2a1e,#1A1816);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--cream)">
         <span id="pAvatar">SS</span>
       </div>
@@ -1111,6 +1181,7 @@ body.mini-on .scroll { padding-bottom:150px; }
         <button class="btn-ghost-full" onclick="gateToAuth('login')">I already have an account</button>
       </div>
       <div class="p-section-title">Account</div>
+      <div class="p-row" id="row-following" onclick="openFollowingList()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></div>Following</div><div id="following-count" style="font-size:12px;font-weight:700;color:var(--muted2)">0 ›</div></div>
       <div class="p-row" id="row-edit-profile" onclick="showEditProfile()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>Edit Profile</div><div class="p-row-chev">›</div></div>
       <div class="p-row" id="row-payouts" onclick="openPayouts()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>Payment & Payouts</div><div id="payouts-badge" style="font-size:10px;font-weight:800;letter-spacing:0.5px;color:var(--accent)">SET UP ›</div></div>
       <div class="p-row" style="opacity:0.5"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>Notifications</div><div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.5px">COMING SOON</div></div>
@@ -1190,7 +1261,7 @@ window.addEventListener('load', async () => {
       hideLoading();
       // Returning guests (and anyone opening a shared cast link) skip the login screen
       const _bootParams = new URLSearchParams(window.location.search);
-      if (guestFlagSaved() || _bootParams.get('join') || _bootParams.get('tip') || getTipReturn()) {
+      if (guestFlagSaved() || _bootParams.get('join') || _bootParams.get('caster') || _bootParams.get('tip') || getTipReturn()) {
         enterGuestMode();
       } else {
         showScreen('auth-screen');
@@ -1232,6 +1303,12 @@ window.addEventListener('load', async () => {
   }
 
   // Jump straight into a shared cast link, e.g. ?join=collingwood-vs-richmond-1774068683702
+  const casterLink = params.get('caster');
+  if (casterLink && /^[0-9a-f-]{36}$/i.test(casterLink)) {
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(() => openCasterProfile(casterLink), 900);
+  }
+
   const joinRoom = params.get('join');
   if (joinRoom) {
     window.history.replaceState({}, '', window.location.pathname);
@@ -1339,6 +1416,7 @@ function updateProfileUI() {
 
   // Load real stats
   loadProfileStats();
+  loadMySocial();
 }
 
 async function loadProfileStats() {
@@ -1454,6 +1532,8 @@ async function signOut() {
   currentUser = null;
   currentUserProfile = null;
   exitGuestMode();
+  window._mySocial = { following: new Set(), blocked: new Set(guestBlockList()) };
+  updateFollowingCount();
   setAuthTab('login');
   showScreen('auth-screen');
 }
@@ -1469,6 +1549,7 @@ function guestFlagSaved() {
 
 function enterGuestMode() {
   isGuest = true;
+  setTimeout(() => { try { loadMySocial(); } catch(e) {} }, 0);
   try { localStorage.setItem('uc_guest', '1'); } catch(e) {}
   applyGuestUI();
   showScreen('home-screen');
@@ -1498,6 +1579,8 @@ function applyGuestUI() {
   show('btn-guest-exit', guest);
   const editRow = document.getElementById('row-edit-profile');
   if (editRow) editRow.style.opacity = guest ? '0.4' : '';
+  const folRow = document.getElementById('row-following');
+  if (folRow) folRow.style.opacity = guest ? '0.4' : '';
   const payRow = document.getElementById('row-payouts');
   if (payRow) payRow.style.opacity = guest ? '0.4' : '';
   const stats = document.getElementById('profileStats');
@@ -1619,7 +1702,7 @@ function showScreen(id) {
 // ════════════════════════════════════════════════
 // MINI PLAYER — keep listening while browsing
 // ════════════════════════════════════════════════
-const MINI_SCREENS = ['home-screen', 'browse-screen', 'startcast-screen', 'profile-screen'];
+const MINI_SCREENS = ['home-screen', 'browse-screen', 'startcast-screen', 'profile-screen', 'caster-screen'];
 const MINI_TAB = { 'home-screen':'home', 'browse-screen':'browse', 'startcast-screen':'cast', 'profile-screen':'profile' };
 window._miniActive = false;
 window._listeningRoom = null;
@@ -1738,7 +1821,8 @@ async function fetchLiveCasts() {
       return;
     }
     const data = await res.json();
-    window._allLiveCasts = Array.isArray(data) ? data : [];
+    window._rawLiveCasts = Array.isArray(data) ? data : [];
+    window._allLiveCasts = applySocialToCasts(window._rawLiveCasts);
     renderLiveCasts(window._allLiveCasts);
     renderBrowseCasts(window._allLiveCasts);
     updateCategoryCounts(window._allLiveCasts);
@@ -1769,6 +1853,7 @@ function renderLiveCasts(casts) {
         <div class="cast-row-caster">${escHtml(cast.caster_name)}</div>
         <div class="cast-tags">
           <span class="tag gold">${escHtml(cast.sport)}</span>
+          ${isFollowingCaster(cast.caster_id) ? '<span class="tag following-tag">★ Following</span>' : ''}
           ${(cast.tags||[]).map(t=>`<span class="tag">${escHtml(t)}</span>`).join('')}
         </div>
       </div>
@@ -1802,6 +1887,7 @@ function renderBrowseCasts(casts, filter) {
         <div class="cast-row-caster">${escHtml(cast.caster_name)} <span style="color:var(--muted)">· ${cast.listener_count||0} listeners</span></div>
         <div class="cast-tags">
           <span class="tag gold">${escHtml(cast.sport)}</span>
+          ${isFollowingCaster(cast.caster_id) ? '<span class="tag following-tag">★ Following</span>' : ''}
           ${(cast.tags||[]).map(t=>`<span class="tag">${escHtml(t)}</span>`).join('')}
         </div>
       </div>
@@ -1943,6 +2029,15 @@ async function openPlayer(game, league, caster, sport, roomName) {
 
   isPlaying = true; isFollowing = false; listenerMuted = false;
   document.getElementById('followBtn').classList.remove('following');
+  refreshPlayerFollow();
+  // If we opened this cast from a link (no list row yet), look it up so follow/tips/reports know the caster
+  if (!window._currentCastRow && room) {
+    fetch(`${SUPABASE_URL}/rest/v1/casts?room_name=eq.${encodeURIComponent(room)}&select=*`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    }).then(r => r.json()).then(d => {
+      if (d?.[0] && window._listeningRoom === room && !window._currentCastRow) { window._currentCastRow = d[0]; refreshPlayerFollow(); }
+    }).catch(() => {});
+  }
 
   showScreen('player-screen');
 
@@ -2244,13 +2339,28 @@ function toggleListenerMute() {
   }
 }
 
-function toggleFollow() {
-  if (guestBlocked('follow')) return;
-  isFollowing = !isFollowing;
+function paintPlayerFollow() {
   const btn = document.getElementById('followBtn');
   btn.classList.toggle('following', isFollowing);
   document.getElementById('followBtnText').textContent = isFollowing ? 'Following ✓' : 'Follow ' + currentCaster;
-  if (isFollowing) showToast('✅ Following ' + currentCaster);
+}
+
+function refreshPlayerFollow() {
+  const cid = window._currentCastRow?.caster_id;
+  isFollowing = !!(cid && isFollowingCaster(cid));
+  paintPlayerFollow();
+}
+
+async function toggleFollow() {
+  if (guestBlocked('follow')) return;
+  const cid = await currentCasterIdForPlayer();
+  if (!cid) { showToast('⚠️ Could not find this caster. Please try again.'); return; }
+  if (cid === currentUser.id) { showToast("🎙️ That's you!"); return; }
+  const want = !isFollowing;
+  isFollowing = want; paintPlayerFollow();
+  const ok = await setFollow(cid, want);
+  if (!ok) { isFollowing = !want; paintPlayerFollow(); return; }
+  if (want) showToast('✅ Following ' + currentCaster);
 }
 
 // ════════════════════════════════════════════════
@@ -2342,6 +2452,334 @@ function selectTip(el, amount) {
   document.getElementById('tipSendBtn').disabled = false;
   document.getElementById('tipSendBtn').textContent = 'Send ' + amount + ' Tip 💰';
 }
+
+// ════════════════════════════════════════════════
+// FOLLOWING + BLOCKING + CASTER PROFILES
+// ════════════════════════════════════════════════
+window._mySocial = { following: new Set(), blocked: new Set() };
+
+function isFollowingCaster(id) { return !!(id && window._mySocial.following.has(id)); }
+function isBlockedCaster(id) { return !!(id && window._mySocial.blocked.has(id)); }
+
+// Hide blocked casters; put casters you follow at the top (otherwise same order as before)
+function applySocialToCasts(list) {
+  const visible = (list || []).filter(c => !isBlockedCaster(c.caster_id));
+  return visible.map((c, i) => [c, i])
+    .sort((a, b) => (isFollowingCaster(b[0].caster_id) - isFollowingCaster(a[0].caster_id)) || (a[1] - b[1]))
+    .map(x => x[0]);
+}
+
+function rerenderCastLists() {
+  window._allLiveCasts = applySocialToCasts(window._rawLiveCasts || window._allLiveCasts || []);
+  try { renderLiveCasts(window._allLiveCasts); renderBrowseCasts(window._allLiveCasts); updateCategoryCounts(window._allLiveCasts); } catch(e) {}
+}
+
+function guestBlockList() { try { return JSON.parse(localStorage.getItem('uc_blocked') || '[]'); } catch(e) { return []; } }
+function saveGuestBlockList(arr) { try { localStorage.setItem('uc_blocked', JSON.stringify(arr)); } catch(e) {} }
+
+async function freshToken() {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.access_token) window._accessToken = session.access_token;
+  } catch(e) {}
+  return window._accessToken || SUPABASE_KEY;
+}
+
+function restHeaders(token, extra) {
+  return Object.assign({ 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token || SUPABASE_KEY}` }, extra || {});
+}
+
+function updateFollowingCount() {
+  const el = document.getElementById('following-count');
+  if (el) el.textContent = window._mySocial.following.size + ' ›';
+}
+
+// Loads who you follow and who you've blocked (guests: blocks on this device only)
+async function loadMySocial() {
+  const s = { following: new Set(), blocked: new Set(currentUser ? [] : guestBlockList()) };
+  if (currentUser) {
+    const token = await freshToken();
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/follows?follower_id=eq.${currentUser.id}&select=following_id`, { headers: restHeaders(token) });
+      if (r.ok) (await r.json()).forEach(x => s.following.add(x.following_id));
+    } catch(e) {}
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/blocks?blocker_id=eq.${currentUser.id}&select=blocked_id`, { headers: restHeaders(token) });
+      if (r.ok) (await r.json()).forEach(x => s.blocked.add(x.blocked_id));
+    } catch(e) {}
+  }
+  window._mySocial = s;
+  updateFollowingCount();
+  rerenderCastLists();
+  if (document.getElementById('player-screen')?.classList.contains('active')) refreshPlayerFollow();
+}
+
+async function setFollow(casterId, on) {
+  if (!currentUser || !casterId) return false;
+  const token = await freshToken();
+  try {
+    const res = on
+      ? await fetch(`${SUPABASE_URL}/rest/v1/follows`, {
+          method: 'POST',
+          headers: restHeaders(token, { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+          body: JSON.stringify({ follower_id: currentUser.id, following_id: casterId }),
+        })
+      : await fetch(`${SUPABASE_URL}/rest/v1/follows?follower_id=eq.${currentUser.id}&following_id=eq.${casterId}`, {
+          method: 'DELETE', headers: restHeaders(token),
+        });
+    if (!res.ok && res.status !== 409) throw new Error('Follow failed ' + res.status);
+    if (on) window._mySocial.following.add(casterId); else window._mySocial.following.delete(casterId);
+    updateFollowingCount();
+    rerenderCastLists();
+    return true;
+  } catch(e) {
+    console.error(e);
+    showToast('⚠️ Could not update. Please try again.');
+    return false;
+  }
+}
+
+async function setBlocked(casterId, on) {
+  if (!casterId) return false;
+  if (currentUser) {
+    const token = await freshToken();
+    try {
+      const res = on
+        ? await fetch(`${SUPABASE_URL}/rest/v1/blocks`, {
+            method: 'POST',
+            headers: restHeaders(token, { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+            body: JSON.stringify({ blocker_id: currentUser.id, blocked_id: casterId }),
+          })
+        : await fetch(`${SUPABASE_URL}/rest/v1/blocks?blocker_id=eq.${currentUser.id}&blocked_id=eq.${casterId}`, {
+            method: 'DELETE', headers: restHeaders(token),
+          });
+      if (!res.ok && res.status !== 409) throw new Error('Block failed ' + res.status);
+    } catch(e) {
+      console.error(e);
+      showToast('⚠️ Could not update. Please try again.');
+      return false;
+    }
+    if (on && isFollowingCaster(casterId)) await setFollow(casterId, false);
+  } else {
+    const list = guestBlockList().filter(x => x !== casterId);
+    if (on) list.push(casterId);
+    saveGuestBlockList(list);
+  }
+  if (on) window._mySocial.blocked.add(casterId); else window._mySocial.blocked.delete(casterId);
+  // Stop listening if you just blocked the caster you're listening to
+  if (on && window._listeningRoom && window._currentCastRow?.caster_id === casterId) {
+    try { await stopListeningQuietly(); } catch(e) {}
+  }
+  rerenderCastLists();
+  return true;
+}
+
+async function currentCasterIdForPlayer() {
+  if (window._currentCastRow?.caster_id) return window._currentCastRow.caster_id;
+  const room = window._listeningRoom;
+  if (!room) return null;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/casts?room_name=eq.${encodeURIComponent(room)}&select=*`, { headers: restHeaders() });
+    const d = await r.json();
+    if (d?.[0] && window._listeningRoom === room) { window._currentCastRow = d[0]; return d[0].caster_id; }
+  } catch(e) {}
+  return null;
+}
+
+async function openCasterFromPlayer() {
+  const cid = await currentCasterIdForPlayer();
+  if (cid) openCasterProfile(cid);
+  else showToast('⚠️ Could not open this profile.');
+}
+
+// ── Caster profile page ──
+window._cp = { id: null, back: 'home-screen', name: '' };
+
+function setAvatarEl(el, url, name) {
+  el.style.backgroundImage = '';
+  el.textContent = (name || '?').substring(0, 2).toUpperCase();
+  if (url) {
+    const img = new Image();
+    img.onload = () => { el.style.backgroundImage = `url(${url})`; el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center'; el.textContent = ''; };
+    img.src = url;
+  }
+}
+
+async function countRows(table, filter) {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, {
+      headers: restHeaders(null, { 'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0' }),
+    });
+    const cr = r.headers.get('content-range') || '';
+    const n = parseInt(cr.split('/')[1], 10);
+    return isNaN(n) ? null : n;
+  } catch(e) { return null; }
+}
+
+function paintCasterPage() {
+  const id = window._cp.id;
+  const self = currentUser && currentUser.id === id;
+  const blocked = isBlockedCaster(id);
+  const fb = document.getElementById('cpFollowBtn');
+  fb.style.display = (self || blocked) ? 'none' : '';
+  fb.classList.toggle('following', isFollowingCaster(id));
+  document.getElementById('cpFollowText').textContent = isFollowingCaster(id) ? 'Following ✓' : 'Follow';
+  document.getElementById('cpSelfNote').style.display = self ? 'block' : 'none';
+  document.getElementById('cpBlockedNote').style.display = blocked ? 'block' : 'none';
+  document.getElementById('cpContent').style.display = blocked ? 'none' : '';
+  const bb = document.getElementById('cpBlockBtn');
+  bb.style.display = self ? 'none' : '';
+  bb.textContent = blocked ? 'Unblock this caster' : 'Block this caster';
+}
+
+async function openCasterProfile(casterId) {
+  if (!casterId) return;
+  const from = document.querySelector('.screen.active')?.id || 'home-screen';
+  if (from !== 'caster-screen') window._cp.back = from;
+  window._cp.id = casterId;
+  window._cp.name = '';
+  // Reset
+  document.getElementById('cpName').textContent = 'Loading…';
+  document.getElementById('cpHandle').textContent = '';
+  document.getElementById('cpBio').style.display = 'none';
+  document.getElementById('cpCasts').textContent = '—';
+  document.getElementById('cpFollowers').textContent = '—';
+  document.getElementById('cpLive').innerHTML = '<div class="cp-empty">Not live right now.</div>';
+  document.getElementById('cpRecent').innerHTML = '<div class="cp-empty">Loading…</div>';
+  setAvatarEl(document.getElementById('cpAvatar'), null, '?');
+  paintCasterPage();
+  showScreen('caster-screen');
+  document.querySelector('#caster-screen .scroll')?.scrollTo(0, 0);
+
+  const id = encodeURIComponent(casterId);
+  const [profile, casts, followers, total] = await Promise.all([
+    fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${id}&select=id,username,display_name,bio,avatar_url`, { headers: restHeaders() }).then(r => r.json()).then(d => d?.[0] || null).catch(() => null),
+    fetch(`${SUPABASE_URL}/rest/v1/casts?caster_id=eq.${id}&select=*&order=created_at.desc&limit=15`, { headers: restHeaders() }).then(r => r.json()).catch(() => []),
+    countRows('follows', `following_id=eq.${id}`),
+    countRows('casts', `caster_id=eq.${id}`),
+  ]);
+  if (window._cp.id !== casterId) return; // opened someone else meanwhile
+
+  const rows = Array.isArray(casts) ? casts : [];
+  const name = profile?.display_name || profile?.username || rows[0]?.caster_name || 'Caster';
+  window._cp.name = name;
+  document.getElementById('cpName').textContent = name;
+  document.getElementById('cpHandle').textContent = profile?.username ? '@' + profile.username : '';
+  const bio = document.getElementById('cpBio');
+  if (profile?.bio) { bio.textContent = profile.bio; bio.style.display = 'block'; }
+  setAvatarEl(document.getElementById('cpAvatar'), profile?.avatar_url, name);
+  document.getElementById('cpCasts').textContent = total ?? rows.length;
+  document.getElementById('cpFollowers').textContent = followers ?? '—';
+
+  const live = rows.filter(c => c.is_live);
+  const past = rows.filter(c => !c.is_live).slice(0, 10);
+  window._cpLiveRows = live;
+  document.getElementById('cpLive').innerHTML = live.length ? live.map((c, i) => `
+    <div class="cp-cast live" onclick="openCasterLiveCast(${i})">
+      <div class="cp-cast-body">
+        <div class="cp-cast-game">${escHtml(c.game)}</div>
+        <div class="cp-cast-meta"><span class="live-badge" style="font-size:9px;padding:2px 6px"><span class="live-dot"></span>LIVE</span> &nbsp;${escHtml(c.sport)} · ${escHtml(c.league)} · 👥 ${c.listener_count || 0}</div>
+      </div>
+      <div class="play-circle"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg></div>
+    </div>`).join('') : '<div class="cp-empty">Not live right now.</div>';
+  document.getElementById('cpRecent').innerHTML = past.length ? past.map(c => {
+    let when = '';
+    try { when = new Date(c.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }); } catch(e) {}
+    return `<div class="cp-cast"><div class="cp-cast-body">
+      <div class="cp-cast-game">${escHtml(c.game)}</div>
+      <div class="cp-cast-meta">${escHtml(when)} · ${escHtml(c.sport)} · ${escHtml(c.league)}</div>
+    </div></div>`;
+  }).join('') : '<div class="cp-empty">No past casts yet.</div>';
+  paintCasterPage();
+}
+
+function openCasterLiveCast(i) {
+  const c = (window._cpLiveRows || [])[i];
+  if (!c) return;
+  openPlayer(c.game, c.sport + ' · ' + c.league, c.caster_name, c.sport, c.room_name);
+}
+
+function closeCasterProfile() {
+  let dest = window._cp.back && window._cp.back !== 'caster-screen' ? window._cp.back : 'home-screen';
+  // If you stopped listening while on the profile (e.g. blocked them), don't return to an empty player
+  if (dest === 'player-screen' && !window._listeningRoom) dest = 'home-screen';
+  showScreen(dest);
+  if (MINI_TAB[dest]) setTimeout(() => setActiveNav(MINI_TAB[dest]), 10);
+  if (dest === 'player-screen') refreshPlayerFollow();
+}
+
+async function toggleCasterPageFollow() {
+  if (guestBlocked('follow')) return;
+  const id = window._cp.id;
+  const want = !isFollowingCaster(id);
+  const ok = await setFollow(id, want);
+  if (!ok) return;
+  paintCasterPage();
+  const f = document.getElementById('cpFollowers');
+  const n = parseInt(f.textContent, 10);
+  if (!isNaN(n)) f.textContent = Math.max(0, n + (want ? 1 : -1));
+  if (want) showToast('✅ Following ' + (window._cp.name || 'caster'));
+}
+
+function toggleBlockCaster() {
+  const id = window._cp.id, name = window._cp.name || 'this caster';
+  if (isBlockedCaster(id)) {
+    setBlocked(id, false).then(ok => { if (ok) { paintCasterPage(); showToast('Unblocked ' + name); openCasterProfile(id); } });
+    return;
+  }
+  openConfirm('BLOCK ' + name.toUpperCase() + '?',
+    "You won't see their casts anymore, and you'll stop following them. They won't be told. You can unblock any time from their profile.",
+    'Block', async () => {
+      const ok = await setBlocked(id, true);
+      if (ok) { paintCasterPage(); showToast('🚫 Blocked ' + name); }
+    });
+}
+
+async function shareCasterProfile() {
+  const url = 'https://ultcast.live/demo?caster=' + window._cp.id;
+  const title = (window._cp.name || 'A caster') + ' on UltCast';
+  try {
+    if (navigator.share) { await navigator.share({ title, url }); return; }
+  } catch(e) { if (e && e.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(url); showToast('🔗 Profile link copied'); }
+  catch(e) { showToast(url); }
+}
+
+// ── Following list (Profile tab) ──
+async function openFollowingList() {
+  if (guestBlocked('follow')) return;
+  const box = document.getElementById('following-list');
+  box.innerHTML = '<div class="cp-empty">Loading…</div>';
+  document.getElementById('following-overlay').classList.add('show');
+  const ids = [...window._mySocial.following];
+  if (!ids.length) { box.innerHTML = '<div class="cp-empty" style="padding:6px 0 10px">You\'re not following anyone yet. Tap Follow on any cast to keep track of casters you like.</div>'; return; }
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=in.(${ids.map(encodeURIComponent).join(',')})&select=id,username,display_name,avatar_url`, { headers: restHeaders() });
+    const people = await r.json();
+    const liveIds = new Set((window._rawLiveCasts || []).filter(c => c.is_live !== false).map(c => c.caster_id));
+    box.innerHTML = (people || []).map(p => {
+      const nm = p.display_name || p.username || 'Caster';
+      return `<div class="fl-row" onclick="closeFollowingList();openCasterProfile('${p.id}')">
+        <div class="fl-avatar" ${p.avatar_url ? `style="background-image:url('${escHtml(p.avatar_url)}')"` : ''}>${p.avatar_url ? '' : escHtml(nm.substring(0,2).toUpperCase())}</div>
+        <div class="fl-name">${escHtml(nm)}<span>${p.username ? '@' + escHtml(p.username) : ''}</span></div>
+        ${liveIds.has(p.id) ? '<span class="live-badge" style="font-size:9px"><span class="live-dot"></span>LIVE</span>' : '<span style="color:var(--muted)">›</span>'}
+      </div>`;
+    }).join('') || '<div class="cp-empty">Nothing to show.</div>';
+  } catch(e) { box.innerHTML = '<div class="cp-empty">Could not load. Please try again.</div>'; }
+}
+function closeFollowingList() { document.getElementById('following-overlay').classList.remove('show'); }
+
+// ── Shared confirm sheet ──
+let _confirmFn = null;
+function openConfirm(title, text, yesLabel, fn) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-sub').textContent = text;
+  document.getElementById('confirm-yes').textContent = yesLabel || 'Yes';
+  _confirmFn = fn;
+  document.getElementById('confirm-overlay').classList.add('show');
+}
+function closeConfirm() { document.getElementById('confirm-overlay').classList.remove('show'); _confirmFn = null; }
+function confirmYes() { const fn = _confirmFn; closeConfirm(); if (fn) fn(); }
 
 // ════════════════════════════════════════════════
 // REPORT A CAST
@@ -2462,6 +2900,8 @@ async function deleteMyAccount() {
     currentUserProfile = null;
     window._accessToken = '';
     exitGuestMode();
+    window._mySocial = { following: new Set(), blocked: new Set(guestBlockList()) };
+    updateFollowingCount();
     setAuthTab('login');
     showScreen('auth-screen');
     showToast('Your account has been deleted. Sorry to see you go.');
