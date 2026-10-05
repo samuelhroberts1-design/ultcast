@@ -302,7 +302,7 @@ body::after {
 .player-listeners-label { font-size:14px; font-weight:600; color:var(--muted2); margin-top:3px; }
 .player-tip-btn {
   display:flex; flex-direction:column; align-items:center; gap:2px;
-  cursor:pointer; padding:4px 8px; border:1px solid var(--line);
+  cursor:pointer; padding:4px 8px; border:1.5px solid var(--accent); background:var(--accent-glow); color:var(--accent);
   border-radius:8px; transition:border-color 0.2s; flex-shrink:0;
 }
 .player-tip-btn:active { border-color:var(--accent); }
@@ -574,6 +574,27 @@ body::after {
   z-index:88; cursor:pointer; box-shadow:0 -4px 24px rgba(0,0,0,0.4); transition:all 0.3s;
 }
 body.mini-on .scroll { padding-bottom:150px; }
+/* Caster live bar (shows while browsing during your own cast) */
+.caster-bar { position:fixed; bottom:64px; left:50%; transform:translateX(-50%); width:calc(100% - 20px); max-width:410px;
+  background:linear-gradient(90deg, rgba(240,54,74,0.18), var(--bg-2) 70%); border:1px solid var(--live-red); border-radius:12px;
+  padding:10px 12px 10px 14px; display:flex; align-items:center; gap:10px; z-index:89; cursor:pointer; box-shadow:0 -4px 24px rgba(0,0,0,0.45); }
+.caster-bar.hidden { display:none; }
+.caster-bar-dot { width:10px; height:10px; border-radius:50%; background:var(--live-red); flex-shrink:0; animation:livePulse 1.4s infinite; }
+@keyframes livePulse { 0%,100% { opacity:1; } 50% { opacity:0.35; } }
+.caster-bar-info { flex:1; min-width:0; }
+.caster-bar-top { font-size:13px; font-weight:800; color:var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.caster-bar-sub { font-size:11px; color:var(--muted2); margin-top:1px; }
+.caster-bar-mic { width:36px; height:36px; border-radius:50%; background:var(--surface-2); border:1px solid var(--line); color:var(--cream); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.caster-bar-mic.muted { background:var(--live-red); border-color:var(--live-red); color:#fff; }
+.onair-min { position:absolute; top:calc(14px + env(safe-area-inset-top, 0px)); left:14px; display:flex; align-items:center; gap:6px;
+  background:var(--surface-2); border:1px solid var(--line); color:var(--cream); border-radius:999px; padding:8px 13px 8px 10px;
+  font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; z-index:5; }
+/* Follow pill next to caster name */
+.player-name-row { display:flex; align-items:center; gap:8px; min-width:0; }
+.player-name-row .player-caster-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.follow-pill { flex-shrink:0; background:var(--accent-glow); border:1.5px solid var(--accent); color:var(--accent); border-radius:999px;
+  padding:4px 11px; font-family:var(--font-body); font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap; line-height:1.3; }
+.follow-pill.following { background:transparent; border-color:var(--line); color:var(--muted2); }
 .uc-overlay.uc-center { align-items:center; padding:20px; }
 .tip-modal { width:100%; max-width:360px; background:var(--surface); border:1px solid rgba(255,107,26,0.45); border-radius:20px; padding:24px 20px 20px; box-shadow:0 20px 60px rgba(0,0,0,0.6); animation:tipPop 0.18s ease-out; position:relative; text-align:center; }
 @keyframes tipPop { from { transform:scale(0.92); opacity:0; } to { transform:scale(1); opacity:1; } }
@@ -931,6 +952,28 @@ body.mini-on .scroll { padding-bottom:150px; }
   </nav>
 </div>
 
+<!-- ═══ CASTER LIVE BAR (your own cast, while browsing) ═══ -->
+<div class="caster-bar hidden" id="casterBar" onclick="returnToOnAir()">
+  <div class="caster-bar-dot"></div>
+  <div class="caster-bar-info">
+    <div class="caster-bar-top">You're LIVE · <span id="cbGame">—</span></div>
+    <div class="caster-bar-sub"><span id="cbTime">0:00</span> · 👥 <span id="cbListeners">0</span> · tap to return</div>
+  </div>
+  <div class="caster-bar-mic" id="cbMic" onclick="event.stopPropagation(); casterBarToggleMute()" title="Mute / unmute"><svg id="cbMicIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="currentColor" stroke-width="2" fill="none"/><line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2"/></svg></div>
+</div>
+
+<!-- ═══ PAYOUT WARNING (before going live) ═══ -->
+<div class="uc-overlay uc-center" id="payoutwarn-overlay">
+  <div class="tip-modal">
+    <div class="tip-modal-emoji">💸</div>
+    <div class="tip-sheet-title" style="font-size:22px">TIPS GO TO ULTCAST FOR NOW</div>
+    <div class="tip-modal-sub" id="payoutwarn-sub"></div>
+    <button class="btn-primary-full" id="payoutwarn-setup" onclick="payoutWarnSetup()">Set up payouts now</button>
+    <button class="btn-ghost-full" onclick="payoutWarnGoLive()">Go live anyway</button>
+    <div style="font-size:11px;color:var(--muted);margin-top:10px">You can set this up any time in Profile → Payment &amp; Payouts.</div>
+  </div>
+</div>
+
 <!-- ═══ MINI PLAYER (shows on Home / Browse / Cast / Profile while listening) ═══ -->
 <div class="mini-player hidden" id="miniPlayer" onclick="openPlayerFromMini()">
   <div class="mini-wave"><div class="mini-bar"></div><div class="mini-bar"></div><div class="mini-bar"></div><div class="mini-bar"></div><div class="mini-bar"></div></div>
@@ -947,7 +990,10 @@ body.mini-on .scroll { padding-bottom:150px; }
         <span id="pAvatar">SS</span>
       </div>
       <div>
-        <div class="player-caster-name" id="pCasterName">—</div>
+        <div class="player-name-row">
+          <div class="player-caster-name" id="pCasterName">—</div>
+          <button class="follow-pill" id="followBtn" onclick="event.stopPropagation(); toggleFollow()"><span id="followBtnText">Follow</span></button>
+        </div>
         <div class="player-listeners-label" id="pListeners">—</div>
         <div id="pBio" style="font-size:11px;color:var(--muted);margin-top:2px;display:none"></div>
       </div>
@@ -995,12 +1041,6 @@ body.mini-on .scroll { padding-bottom:150px; }
       <button class="end-btn" onclick="goBack()">Stop Listening</button>
     </div>
 
-    <div style="display:flex;justify-content:center;padding:0 20px 20px">
-      <button class="follow-btn" id="followBtn" onclick="toggleFollow()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span id="followBtnText">Follow</span>
-      </button>
-    </div>
 
 
 
@@ -1142,6 +1182,7 @@ body.mini-on .scroll { padding-bottom:150px; }
 
 <!-- ═══ ON AIR ═══ -->
 <div class="screen" id="onair-screen">
+  <button class="onair-min" onclick="minimiseBroadcast()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>Browse app</button>
   <div class="onair-badge"><div class="onair-badge-dot"></div>YOU'RE LIVE</div>
   <div class="onair-game" id="onairGame">—</div>
   <div class="onair-sport" id="onairSport">—</div>
@@ -1537,6 +1578,7 @@ async function handleAuth() {
 }
 
 async function signOut() {
+  if (blockedWhileLive('log out')) return;
   if (window._listeningRoom) { await stopListeningQuietly(); }
   try { await sb.auth.signOut(); } catch(e) {}
   currentUser = null;
@@ -1699,7 +1741,7 @@ function confirmUnofficialAndGoLive() {
   const ticked = document.querySelectorAll('#unofficial-overlay .uc-check.on');
   if (ticked.length !== all.length) return;
   closeUnofficialCheck();
-  goLive();
+  maybeWarnPayoutsThenGoLive();
 }
 
 // ════════════════════════════════════════════════
@@ -1730,7 +1772,8 @@ function updateMiniPlayer() {
   const active = document.querySelector('.screen.active')?.id;
   const show = window._miniActive && MINI_SCREENS.includes(active);
   mp.classList.toggle('hidden', !show);
-  document.body.classList.toggle('mini-on', show);
+  const casterShow = updateCasterBar();
+  document.body.classList.toggle('mini-on', show || casterShow);
   if (show) refreshMiniIcon();
 }
 
@@ -1811,6 +1854,7 @@ function refreshHome() {
 function showCastHub() { showStartCast(); } // Cast Hub removed — go straight to Start a Cast
 function showStartCast() {
   if (guestBlocked('cast')) return;
+  if (window._isBroadcasting) { returnToOnAir(); return; }
   showScreen('startcast-screen');
   loadSportsData();
   setTimeout(() => setActiveNav('cast'), 10);
@@ -1945,7 +1989,7 @@ function subscribeToLiveCasts() {
         // Caster: your own cast was ended from outside the app (moderation or 4-hour auto-expiry)
         if (changed && changed.is_live === false && !window._endingBroadcast
             && window._activeCastRoomName && changed.room_name === window._activeCastRoomName
-            && document.getElementById('onair-screen').classList.contains('active')) {
+            && window._isBroadcasting) {
           window._activeCastId = null; // already ended in the database
           endBroadcast().then(async () => {
             const ban = await checkMyBan();
@@ -1985,6 +2029,7 @@ function openBrowseCastByIndex(i) {
 }
 
 async function openPlayer(game, league, caster, sport, roomName) {
+  if (window._isBroadcasting) { showToast("🎙️ You're live. End your cast to listen to others."); return; }
   const _room = roomName || game.replace(/\s+/g,'-').toLowerCase();
   // Already listening to this exact cast: just bring the player back up
   if (window._listeningRoom === _room && lkRoom && lkRoom.state !== 'disconnected') { openPlayerFromMini(); return; }
@@ -2045,7 +2090,7 @@ async function openPlayer(game, league, caster, sport, roomName) {
     }
   }
   document.getElementById('tipTitle').textContent = 'Tip ' + caster;
-  document.getElementById('followBtnText').textContent = 'Follow ' + caster;
+  document.getElementById('followBtnText').textContent = 'Follow';
 
   // Mini player
   document.getElementById('miniGame').textContent = game;
@@ -2367,7 +2412,7 @@ function toggleListenerMute() {
 function paintPlayerFollow() {
   const btn = document.getElementById('followBtn');
   btn.classList.toggle('following', isFollowing);
-  document.getElementById('followBtnText').textContent = isFollowing ? 'Following ✓' : 'Follow ' + currentCaster;
+  document.getElementById('followBtnText').textContent = isFollowing ? 'Following ✓' : 'Follow';
 }
 
 function refreshPlayerFollow() {
@@ -2476,6 +2521,109 @@ function selectTip(el, amount) {
   if (hint) { hint.textContent = 'Minimum $2'; hint.classList.remove('bad'); }
   document.getElementById('tipSendBtn').disabled = false;
   document.getElementById('tipSendBtn').textContent = 'Send ' + amount + ' Tip 💰';
+}
+
+// ════════════════════════════════════════════════
+// CASTER LIVE BAR — browse the app while you're live
+// ════════════════════════════════════════════════
+window._isBroadcasting = false;
+const MIC_ON_PATH = '<path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="currentColor" stroke-width="2" fill="none"/><line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2"/>';
+const MIC_OFF_PATH = '<path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z"/>';
+
+// Shows/hides the red bar. Returns true if it's showing.
+function updateCasterBar() {
+  const bar = document.getElementById('casterBar');
+  if (!bar) return false;
+  const active = document.querySelector('.screen.active')?.id;
+  const show = !!window._isBroadcasting && MINI_SCREENS.includes(active);
+  bar.classList.toggle('hidden', !show);
+  if (show) refreshCasterBar();
+  return show;
+}
+
+function refreshCasterBar() {
+  const g = document.getElementById('onairGame')?.textContent || '—';
+  document.getElementById('cbGame').textContent = g;
+  document.getElementById('cbTime').textContent = document.getElementById('oa-time')?.textContent || '0:00';
+  const l = document.getElementById('oa-listeners')?.textContent;
+  document.getElementById('cbListeners').textContent = (l && l !== '—') ? l : '0';
+  const mic = document.getElementById('cbMic');
+  mic.classList.toggle('muted', !!isMuted);
+  document.getElementById('cbMicIcon').innerHTML = isMuted ? MIC_OFF_PATH : MIC_ON_PATH;
+}
+
+function minimiseBroadcast() {
+  showScreen('home-screen');
+  setTimeout(() => setActiveNav('home'), 10);
+  showToast("🎙️ Still live. Tap the red bar to go back.");
+}
+
+function returnToOnAir() {
+  if (!window._isBroadcasting) return;
+  showScreen('onair-screen');
+}
+
+function casterBarToggleMute() {
+  toggleMute();
+  refreshCasterBar();
+}
+
+// Friendly stop for anything that would end a live cast by leaving the page
+function blockedWhileLive(what) {
+  if (!window._isBroadcasting) return false;
+  showToast('🎙️ You\'re live. End your cast first to ' + what + '.');
+  return true;
+}
+
+// Safety net: warn before the page closes/navigates away while live (e.g. phone back gesture)
+window.addEventListener('beforeunload', (e) => {
+  if (window._isBroadcasting) { e.preventDefault(); e.returnValue = ''; return ''; }
+});
+
+// ════════════════════════════════════════════════
+// PAYOUT WARNING — before going live without payouts set up
+// ════════════════════════════════════════════════
+async function maybeWarnPayoutsThenGoLive() {
+  let state = window._payoutState;
+  if (state !== 'active') {
+    try {
+      const d = await Promise.race([
+        payoutsRequest('status'),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 4000)),
+      ]);
+      state = d.state;
+      setPayoutBadge(state);
+    } catch(e) { state = null; }
+  }
+  // Set up, or we couldn't check: go straight live (never block going live)
+  if (state === 'active' || state === null) { goLive(); return; }
+  const sub = document.getElementById('payoutwarn-sub');
+  sub.textContent = state === 'pending'
+    ? "Stripe is still checking your payout details. Until it's approved, any tips sent during this cast go 100% to UltCast. Once approved, you'll get 80% of every tip."
+    : "You haven't set up payouts yet, so any tips sent during this cast go 100% to UltCast. Set up payouts (about 5 minutes) to get 80% of every tip.";
+  const b = document.getElementById('payoutwarn-setup');
+  b.disabled = false;
+  b.textContent = state === 'pending' ? 'Check my payout details' : 'Set up payouts now';
+  document.getElementById('payoutwarn-overlay').classList.add('show');
+}
+
+function payoutWarnGoLive() {
+  document.getElementById('payoutwarn-overlay').classList.remove('show');
+  goLive();
+}
+
+async function payoutWarnSetup() {
+  const b = document.getElementById('payoutwarn-setup');
+  const label = b.textContent;
+  b.disabled = true; b.textContent = 'Opening Stripe…';
+  try {
+    const d = await payoutsRequest('start');
+    if (!d.url) throw new Error('Could not open Stripe');
+    window.location.href = d.url;
+  } catch(e) {
+    showToast('⚠️ ' + e.message);
+    b.disabled = false; b.textContent = label;
+  }
 }
 
 // ════════════════════════════════════════════════
@@ -2916,6 +3064,7 @@ async function sendReport() {
 // ════════════════════════════════════════════════
 function openDeleteAccount() {
   if (!currentUser) return;
+  if (blockedWhileLive('delete your account')) return;
   document.getElementById('delete-confirm').value = '';
   const btn = document.getElementById('delete-go-btn');
   btn.disabled = true; btn.textContent = 'Permanently delete my account';
@@ -3042,6 +3191,7 @@ function closePayouts() {
 }
 
 async function payoutsGo() {
+  if (blockedWhileLive('open Stripe')) return;
   const b = document.getElementById('payouts-go-btn');
   const label = b.textContent;
   b.disabled = true; b.textContent = 'Opening Stripe…';
@@ -3299,6 +3449,9 @@ async function goLive() {
     // Non-blocking — audio still works even if this fails
     console.warn('Cast save error (non-blocking):', e.message);
   }
+  window._isBroadcasting = true;
+  if (window._casterBarTick) clearInterval(window._casterBarTick);
+  window._casterBarTick = setInterval(() => { if (!document.getElementById('casterBar').classList.contains('hidden')) refreshCasterBar(); }, 1000);
   showToast('🎙️ Going live...');
 
   // Start broadcast timer
@@ -3437,6 +3590,9 @@ function toggleMute() {
 }
 async function endBroadcast() {
   window._endingBroadcast = true;
+  window._isBroadcasting = false;
+  if (window._casterBarTick) { clearInterval(window._casterBarTick); window._casterBarTick = null; }
+  try { updateCasterBar(); } catch(e) {}
   clearInterval(broadcastInterval);
   stopCasterBackground();
   if (window._casterCountInterval) { clearInterval(window._casterCountInterval); window._casterCountInterval = null; }
