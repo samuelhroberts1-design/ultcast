@@ -758,6 +758,16 @@ body.mini-on .scroll { padding-bottom:150px; }
   </div>
 </div>
 
+<!-- ═══ CAN'T GO LIVE / CAST ENDED ═══ -->
+<div class="uc-overlay uc-center" id="castnotice-overlay" onclick="if(event.target===this)closeCastNotice()">
+  <div class="tip-modal">
+    <div class="tip-modal-emoji" id="castnotice-emoji">🚫</div>
+    <div class="tip-sheet-title" id="castnotice-title">YOU CAN'T GO LIVE</div>
+    <div class="tip-modal-sub" id="castnotice-sub"></div>
+    <button class="btn-primary-full" onclick="closeCastNotice()">OK</button>
+  </div>
+</div>
+
 <!-- ═══ CAST OPTIONS (⋮ on player) ═══ -->
 <div class="uc-overlay" id="castmenu-overlay" onclick="if(event.target===this)closeCastMenu()">
   <div class="uc-sheet">
@@ -1663,9 +1673,11 @@ document.addEventListener('change', (e) => {
   if (box) box.style.display = 'none';
 });
 
-function openUnofficialCheck() {
+async function openUnofficialCheck() {
   if (guestBlocked('cast')) return;
   if (!validateCastForm()) return;
+  const ban = await checkMyBan();
+  if (ban) { showCastNotice('banned', ban.reason); return; }
   document.querySelectorAll('#unofficial-overlay .uc-check').forEach(el => el.classList.remove('on'));
   document.getElementById('unofficial-go-btn').disabled = true;
   document.getElementById('unofficial-overlay').classList.add('show');
@@ -1929,6 +1941,19 @@ function subscribeToLiveCasts() {
 
         // If the cast the user is currently listening to just ended, hide mini player
         const changed = payload.new;
+
+        // Caster: your own cast was ended from outside the app (moderation or 4-hour auto-expiry)
+        if (changed && changed.is_live === false && !window._endingBroadcast
+            && window._activeCastRoomName && changed.room_name === window._activeCastRoomName
+            && document.getElementById('onair-screen').classList.contains('active')) {
+          window._activeCastId = null; // already ended in the database
+          endBroadcast().then(async () => {
+            const ban = await checkMyBan();
+            showCastNotice(ban ? 'banned' : 'ended', ban?.reason);
+          });
+          return;
+        }
+
         const listeningTo = window._listeningRoom || window._currentCastRow?.room_name;
         if (changed && changed.is_live === false && listeningTo && changed.room_name === listeningTo) {
           // Cast ended — stop listening, hide mini player, and let them know
@@ -2452,6 +2477,42 @@ function selectTip(el, amount) {
   document.getElementById('tipSendBtn').disabled = false;
   document.getElementById('tipSendBtn').textContent = 'Send ' + amount + ' Tip 💰';
 }
+
+// ════════════════════════════════════════════════
+// BANS — banned casters can't go live
+// ════════════════════════════════════════════════
+const SUPPORT_EMAIL = 'samroberts@ultcast.live';
+
+// Returns { reason } if you're banned, null if not (or if the check fails, so it never blocks by mistake)
+async function checkMyBan() {
+  if (!currentUser) return null;
+  try {
+    const token = await freshToken();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/banned_users?user_id=eq.${currentUser.id}&select=reason`, { headers: restHeaders(token) });
+    if (!r.ok) return null;
+    const d = await r.json();
+    return d?.[0] ? { reason: d[0].reason || '' } : null;
+  } catch(e) { return null; }
+}
+
+function showCastNotice(kind, reason) {
+  const e = document.getElementById('castnotice-emoji');
+  const t = document.getElementById('castnotice-title');
+  const s = document.getElementById('castnotice-sub');
+  if (kind === 'banned') {
+    e.textContent = '🚫';
+    t.textContent = "YOU CAN'T GO LIVE";
+    s.textContent = 'Your account has been restricted from casting for breaking our Creator Guidelines.'
+      + (reason ? ' Reason: ' + reason + '.' : '')
+      + ' You can still listen. If you think this is a mistake, email ' + SUPPORT_EMAIL + '.';
+  } else {
+    e.textContent = '📻';
+    t.textContent = 'YOUR CAST HAS ENDED';
+    s.textContent = 'Casts end automatically after 4 hours, or if they break our Creator Guidelines. You can start a new cast any time.';
+  }
+  document.getElementById('castnotice-overlay').classList.add('show');
+}
+function closeCastNotice() { document.getElementById('castnotice-overlay').classList.remove('show'); }
 
 // ════════════════════════════════════════════════
 // FOLLOWING + BLOCKING + CASTER PROFILES
@@ -3170,6 +3231,7 @@ async function onLeagueChange() {
 
 async function goLive() {
   if (guestBlocked('cast')) return;
+  window._endingBroadcast = false;
   if (window._listeningRoom) { await stopListeningQuietly(); showToast('🎧 Stopped listening so you can go live'); }
   startCasterBackground(); // background casting helper (separate from the mic)
   const home = document.getElementById('cast-home').value.trim() || 'Team A';
@@ -3221,6 +3283,14 @@ async function goLive() {
     const data = await res.json();
     if (!res.ok) {
       console.warn('Cast save failed (non-blocking):', JSON.stringify(data));
+      // If the save failed because this account is banned, stop before connecting the mic
+      const ban = await checkMyBan();
+      if (ban) {
+        stopCasterBackground();
+        showScreen('startcast-screen');
+        showCastNotice('banned', ban.reason);
+        return;
+      }
     } else {
       castId = Array.isArray(data) ? data[0]?.id : data?.id;
       console.log('Cast saved, id:', castId);
@@ -3366,6 +3436,7 @@ function toggleMute() {
   }
 }
 async function endBroadcast() {
+  window._endingBroadcast = true;
   clearInterval(broadcastInterval);
   stopCasterBackground();
   if (window._casterCountInterval) { clearInterval(window._casterCountInterval); window._casterCountInterval = null; }
