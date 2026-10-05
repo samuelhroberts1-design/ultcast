@@ -6,6 +6,12 @@
 <title>UltCast</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-8 -4 100 100'><rect x='-8' y='-4' width='100' height='100' rx='22' fill='%230F0E0D'/><path d='M71.4 42.6A19 19 0 1 0 71.4 69.4' fill='none' stroke='%23FF6B1A' stroke-width='12'/><circle cx='58' cy='56' r='6' fill='%23FF6B1A'/><path d='M14 10V36A17 17 0 0 0 48 36V10' fill='none' stroke='%230F0E0D' stroke-width='18'/><path d='M14 10V36A17 17 0 0 0 48 36V10' fill='none' stroke='%23FF6B1A' stroke-width='12'/><path d='M25 27V37M31 22V42M37 27V37' fill='none' stroke='%23FF6B1A' stroke-width='4' stroke-linecap='round'/></svg>">
 <meta name="theme-color" content="#0F0E0D">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="UltCast">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -637,6 +643,15 @@ body.mini-on .scroll { padding-bottom:150px; }
 .fl-avatar { width:40px; height:40px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg,#3a2a1e,#1A1816) center/cover; border:1.5px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--cream); }
 .fl-name { flex:1; min-width:0; font-size:14px; font-weight:700; color:var(--cream); }
 .fl-name span { display:block; font-size:12px; font-weight:500; color:var(--muted); }
+.install-banner { display:none; margin:12px 16px 0; padding:11px 12px 11px 14px; border-radius:12px; background:var(--bg-2); border:1px solid var(--line); align-items:center; gap:10px; }
+.install-banner img { width:36px; height:36px; border-radius:9px; flex-shrink:0; }
+.install-banner-text { flex:1; font-size:12px; color:var(--muted2); line-height:1.4; }
+.install-banner-text strong { display:block; color:var(--cream); font-size:13px; }
+.install-banner .ib-add { background:var(--accent); color:var(--bg); border:none; border-radius:9px; padding:8px 12px; font-family:var(--font-body); font-size:12px; font-weight:800; cursor:pointer; }
+.install-banner .ib-x { background:none; border:none; color:var(--muted); font-size:16px; cursor:pointer; padding:4px; }
+.ios-steps { text-align:left; margin:4px 0 14px; padding:0; list-style:none; counter-reset:s; }
+.ios-steps li { counter-increment:s; display:flex; gap:10px; align-items:flex-start; font-size:14px; color:var(--cream); margin-bottom:10px; line-height:1.45; }
+.ios-steps li::before { content:counter(s); width:22px; height:22px; border-radius:50%; background:var(--accent); color:var(--bg); font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
 .mini-player.hidden { transform:translateX(-50%) translateY(100px); opacity:0; pointer-events:none; }
 .mini-wave { display:flex; align-items:center; gap:2px; }
 .mini-bar { width:2px; background:var(--accent); border-radius:2px; animation:barAnim 1s ease-in-out infinite; }
@@ -771,6 +786,28 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="uc-sheet-sub" id="confirm-sub"></div>
     <button class="btn-danger-full" id="confirm-yes" onclick="confirmYes()">Yes</button>
     <button class="btn-ghost-full" onclick="closeConfirm()">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══ LIVE ALERTS ═══ -->
+<div class="uc-overlay uc-center" id="alerts-overlay" onclick="if(event.target===this)closeAlerts()">
+  <div class="tip-modal">
+    <div class="tip-modal-emoji">🔔</div>
+    <div class="tip-sheet-title" id="alerts-title" style="font-size:22px">GET LIVE ALERTS</div>
+    <div class="tip-modal-sub" id="alerts-sub">Get a notification when a caster you follow goes live.</div>
+    <button class="btn-primary-full" id="alerts-btn" onclick="alertsPrimary()">Turn on alerts</button>
+    <button class="btn-ghost-full" id="alerts-secondary" onclick="closeAlerts()">Not now</button>
+  </div>
+</div>
+
+<!-- ═══ ADD TO HOME SCREEN ═══ -->
+<div class="uc-overlay uc-center" id="install-overlay" onclick="if(event.target===this)closeInstall()">
+  <div class="tip-modal">
+    <img src="/apple-touch-icon.png" alt="" style="width:64px;height:64px;border-radius:15px;margin-bottom:10px">
+    <div class="tip-sheet-title" style="font-size:22px">ADD ULTCAST TO YOUR HOME SCREEN</div>
+    <div class="tip-modal-sub" id="install-sub">Opens full-screen like a normal app, with one tap.</div>
+    <ol class="ios-steps" id="install-steps"></ol>
+    <button class="btn-primary-full" id="install-btn" onclick="closeInstall()">Got it</button>
   </div>
 </div>
 
@@ -920,6 +957,12 @@ body.mini-on .scroll { padding-bottom:150px; }
   </div>
 
   <div class="scroll">
+    <div class="install-banner" id="install-banner">
+      <img src="/apple-touch-icon.png" alt="">
+      <div class="install-banner-text"><strong>Get the UltCast app</strong>Add it to your Home Screen for one-tap access and live alerts.</div>
+      <button class="ib-add" onclick="openInstall()">Add</button>
+      <button class="ib-x" onclick="dismissInstallBanner()" aria-label="Dismiss">✕</button>
+    </div>
     <div class="guest-banner" id="guest-banner">
       <div class="guest-banner-text"><strong>You're listening as a guest</strong>Create a free account to go live and follow casters.</div>
       <button onclick="gateToAuth('signup')">Sign up</button>
@@ -1233,7 +1276,8 @@ body.mini-on .scroll { padding-bottom:150px; }
       <div class="p-row" id="row-following" onclick="openFollowingList()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></div>Following</div><div id="following-count" style="font-size:12px;font-weight:700;color:var(--muted2)">0 ›</div></div>
       <div class="p-row" id="row-edit-profile" onclick="showEditProfile()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>Edit Profile</div><div class="p-row-chev">›</div></div>
       <div class="p-row" id="row-payouts" onclick="openPayouts()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>Payment & Payouts</div><div id="payouts-badge" style="font-size:10px;font-weight:800;letter-spacing:0.5px;color:var(--accent)">SET UP ›</div></div>
-      <div class="p-row" style="opacity:0.5"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>Notifications</div><div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.5px">COMING SOON</div></div>
+      <div class="p-row" id="row-alerts" onclick="openAlerts()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>Live alerts</div><div id="alerts-badge" style="font-size:10px;font-weight:800;letter-spacing:0.5px;color:var(--accent)">TURN ON ›</div></div>
+      <div class="p-row" id="row-install" onclick="openInstall()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7M9 11l3 3 3-3"/></svg></div>Add UltCast to Home Screen</div><div style="font-size:12px;color:var(--muted2)">›</div></div>
       <div class="p-section-title">Support</div>
       <div class="p-row" style="opacity:0.5"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>Help Centre</div><div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.5px">COMING SOON</div></div>
       <div class="p-row" onclick="window.open('https://ultcast.live/terms.html','_blank')"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>Terms & Privacy</div><div class="p-row-chev">›</div></div>
@@ -1310,7 +1354,7 @@ window.addEventListener('load', async () => {
       hideLoading();
       // Returning guests (and anyone opening a shared cast link) skip the login screen
       const _bootParams = new URLSearchParams(window.location.search);
-      if (guestFlagSaved() || _bootParams.get('join') || _bootParams.get('caster') || _bootParams.get('tip') || getTipReturn()) {
+      if (guestFlagSaved() || _bootParams.get('join') || _bootParams.get('caster') || _bootParams.get('listen') || _bootParams.get('tip') || getTipReturn()) {
         enterGuestMode();
       } else {
         showScreen('auth-screen');
@@ -1352,6 +1396,12 @@ window.addEventListener('load', async () => {
   }
 
   // Jump straight into a shared cast link, e.g. ?join=collingwood-vs-richmond-1774068683702
+  const listenLink = params.get('listen');
+  if (listenLink) {
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(() => showListenPrompt(listenLink), 900);
+  }
+
   const casterLink = params.get('caster');
   if (casterLink && /^[0-9a-f-]{36}$/i.test(casterLink)) {
     window.history.replaceState({}, '', window.location.pathname);
@@ -1577,6 +1627,7 @@ async function handleAuth() {
 
 async function signOut() {
   if (blockedWhileLive('log out')) return;
+  try { if (window._alertsOn) await disableAlerts(); } catch(e) {}
   if (window._listeningRoom) { await stopListeningQuietly(); }
   try { await sb.auth.signOut(); } catch(e) {}
   currentUser = null;
@@ -1827,7 +1878,7 @@ function switchMain(tab) {
   const map = { home:'home-screen', browse:'browse-screen', profile:'profile-screen' };
   if (map[tab]) showScreen(map[tab]);
   if (tab === 'browse') renderBrowseCasts(window._allLiveCasts || []);
-  if (tab === 'profile') { applyGuestUI(); loadProfileStats(); loadPayoutStatus(); }
+  if (tab === 'profile') { applyGuestUI(); loadProfileStats(); loadPayoutStatus(); refreshAlertsUI(); refreshInstallUI(); }
   setTimeout(() => setActiveNav(tab), 10);
 }
 
@@ -2426,7 +2477,7 @@ async function toggleFollow() {
   isFollowing = want; paintPlayerFollow();
   const ok = await setFollow(cid, want);
   if (!ok) { isFollowing = !want; paintPlayerFollow(); return; }
-  if (want) showToast('✅ Following ' + currentCaster);
+  if (want) { showToast('✅ Following ' + currentCaster); maybeOfferAlerts(currentCaster); }
 }
 
 // ════════════════════════════════════════════════
@@ -2517,6 +2568,231 @@ function selectTip(el, amount) {
   if (hint) { hint.textContent = 'Minimum $2'; hint.classList.remove('bad'); }
   document.getElementById('tipSendBtn').disabled = false;
   document.getElementById('tipSendBtn').textContent = 'Send ' + amount + ' Tip 💰';
+}
+
+// ════════════════════════════════════════════════
+// INSTALLABLE APP + LIVE ALERTS (web push)
+// OFF SWITCH: set PUSH_ENABLED to false to hide live alerts everywhere.
+// ════════════════════════════════════════════════
+const PUSH_ENABLED = true;
+const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isMobile = () => /android|iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const pushSupported = () => PUSH_ENABLED && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+let _installPrompt = null;
+window._alertsOn = false;
+
+// Register the background helper (only shows notifications; caches nothing)
+if (PUSH_ENABLED && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(e => console.warn('Service worker not registered:', e.message));
+  });
+  // Tapping a notification while UltCast is already open
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    if (e.data?.type === 'uc-open' && e.data.url) {
+      try { const room = new URL(e.data.url).searchParams.get('listen'); if (room) showListenPrompt(room); } catch(err) {}
+    }
+  });
+}
+
+// Android/Chrome: capture the install prompt so our button can show it
+window.addEventListener('load', () => { try { refreshInstallUI(); } catch(e) {} });
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); _installPrompt = e; refreshInstallUI(); });
+window.addEventListener('appinstalled', () => { _installPrompt = null; refreshInstallUI(); showToast('✅ UltCast added to your Home Screen'); });
+
+function refreshInstallUI() {
+  const installed = isStandalone();
+  const row = document.getElementById('row-install');
+  if (row) row.style.display = installed ? 'none' : '';
+  const banner = document.getElementById('install-banner');
+  let dismissed = false; try { dismissed = localStorage.getItem('uc_install_dismissed') === '1'; } catch(e) {}
+  if (banner) banner.style.display = (!installed && isMobile() && !dismissed) ? 'flex' : 'none';
+}
+function dismissInstallBanner() {
+  try { localStorage.setItem('uc_install_dismissed', '1'); } catch(e) {}
+  refreshInstallUI();
+}
+
+async function openInstall() {
+  if (isStandalone()) { showToast("✅ You're already using the app"); return; }
+  if (_installPrompt) {
+    try { _installPrompt.prompt(); const c = await _installPrompt.userChoice; if (c?.outcome === 'accepted') dismissInstallBanner(); } catch(e) {}
+    _installPrompt = null;
+    return;
+  }
+  const steps = document.getElementById('install-steps');
+  const share = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+  if (isIOS()) {
+    steps.innerHTML = `<li>Open this page in <strong>Safari</strong></li><li>Tap the Share button ${share} at the bottom</li><li>Scroll down and tap <strong>Add to Home Screen</strong>, then <strong>Add</strong></li><li>Open UltCast from your Home Screen</li>`;
+  } else {
+    steps.innerHTML = `<li>Tap your browser's menu <strong>⋮</strong> (top right)</li><li>Tap <strong>Add to Home screen</strong> or <strong>Install app</strong></li><li>Open UltCast from your Home Screen</li>`;
+  }
+  document.getElementById('install-overlay').classList.add('show');
+}
+function closeInstall() { document.getElementById('install-overlay').classList.remove('show'); }
+
+// ── Live alerts ──
+function urlB64ToUint8(s) {
+  const pad = '='.repeat((4 - s.length % 4) % 4);
+  const raw = atob((s + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+async function currentPushSub() {
+  if (!pushSupported()) return null;
+  try { const reg = await navigator.serviceWorker.getRegistration('/'); return reg ? await reg.pushManager.getSubscription() : null; }
+  catch(e) { return null; }
+}
+
+async function refreshAlertsUI() {
+  const row = document.getElementById('row-alerts');
+  const badge = document.getElementById('alerts-badge');
+  if (!row || !badge) return;
+  if (!PUSH_ENABLED) { row.style.display = 'none'; return; }
+  const sub = await currentPushSub();
+  window._alertsOn = !!(sub && Notification.permission === 'granted' && currentUser);
+  if (window._alertsOn) { badge.textContent = 'ON ✓'; badge.style.color = '#3DDC84'; }
+  else if ('Notification' in window && Notification.permission === 'denied') { badge.textContent = 'BLOCKED'; badge.style.color = 'var(--muted2)'; }
+  else { badge.textContent = 'TURN ON ›'; badge.style.color = 'var(--accent)'; }
+}
+
+let _alertsMode = 'enable';
+function openAlerts(casterName) {
+  if (guestBlocked('follow')) return;
+  const t = document.getElementById('alerts-title'), s = document.getElementById('alerts-sub');
+  const b = document.getElementById('alerts-btn'), b2 = document.getElementById('alerts-secondary');
+  b.disabled = false; b2.textContent = 'Not now'; b.style.display = '';
+  if (!pushSupported() && isIOS() && !isStandalone()) {
+    _alertsMode = 'install';
+    t.textContent = 'ADD TO HOME SCREEN FIRST';
+    s.textContent = 'On iPhone, live alerts work once UltCast is on your Home Screen. Add it, open UltCast from there, then turn on alerts.';
+    b.textContent = 'Show me how';
+  } else if (!pushSupported()) {
+    _alertsMode = 'none';
+    t.textContent = 'ALERTS NOT AVAILABLE';
+    s.textContent = "This browser doesn't support live alerts. Try Chrome on Android, or Safari on iPhone with UltCast added to your Home Screen.";
+    b.style.display = 'none'; b2.textContent = 'OK';
+  } else if (Notification.permission === 'denied') {
+    _alertsMode = 'none';
+    t.textContent = 'NOTIFICATIONS ARE BLOCKED';
+    s.textContent = isIOS() ? 'Turn them on in your iPhone Settings → Notifications → UltCast, then come back and try again.'
+                            : 'Tap the icon to the left of the web address (or Settings → Site settings → Notifications), allow notifications for ultcast.live, then try again.';
+    b.style.display = 'none'; b2.textContent = 'OK';
+  } else if (window._alertsOn) {
+    _alertsMode = 'disable';
+    t.textContent = 'LIVE ALERTS ARE ON';
+    s.textContent = "You'll get a notification on this phone when a caster you follow goes live.";
+    b.textContent = 'Turn off alerts'; b2.textContent = 'Keep them on';
+  } else {
+    _alertsMode = 'enable';
+    t.textContent = casterName ? 'KNOW WHEN ' + String(casterName).toUpperCase() + ' GOES LIVE' : 'GET LIVE ALERTS';
+    s.textContent = 'Get a notification on this phone whenever a caster you follow goes live.';
+    b.textContent = 'Turn on alerts';
+  }
+  document.getElementById('alerts-overlay').classList.add('show');
+}
+function closeAlerts() { document.getElementById('alerts-overlay').classList.remove('show'); }
+
+async function alertsPrimary() {
+  if (_alertsMode === 'install') { closeAlerts(); openInstall(); return; }
+  const b = document.getElementById('alerts-btn');
+  b.disabled = true;
+  if (_alertsMode === 'disable') {
+    b.textContent = 'Turning off…';
+    await disableAlerts();
+    closeAlerts(); showToast('🔕 Live alerts turned off');
+    return;
+  }
+  b.textContent = 'Turning on…';
+  const ok = await enableAlerts();
+  closeAlerts();
+  if (ok) showToast("🔔 Live alerts on. We'll tell you when casters you follow go live.");
+}
+
+async function enableAlerts() {
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') { showToast('🔕 Notifications not allowed'); refreshAlertsUI(); return false; }
+    const keyRes = await fetch(`${TOKEN_SERVER}/api/push`);
+    const keyData = await keyRes.json().catch(() => ({}));
+    if (!keyRes.ok || !keyData.key) throw new Error(keyData.error || 'Alerts are not set up yet');
+    let reg = await navigator.serviceWorker.getRegistration('/');
+    if (!reg) reg = await navigator.serviceWorker.register('/sw.js');
+    reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToUint8(keyData.key) });
+    const j = sub.toJSON();
+    const token = await freshToken();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/ultcast_save_push`, {
+      method: 'POST',
+      headers: restHeaders(token, { 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ p_endpoint: j.endpoint, p_p256dh: j.keys?.p256dh, p_auth: j.keys?.auth }),
+    });
+    if (!r.ok) throw new Error('Could not save (' + r.status + ')');
+    try { localStorage.setItem('uc_alerts_asked', '1'); } catch(e) {}
+    await refreshAlertsUI();
+    return true;
+  } catch(e) {
+    console.error('Enable alerts failed:', e);
+    showToast('⚠️ ' + (e.message || 'Could not turn on alerts'));
+    refreshAlertsUI();
+    return false;
+  }
+}
+
+async function disableAlerts() {
+  try {
+    const sub = await currentPushSub();
+    if (sub) {
+      const token = await freshToken();
+      await fetch(`${SUPABASE_URL}/rest/v1/rpc/ultcast_remove_push`, {
+        method: 'POST', headers: restHeaders(token, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ p_endpoint: sub.endpoint }),
+      }).catch(() => {});
+      await sub.unsubscribe().catch(() => {});
+    }
+  } catch(e) {}
+  await refreshAlertsUI();
+}
+
+// After someone follows a caster: offer alerts once (if not already on)
+async function maybeOfferAlerts(casterName) {
+  if (!PUSH_ENABLED || window._alertsOn) return;
+  let asked = false; try { asked = localStorage.getItem('uc_alerts_asked') === '1'; } catch(e) {}
+  if (asked) return;
+  if ('Notification' in window && Notification.permission === 'denied') return;
+  if (!pushSupported() && !(isIOS() && !isStandalone())) return;
+  try { localStorage.setItem('uc_alerts_asked', '1'); } catch(e) {}
+  setTimeout(() => openAlerts(casterName), 600);
+}
+
+// Opened from a "X is live" notification: one tap to listen
+// (phones need a tap before playing sound on a freshly opened page)
+function showListenPrompt(room) {
+  if (window._isBroadcasting) { showToast("🎙️ You're live. End your cast to listen to others."); return; }
+  if (window._listeningRoom === room) { openPlayerFromMini(); return; }
+  window._tipReturnCast = null;
+  document.getElementById('tipreturn-emoji').textContent = '🔴';
+  document.getElementById('tipreturn-title').textContent = 'LIVE NOW';
+  const s = document.getElementById('tipreturn-sub');
+  s.textContent = 'Checking the cast…';
+  const btn = document.getElementById('tipreturn-btn');
+  btn.style.display = 'block'; btn.disabled = true; btn.textContent = 'Loading…';
+  document.getElementById('tipreturn-overlay').classList.add('show');
+  fetch(`${SUPABASE_URL}/rest/v1/casts?room_name=eq.${encodeURIComponent(room)}&select=*`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  }).then(r => r.json()).then(d => {
+    const c = d?.[0];
+    if (c && c.is_live) {
+      window._tipReturnCast = c;
+      s.textContent = `${c.caster_name} is live: ${c.game}`;
+      btn.disabled = false; btn.textContent = '🎧 Listen now';
+    } else {
+      document.getElementById('tipreturn-title').textContent = 'CAST ENDED';
+      s.textContent = 'That cast has already finished. Check Home for who else is live.';
+      btn.style.display = 'none';
+    }
+  }).catch(() => { s.textContent = 'Could not open that cast.'; btn.style.display = 'none'; });
 }
 
 // ════════════════════════════════════════════════
@@ -2923,7 +3199,7 @@ async function toggleCasterPageFollow() {
   const f = document.getElementById('cpFollowers');
   const n = parseInt(f.textContent, 10);
   if (!isNaN(n)) f.textContent = Math.max(0, n + (want ? 1 : -1));
-  if (want) showToast('✅ Following ' + (window._cp.name || 'caster'));
+  if (want) { showToast('✅ Following ' + (window._cp.name || 'caster')); maybeOfferAlerts(window._cp.name); }
 }
 
 function toggleBlockCaster() {
