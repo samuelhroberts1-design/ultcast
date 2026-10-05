@@ -796,6 +796,7 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="tip-sheet-title" id="alerts-title" style="font-size:22px">GET LIVE ALERTS</div>
     <div class="tip-modal-sub" id="alerts-sub">Get a notification when a caster you follow goes live.</div>
     <button class="btn-primary-full" id="alerts-btn" onclick="alertsPrimary()">Turn on alerts</button>
+    <button class="btn-ghost-full" id="alerts-test" style="display:none;color:var(--cream)" onclick="sendTestAlert()">🔔 Send me a test alert</button>
     <button class="btn-ghost-full" id="alerts-secondary" onclick="closeAlerts()">Not now</button>
   </div>
 </div>
@@ -2662,6 +2663,7 @@ function openAlerts(casterName) {
   const t = document.getElementById('alerts-title'), s = document.getElementById('alerts-sub');
   const b = document.getElementById('alerts-btn'), b2 = document.getElementById('alerts-secondary');
   b.disabled = false; b2.textContent = 'Not now'; b.style.display = '';
+  const tb = document.getElementById('alerts-test'); tb.style.display = 'none'; tb.disabled = false; tb.textContent = '🔔 Send me a test alert';
   if (!pushSupported() && isIOS() && !isStandalone()) {
     _alertsMode = 'install';
     t.textContent = 'ADD TO HOME SCREEN FIRST';
@@ -2683,6 +2685,7 @@ function openAlerts(casterName) {
     t.textContent = 'LIVE ALERTS ARE ON';
     s.textContent = "You'll get a notification on this phone when a caster you follow goes live.";
     b.textContent = 'Turn off alerts'; b2.textContent = 'Keep them on';
+    tb.style.display = '';
   } else {
     _alertsMode = 'enable';
     t.textContent = casterName ? 'KNOW WHEN ' + String(casterName).toUpperCase() + ' GOES LIVE' : 'GET LIVE ALERTS';
@@ -2737,6 +2740,30 @@ async function enableAlerts() {
     showToast('⚠️ ' + (e.message || 'Could not turn on alerts'));
     refreshAlertsUI();
     return false;
+  }
+}
+
+async function sendTestAlert() {
+  const tb = document.getElementById('alerts-test');
+  tb.disabled = true; tb.textContent = 'Sending…';
+  try {
+    const token = await freshToken();
+    const r = await fetch(`${TOKEN_SERVER}/api/push`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ action: 'test' }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || ('Server error ' + r.status));
+    if (d.sent > 0) {
+      closeAlerts();
+      showToast('🔔 Test sent. Lock your phone; it should arrive within a few seconds.');
+    } else {
+      throw new Error((d.problems && d.problems[0]) || 'Nothing was sent');
+    }
+  } catch(e) {
+    showToast('⚠️ ' + e.message);
+    tb.disabled = false; tb.textContent = '🔔 Send me a test alert';
   }
 }
 
