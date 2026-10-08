@@ -652,6 +652,32 @@ body.mini-on .scroll { padding-bottom:150px; }
 .ios-steps { text-align:left; margin:4px 0 14px; padding:0; list-style:none; counter-reset:s; }
 .ios-steps li { counter-increment:s; display:flex; gap:10px; align-items:flex-start; font-size:14px; color:var(--cream); margin-bottom:10px; line-height:1.45; }
 .ios-steps li::before { content:counter(s); width:22px; height:22px; border-radius:50%; background:var(--accent); color:var(--bg); font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.faq-head { padding:6px 20px 4px; }
+.faq-title { font-family:var(--font-title); font-size:30px; letter-spacing:2px; color:var(--cream); line-height:1; }
+.faq-sub { font-size:13px; color:var(--muted2); margin-top:6px; line-height:1.5; }
+.faq-search { display:flex; align-items:center; gap:8px; margin:14px 20px 4px; padding:0 14px; border:1px solid var(--line); border-radius:12px; background:var(--bg-2); }
+.faq-search input { flex:1; min-width:0; background:transparent; border:none; outline:none; color:var(--cream); font-family:var(--font-body); font-size:16px; padding:12px 0; }
+.faq-search svg { color:var(--muted); flex-shrink:0; }
+.faq-chips { display:flex; gap:8px; overflow-x:auto; padding:10px 20px 4px; scrollbar-width:none; }
+.faq-chips::-webkit-scrollbar { display:none; }
+.faq-chip { flex-shrink:0; padding:7px 12px; border-radius:999px; border:1px solid var(--line); background:var(--bg-2); color:var(--muted2); font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.faq-chip.on { border-color:var(--accent); color:var(--accent); background:var(--accent-glow); }
+.faq-section { padding:0 20px; }
+.faq-section-title { display:flex; align-items:center; gap:8px; font-family:var(--font-title); font-size:19px; letter-spacing:1.5px; color:var(--cream); margin:22px 0 10px; }
+.faq-item { border:1px solid var(--line); border-radius:12px; background:var(--bg-2); margin-bottom:8px; overflow:hidden; }
+.faq-item.open { border-color:rgba(255,107,26,0.45); }
+.faq-q { display:flex; align-items:center; gap:10px; padding:14px; cursor:pointer; font-size:14px; font-weight:700; color:var(--cream); line-height:1.35; }
+.faq-q span { flex:1; }
+.faq-chev { color:var(--muted); transition:transform 0.2s; flex-shrink:0; }
+.faq-item.open .faq-chev { transform:rotate(180deg); color:var(--accent); }
+.faq-a { display:none; padding:0 14px 14px; font-size:13.5px; color:var(--muted2); line-height:1.6; }
+.faq-item.open .faq-a { display:block; }
+.faq-a strong { color:var(--cream); }
+.faq-try { display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:8px 14px; border-radius:999px; border:1.5px solid var(--accent); background:var(--accent-glow); color:var(--accent); font-family:var(--font-body); font-size:12px; font-weight:800; cursor:pointer; }
+.faq-empty { padding:24px 20px; text-align:center; color:var(--muted); font-size:13px; }
+.faq-contact { margin:26px 20px 30px; padding:18px; border-radius:14px; border:1px solid rgba(255,107,26,0.35); background:var(--accent-glow); text-align:center; }
+.faq-contact-title { font-family:var(--font-title); font-size:20px; letter-spacing:1.5px; color:var(--cream); margin-bottom:4px; }
+.faq-contact a { color:var(--accent); font-weight:800; text-decoration:none; }
 .mini-player.hidden { transform:translateX(-50%) translateY(100px); opacity:0; pointer-events:none; }
 .mini-wave { display:flex; align-items:center; gap:2px; }
 .mini-bar { width:2px; background:var(--accent); border-radius:2px; animation:barAnim 1s ease-in-out infinite; }
@@ -786,6 +812,30 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="uc-sheet-sub" id="confirm-sub"></div>
     <button class="btn-danger-full" id="confirm-yes" onclick="confirmYes()">Yes</button>
     <button class="btn-ghost-full" onclick="closeConfirm()">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══ HELP & FAQ ═══ -->
+<div class="screen" id="faq-screen">
+  <div class="topbar">
+    <button class="back-btn" onclick="closeFaq()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+  </div>
+  <div class="scroll">
+    <div class="faq-head">
+      <div class="faq-title">HELP &amp; FAQ</div>
+      <div class="faq-sub">Everything UltCast can do, and how to do it.</div>
+    </div>
+    <div class="faq-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="faq-search" type="search" placeholder="Search questions…" autocomplete="off" oninput="renderFaq()">
+    </div>
+    <div class="faq-chips" id="faq-chips"></div>
+    <div id="faq-list"></div>
+    <div class="faq-contact">
+      <div class="faq-contact-title">STILL STUCK?</div>
+      <div class="faq-sub" style="margin:0 0 6px">We're a small team and we read every email.</div>
+      <a href="mailto:support@ultcast.live">support@ultcast.live</a>
+    </div>
   </div>
 </div>
 
@@ -1280,7 +1330,7 @@ body.mini-on .scroll { padding-bottom:150px; }
       <div class="p-row" id="row-alerts" onclick="openAlerts()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>Live alerts</div><div id="alerts-badge" style="font-size:10px;font-weight:800;letter-spacing:0.5px;color:var(--accent)">TURN ON ›</div></div>
       <div class="p-row" id="row-install" onclick="openInstall()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7M9 11l3 3 3-3"/></svg></div>Add UltCast to Home Screen</div><div style="font-size:12px;color:var(--muted2)">›</div></div>
       <div class="p-section-title">Support</div>
-      <div class="p-row" style="opacity:0.5"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>Help Centre</div><div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.5px">COMING SOON</div></div>
+      <div class="p-row" id="row-faq" onclick="openFaq()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>Help &amp; FAQ</div><div style="font-size:12px;color:var(--muted2)">›</div></div>
       <div class="p-row" onclick="window.open('https://ultcast.live/terms.html','_blank')"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>Terms & Privacy</div><div class="p-row-chev">›</div></div>
       <div style="margin-top:20px">
         <button style="width:100%;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:13px;font-family:var(--font-body);font-size:13px;cursor:pointer" id="btn-logout" onclick="signOut()">Log Out</button>
@@ -1709,6 +1759,7 @@ function guestBlocked(kind) {
     follow:  ['FOLLOW YOUR CASTERS', 'Create a free account to follow casters and find them again easily.'],
     profile: ['MAKE IT YOURS', 'Create a free account to set up your profile, name and photo.'],
     payouts: ['GET PAID TO CAST', 'Create a free account to go live and receive tips.'],
+    alerts:  ['GET LIVE ALERTS', 'Create a free account to follow casters and get notified when they go live.'],
   }[kind] || ['CREATE A FREE ACCOUNT', 'You need an account for this.'];
   document.getElementById('gate-title').textContent = copy[0];
   document.getElementById('gate-sub').textContent = copy[1];
@@ -1806,7 +1857,7 @@ function showScreen(id) {
 // ════════════════════════════════════════════════
 // MINI PLAYER — keep listening while browsing
 // ════════════════════════════════════════════════
-const MINI_SCREENS = ['home-screen', 'browse-screen', 'startcast-screen', 'profile-screen', 'caster-screen'];
+const MINI_SCREENS = ['home-screen', 'browse-screen', 'startcast-screen', 'profile-screen', 'caster-screen', 'faq-screen'];
 const MINI_TAB = { 'home-screen':'home', 'browse-screen':'browse', 'startcast-screen':'cast', 'profile-screen':'profile' };
 window._miniActive = false;
 window._listeningRoom = null;
@@ -2572,6 +2623,123 @@ function selectTip(el, amount) {
 }
 
 // ════════════════════════════════════════════════
+// HELP & FAQ
+// To edit: change the questions/answers below. `try` adds a button that does the thing.
+// ════════════════════════════════════════════════
+const FAQ = [
+  { id: 'start', icon: '👋', title: 'Getting started', items: [
+    { q: 'What is UltCast?', a: "UltCast is live sports audio made by fans. Real fans call the game live in their own words, with their own opinions, banter and stats. You can listen for free, go live yourself, and tip the casters you love." },
+    { q: 'Do I need an account?', a: "No. Tap <strong>Just listen, continue as guest</strong> on the welcome screen and you can listen and tip straight away. A free account lets you <strong>go live</strong>, <strong>follow casters</strong>, get <strong>live alerts</strong> and <strong>get paid</strong> for your casts." },
+    { q: 'Can I get UltCast as an app?', a: "Yes. Add it to your Home Screen and it opens full-screen like any other app.<br><br><strong>Android:</strong> tap <strong>Add</strong> on the banner, or your browser menu <strong>⋮</strong> then <strong>Add to Home screen</strong>.<br><strong>iPhone:</strong> in Safari, tap <strong>Share</strong> then <strong>Add to Home Screen</strong>.", try: ['Add to Home Screen', 'openInstall()'] },
+    { q: 'Does it cost anything?', a: "Listening and casting are completely free. Tipping is always optional." },
+  ]},
+  { id: 'listen', icon: '🎧', title: 'Listening', items: [
+    { q: 'How do I listen to a cast?', a: "Everything live is on <strong>Home</strong>. Use <strong>Browse</strong> to filter by sport. Tap any cast to start listening. Each card shows how many people are listening right now." },
+    { q: 'Can I keep listening with my screen locked?', a: "Yes. Lock your phone or switch to another app and the cast keeps playing. You can mute or stop it from your lock screen or notification bar. Tip: on iPhone, adding UltCast to your Home Screen gives the best results." },
+    { q: 'Can I browse the app while I listen?', a: "Yes. Tap the <strong>back arrow</strong> on the player and the cast keeps playing in a <strong>mini player</strong> at the bottom. Tap the speaker button to mute, or tap the mini player to open the full player again. <strong>Stop Listening</strong> ends it." },
+    { q: 'Is the listener count live?', a: "Yes. The number of listeners updates in real time as people join and leave, both for you and for the caster." },
+    { q: 'What if a cast ends while I\'m listening?', a: "You'll see a message that the cast has ended, and you can pick another one from Home." },
+  ]},
+  { id: 'follow', icon: '⭐', title: 'Following & alerts', items: [
+    { q: 'How do I follow a caster?', a: "Tap <strong>Follow</strong> on the player, or on their profile. Casters you follow are <strong>pinned to the top</strong> of Home and Browse with a <strong>★ Following</strong> tag. See everyone you follow in <strong>Profile → Following</strong>." },
+    { q: 'How do I see a caster\'s profile?', a: "Tap the caster's name or photo on the player. Their profile shows their bio, followers, broadcasts, recent casts and anything they're live with right now. Tap the share button to send their profile to a friend." },
+    { q: 'Can I get notified when a caster goes live?', a: "Yes. Turn on <strong>Live alerts</strong> and you'll get a notification whenever someone you follow goes live. Tap it and you're one tap away from listening.<br><br><strong>iPhone:</strong> alerts work once UltCast is on your Home Screen (an Apple rule).", try: ['Turn on live alerts', 'openAlerts()'] },
+    { q: 'How do I check alerts are working?', a: "Go to <strong>Profile → Live alerts</strong> and tap <strong>Send me a test alert</strong>. You should get a notification within a few seconds." },
+    { q: 'How do I turn alerts off?', a: "<strong>Profile → Live alerts → Turn off alerts</strong>. Logging out also turns them off on that phone." },
+  ]},
+  { id: 'tip', icon: '💰', title: 'Tipping', items: [
+    { q: 'How do I tip a caster?', a: "Tap the orange <strong>TIP</strong> button on the player. Pick <strong>$2, $5, $10 or $20</strong>, or type your own amount (<strong>$2 to $500</strong>). You'll pay securely with Stripe by card, Apple Pay or Google Pay. You don't need an account to tip." },
+    { q: 'How much of my tip does the caster get?', a: "Casters who have set up payouts get <strong>80% of every tip</strong>, paid straight to their bank by Stripe. UltCast keeps 20%, which also covers card fees." },
+    { q: 'What happens after I tip?', a: "You'll come straight back to UltCast with one tap to jump back into the cast you were listening to. Stripe emails you a receipt." },
+    { q: 'I tipped by mistake. Can I get a refund?', a: "Email <a href=\"mailto:support@ultcast.live\" style=\"color:var(--accent)\">support@ultcast.live</a> with the date and amount and we'll sort it out." },
+  ]},
+  { id: 'cast', icon: '🎙️', title: 'Casting', items: [
+    { q: 'How do I go live?', a: "Tap <strong>Cast</strong>, pick the <strong>sport, league and teams</strong>, choose some tags (like Analytical or Humorous) so listeners know your style, then tap <strong>GO LIVE</strong>. Confirm the quick checklist and you're on air.", try: ['Start a cast', 'showStartCast()'] },
+    { q: 'What are the casting rules?', a: "Every UltCast cast is <strong>unofficial and in your own words</strong>:<br>• Don't claim to be official or use league or club logos<br>• No TV, radio or stream audio in your mic (use headphones)<br>• Don't cast from inside the venue<br>• No gambling promotion or betting odds<br><br>Casts that break these rules can be ended, and repeat offenders can be banned." },
+    { q: 'How do I get people listening?', a: "Tap the <strong>share</strong> button on your live screen to send a link straight to your cast. Your followers also get a <strong>live alert</strong> automatically when you go live." },
+    { q: 'Can I use the app while I\'m live?', a: "Yes. Tap <strong>Browse app</strong> on your live screen. A red <strong>You're LIVE</strong> bar shows your time and listener count, with a mic button to mute yourself. Tap the bar to go back to your live screen. A few things (like opening another cast or logging out) wait until you've ended your cast so you can't end it by accident." },
+    { q: 'Can I cast with my screen locked?', a: "Not yet. Phones pause the microphone for websites in the background, so <strong>keep UltCast open with the screen on</strong> while you're live. This is coming with the UltCast app." },
+    { q: 'How long can a cast be?', a: "Up to 4 hours. Casts end automatically after that, and you can start a new one any time." },
+  ]},
+  { id: 'paid', icon: '💸', title: 'Getting paid', items: [
+    { q: 'How do I get paid for my casts?', a: "Go to <strong>Profile → Payment &amp; Payouts</strong> and set up with Stripe. It takes about 5 minutes and you'll need photo ID and your bank details. After that you get <strong>80% of every tip</strong>, paid straight to your bank.", try: ['Set up payouts', 'openPayouts()'] },
+    { q: 'What if I go live before setting up payouts?', a: "You can still go live, but tips sent during that cast go to UltCast. We'll remind you before you go live, with a button to set it up first." },
+    { q: 'Where can I see my earnings?', a: "Once you're set up, <strong>Profile → Payment &amp; Payouts</strong> opens your own Stripe dashboard with your tips, payouts and bank details." },
+  ]},
+  { id: 'safety', icon: '🛡️', title: 'Safety', items: [
+    { q: 'How do I report a cast?', a: "Tap <strong>⋮</strong> on the player, then <strong>Report this cast</strong>, and pick a reason. Reports are private: the caster never sees who sent it. We review every report within 24 hours." },
+    { q: 'How do I block a caster?', a: "Open their profile and tap <strong>Block this caster</strong>. Their casts disappear from your Home and Browse, you stop following them, and they're never told. You can unblock them from their profile any time." },
+    { q: 'What happens to casters who break the rules?', a: "We can end their cast straight away, and casters who keep breaking the rules are banned from going live." },
+  ]},
+  { id: 'account', icon: '👤', title: 'Your account', items: [
+    { q: 'How do I change my name, photo or bio?', a: "<strong>Profile → Edit Profile</strong>, or tap your photo on the Profile page." },
+    { q: 'I forgot my password', a: "On the login screen tap <strong>Forgot your password?</strong> and we'll email you a reset link." },
+    { q: 'How do I delete my account?', a: "<strong>Profile → Delete my account</strong> (under Log Out), then type DELETE to confirm. This permanently removes your login, profile, photo and cast history. If you set up payouts, your Stripe account stays with Stripe so you can still access money owed to you." },
+    { q: 'How do I contact UltCast?', a: "Email <a href=\"mailto:support@ultcast.live\" style=\"color:var(--accent)\">support@ultcast.live</a>. You can also read our <a href=\"https://ultcast.live/terms.html\" target=\"_blank\" rel=\"noopener\" style=\"color:var(--accent)\">Terms &amp; Privacy</a>." },
+  ]},
+];
+
+let _faqSection = 'all';
+let _faqBack = 'profile-screen';
+
+function openFaq() {
+  const from = document.querySelector('.screen.active')?.id;
+  if (from && from !== 'faq-screen') _faqBack = from;
+  _faqSection = 'all';
+  document.getElementById('faq-search').value = '';
+  renderFaq();
+  showScreen('faq-screen');
+  document.querySelector('#faq-screen .scroll')?.scrollTo(0, 0);
+}
+
+function closeFaq() {
+  const dest = _faqBack || 'profile-screen';
+  showScreen(dest);
+  if (MINI_TAB[dest]) setTimeout(() => setActiveNav(MINI_TAB[dest]), 10);
+}
+
+function faqStrip(html) { return html.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').toLowerCase(); }
+
+function renderFaq() {
+  const term = (document.getElementById('faq-search').value || '').trim().toLowerCase();
+  document.getElementById('faq-chips').innerHTML =
+    [`<div class="faq-chip ${_faqSection === 'all' ? 'on' : ''}" onclick="pickFaqSection('all')">All</div>`]
+    .concat(FAQ.map(s => `<div class="faq-chip ${_faqSection === s.id ? 'on' : ''}" onclick="pickFaqSection('${s.id}')">${s.icon} ${s.title}</div>`)).join('');
+  const chev = '<svg class="faq-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+  let html = '', count = 0;
+  FAQ.forEach((s, si) => {
+    if (!term && _faqSection !== 'all' && s.id !== _faqSection) return;
+    const items = s.items.map((it, ii) => ({ it, ii })).filter(({ it }) => !term || it.q.toLowerCase().includes(term) || faqStrip(it.a).includes(term));
+    if (!items.length) return;
+    count += items.length;
+    html += `<div class="faq-section"><div class="faq-section-title">${s.icon} ${s.title.toUpperCase()}</div>` +
+      items.map(({ it, ii }) => `
+        <div class="faq-item${term ? ' open' : ''}" id="faq-${si}-${ii}">
+          <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>${it.q}</span>${chev}</div>
+          <div class="faq-a">${it.a}${it.try ? `<br><button class="faq-try" onclick="faqTry('${it.try[1]}')">${it.try[0]} ›</button>` : ''}</div>
+        </div>`).join('') + '</div>';
+  });
+  document.getElementById('faq-list').innerHTML = html || `<div class="faq-empty">No answers match "${escHtml(term)}". Try another word, or email us below.</div>`;
+}
+
+function pickFaqSection(id) {
+  _faqSection = id;
+  document.getElementById('faq-search').value = '';
+  renderFaq();
+}
+
+// "Try it" buttons: only these actions are allowed
+function faqTry(action) {
+  const actions = {
+    'openInstall()': () => openInstall(),
+    'openAlerts()': () => openAlerts(),
+    'showStartCast()': () => showStartCast(),
+    'openPayouts()': () => openPayouts(),
+  };
+  (actions[action] || (() => {}))();
+}
+
+// ════════════════════════════════════════════════
 // INSTALLABLE APP + LIVE ALERTS (web push)
 // OFF SWITCH: set PUSH_ENABLED to false to hide live alerts everywhere.
 // ════════════════════════════════════════════════
@@ -2659,7 +2827,7 @@ async function refreshAlertsUI() {
 
 let _alertsMode = 'enable';
 function openAlerts(casterName) {
-  if (guestBlocked('follow')) return;
+  if (guestBlocked('alerts')) return;
   const t = document.getElementById('alerts-title'), s = document.getElementById('alerts-sub');
   const b = document.getElementById('alerts-btn'), b2 = document.getElementById('alerts-secondary');
   b.disabled = false; b2.textContent = 'Not now'; b.style.display = '';
