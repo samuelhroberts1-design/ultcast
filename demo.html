@@ -684,6 +684,15 @@ body.mini-on .scroll { padding-bottom:150px; }
 .age-check.on .uc-box { background:var(--accent); border-color:var(--accent); }
 .age-check.on .uc-box svg { display:block; }
 .age-check strong { color:var(--cream); }
+.sk-chips { display:flex; gap:8px; justify-content:center; margin:2px 0 12px; }
+.sk-chip { padding:7px 14px; border-radius:999px; border:1px solid var(--line); background:var(--bg-2); color:var(--muted2); font-size:12px; font-weight:800; cursor:pointer; }
+.sk-chip.on { border-color:var(--accent); color:var(--accent); background:var(--accent-glow); }
+.sk-preview { display:flex; justify-content:center; align-items:center; background:var(--bg-2); border:1px solid var(--line); border-radius:14px; padding:10px; margin-bottom:12px; min-height:180px; }
+.sk-preview img { max-width:100%; max-height:42vh; border-radius:8px; box-shadow:0 8px 30px rgba(0,0,0,0.5); display:block; }
+.sk-hint { font-size:12px; color:var(--muted); text-align:center; margin:-4px 0 10px; display:none; }
+.sk-row { display:flex; gap:8px; margin-top:8px; }
+.sk-row .btn-ghost-full { margin-top:0; flex:1; color:var(--cream); font-weight:700; }
+.sk-label { font-size:11px; font-weight:800; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin:4px 0 6px; }
 .mini-player.hidden { transform:translateX(-50%) translateY(100px); opacity:0; pointer-events:none; }
 .mini-wave { display:flex; align-items:center; gap:2px; }
 .mini-bar { width:2px; background:var(--accent); border-radius:2px; animation:barAnim 1s ease-in-out infinite; }
@@ -878,11 +887,37 @@ body.mini-on .scroll { padding-bottom:150px; }
   </div>
 </div>
 
+<!-- ═══ SHARE KIT ═══ -->
+<div class="uc-overlay" id="sharekit-overlay" onclick="if(event.target===this)closeShareKit()">
+  <div class="uc-sheet">
+    <div class="uc-sheet-handle"></div>
+    <div class="uc-sheet-title" id="sk-title">SHARE</div>
+    <div class="uc-sheet-sub" id="sk-sub" style="margin-bottom:12px">Post it anywhere. Every share helps grow the crowd.</div>
+    <div class="sk-chips">
+      <div class="sk-chip on" data-f="story" onclick="setShareFormat('story')">Story</div>
+      <div class="sk-chip" data-f="post" onclick="setShareFormat('post')">Post</div>
+      <div class="sk-chip" data-f="wide" onclick="setShareFormat('wide')">Wide (X)</div>
+    </div>
+    <div class="sk-preview"><img id="sk-img" alt="Share image preview"></div>
+    <div class="sk-hint" id="sk-hint">Press and hold the image, then tap <strong>Save to Photos</strong>.</div>
+    <button class="btn-primary-full" id="sk-share-btn" onclick="shareKitShareImage()">Share image</button>
+    <div class="sk-row">
+      <button class="btn-ghost-full" onclick="shareKitSaveImage()">Save image</button>
+      <button class="btn-ghost-full" onclick="shareKitCopyLink()">Copy link</button>
+    </div>
+    <div class="sk-label" style="margin-top:16px">Caption (edit if you like)</div>
+    <textarea class="uc-textarea" id="sk-caption" style="min-height:96px;margin-top:0"></textarea>
+    <button class="btn-ghost-full" style="color:var(--accent);font-weight:800;border-color:rgba(255,107,26,0.45)" onclick="shareKitCopyCaption()">Copy caption + link</button>
+    <button class="btn-ghost-full" style="border:none" onclick="closeShareKit()">Close</button>
+  </div>
+</div>
+
 <!-- ═══ CAST OPTIONS (⋮ on player) ═══ -->
 <div class="uc-overlay" id="castmenu-overlay" onclick="if(event.target===this)closeCastMenu()">
   <div class="uc-sheet">
     <div class="uc-sheet-handle"></div>
-    <button class="btn-ghost-full" style="margin-top:0;color:var(--cream);font-weight:700;text-align:left;padding:15px 16px" onclick="closeCastMenu();openReport()">🚩&nbsp;&nbsp;Report this cast</button>
+    <button class="btn-ghost-full" style="margin-top:0;color:var(--cream);font-weight:700;text-align:left;padding:15px 16px" onclick="closeCastMenu();shareCurrentCast()">📣&nbsp;&nbsp;Share this cast</button>
+    <button class="btn-ghost-full" style="color:var(--cream);font-weight:700;text-align:left;padding:15px 16px" onclick="closeCastMenu();openReport()">🚩&nbsp;&nbsp;Report this cast</button>
     <button class="btn-ghost-full" style="border:none" onclick="closeCastMenu()">Cancel</button>
   </div>
 </div>
@@ -1334,6 +1369,7 @@ body.mini-on .scroll { padding-bottom:150px; }
         <button class="btn-ghost-full" onclick="gateToAuth('login')">I already have an account</button>
       </div>
       <div class="p-section-title">Account</div>
+      <div class="p-row" id="row-share-me" onclick="shareMyProfile()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></div>Share my profile</div><div style="font-size:10px;font-weight:800;letter-spacing:0.5px;color:var(--accent)">SHARE ›</div></div>
       <div class="p-row" id="row-following" onclick="openFollowingList()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></div>Following</div><div id="following-count" style="font-size:12px;font-weight:700;color:var(--muted2)">0 ›</div></div>
       <div class="p-row" id="row-edit-profile" onclick="showEditProfile()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>Edit Profile</div><div class="p-row-chev">›</div></div>
       <div class="p-row" id="row-payouts" onclick="openPayouts()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>Payment & Payouts</div><div id="payouts-badge" style="font-size:10px;font-weight:800;letter-spacing:0.5px;color:var(--accent)">SET UP ›</div></div>
@@ -1762,6 +1798,8 @@ function applyGuestUI() {
   show('btn-guest-exit', guest);
   const editRow = document.getElementById('row-edit-profile');
   if (editRow) editRow.style.opacity = guest ? '0.4' : '';
+  const shRow = document.getElementById('row-share-me');
+  if (shRow) shRow.style.opacity = guest ? '0.4' : '';
   const folRow = document.getElementById('row-following');
   if (folRow) folRow.style.opacity = guest ? '0.4' : '';
   const payRow = document.getElementById('row-payouts');
@@ -2654,6 +2692,324 @@ function selectTip(el, amount) {
 }
 
 // ════════════════════════════════════════════════
+// SHARE KIT — images (story / post / wide) + caption for socials
+// Everything is drawn in the browser; nothing is uploaded anywhere.
+// ════════════════════════════════════════════════
+const SK_SIZES = { story: [1080, 1920], post: [1080, 1080], wide: [1200, 675] };
+const SK_ORANGE = '#FF6B1A', SK_BG = '#0F0E0D', SK_CREAM = '#F5F1EA', SK_MUTED = '#A39A8E', SK_RED = '#F0364A';
+const _sk = { kind: null, data: null, format: 'story', file: null, url: '', link: '' };
+let _skWordmark = null;
+
+const skHashtag = (s) => (s || '').replace(/[^A-Za-z0-9]/g, '');
+const skDollars = (n) => (n == null ? '' : Number(n).toLocaleString());
+function skAppUrl() { return (location.origin.includes('ultcast.live') ? location.origin : 'https://ultcast.live') + '/demo'; }
+
+function skCaption(kind, d, link) {
+  const tags = ['#UltCast', d.sport ? '#' + skHashtag(d.sport) : ''].filter(Boolean).join(' ');
+  if (kind === 'live') {
+    const comp = d.league ? ` (${d.league})` : '';
+    return d.mine
+      ? `🔴 I'm LIVE calling ${d.game}${comp} on UltCast 🎙️\nCome listen, it's free 👉 ${link}\n${tags}`
+      : `🎧 Listening to ${d.casterName} call ${d.game} live on UltCast. Jump in 👉 ${link}\n${tags}`;
+  }
+  return d.mine
+    ? `🎙️ I call live sport on UltCast. Follow me so you never miss a cast 👉 ${link}\n#UltCast`
+    : `🎙️ Check out ${d.name} on UltCast: live sports calls from real fans 👉 ${link}\n#UltCast`;
+}
+
+async function openShareKit(kind, data) {
+  _sk.kind = kind; _sk.data = data; _sk.format = 'story';
+  _sk.link = kind === 'live' ? `${skAppUrl()}?join=${encodeURIComponent(data.room)}` : `${skAppUrl()}?caster=${data.id}`;
+  document.getElementById('sk-title').textContent = kind === 'live' ? (data.mine ? 'SHARE YOUR CAST' : 'SHARE THIS CAST') : (data.mine ? 'SHARE YOUR PROFILE' : 'SHARE PROFILE');
+  document.getElementById('sk-caption').value = skCaption(kind, data, _sk.link);
+  document.getElementById('sk-hint').style.display = 'none';
+  document.querySelectorAll('.sk-chip').forEach(c => c.classList.toggle('on', c.dataset.f === 'story'));
+  document.getElementById('sharekit-overlay').classList.add('show');
+  await renderShareKit();
+}
+function closeShareKit() { document.getElementById('sharekit-overlay').classList.remove('show'); }
+
+async function setShareFormat(f) {
+  _sk.format = f;
+  document.querySelectorAll('.sk-chip').forEach(c => c.classList.toggle('on', c.dataset.f === f));
+  await renderShareKit();
+}
+
+async function renderShareKit() {
+  const img = document.getElementById('sk-img');
+  const btn = document.getElementById('sk-share-btn');
+  img.style.opacity = '0.35'; btn.disabled = true;
+  try {
+    const blob = await drawShareImage(_sk.kind, _sk.data, _sk.format);
+    if (_sk.url) URL.revokeObjectURL(_sk.url);
+    _sk.url = URL.createObjectURL(blob);
+    _sk.file = new File([blob], `ultcast-${_sk.kind}-${_sk.format}.png`, { type: 'image/png' });
+    img.src = _sk.url;
+  } catch (e) {
+    console.error('Share image failed:', e);
+    showToast('⚠️ Could not make the image. You can still copy the caption and link.');
+  }
+  img.style.opacity = '1'; btn.disabled = false;
+}
+
+function skLoadImage(src, cors) {
+  return new Promise((res) => {
+    if (!src) return res(null);
+    const i = new Image();
+    if (cors) i.crossOrigin = 'anonymous';
+    i.onload = () => res(i); i.onerror = () => res(null);
+    i.src = src;
+  });
+}
+
+async function skGetWordmark() {
+  if (_skWordmark) return _skWordmark;
+  const sym = document.getElementById('uc-wordmark');
+  if (!sym) return null;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${sym.getAttribute('viewBox')}" width="1740" height="350">${sym.innerHTML}</svg>`;
+  _skWordmark = await skLoadImage('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg));
+  return _skWordmark;
+}
+
+// Wraps text into lines that fit maxW. Returns array of lines (max `maxLines`, last one ellipsised)
+function skWrap(ctx, text, maxW, maxLines) {
+  const words = String(text || '').split(/\s+/).filter(Boolean);
+  const lines = []; let cur = '';
+  for (const w of words) {
+    const t = cur ? cur + ' ' + w : w;
+    if (ctx.measureText(t).width <= maxW) cur = t;
+    else { if (cur) lines.push(cur); cur = w; }
+  }
+  if (cur) lines.push(cur);
+  if (lines.length > maxLines) {
+    const keep = lines.slice(0, maxLines);
+    let last = keep[maxLines - 1] + '…';
+    while (ctx.measureText(last).width > maxW && last.length > 2) last = last.slice(0, -2) + '…';
+    keep[maxLines - 1] = last;
+    return keep;
+  }
+  return lines;
+}
+
+// Biggest font size (<= max) at which text fits in maxLines lines
+function skFit(ctx, text, weight, family, max, min, maxW, maxLines) {
+  for (let s = max; s >= min; s -= 4) {
+    ctx.font = `${weight} ${s}px ${family}`;
+    const lines = skWrap(ctx, text, maxW, 99);
+    if (lines.length <= maxLines) return { size: s, lines };
+  }
+  ctx.font = `${weight} ${min}px ${family}`;
+  return { size: min, lines: skWrap(ctx, text, maxW, maxLines) };
+}
+
+function skRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+
+function skAvatar(ctx, img, name, cx, cy, r) {
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, r + r * 0.07, 0, Math.PI * 2); ctx.fillStyle = SK_ORANGE; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.closePath(); ctx.clip();
+  if (img) {
+    const s = Math.max((2 * r) / img.width, (2 * r) / img.height);
+    ctx.drawImage(img, cx - (img.width * s) / 2, cy - (img.height * s) / 2, img.width * s, img.height * s);
+  } else {
+    const g = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r); g.addColorStop(0, '#3a2a1e'); g.addColorStop(1, '#1A1816');
+    ctx.fillStyle = g; ctx.fillRect(cx - r, cy - r, 2 * r, 2 * r);
+    ctx.fillStyle = SK_CREAM; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `700 ${Math.round(r * 0.75)}px 'DM Sans', sans-serif`;
+    ctx.fillText((name || '?').substring(0, 2).toUpperCase(), cx, cy + r * 0.04);
+  }
+  ctx.restore();
+}
+
+async function drawShareImage(kind, d, format) {
+  const [W, H] = SK_SIZES[format];
+  try { await Promise.all([document.fonts.load("800 100px 'Barlow Condensed'"), document.fonts.load("700 40px 'DM Sans'"), document.fonts.load("500 40px 'DM Sans'")]); } catch (e) {}
+  const [wordmark, avatar0] = await Promise.all([skGetWordmark(), skLoadImage(d.avatarUrl, true)]);
+  let avatar = avatar0;
+
+  const draw = (useAvatar) => {
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const ctx = c.getContext('2d');
+    const T = "'Barlow Condensed', sans-serif", B = "'DM Sans', sans-serif";
+    const wide = format === 'wide';
+    const u = wide ? H / 1080 * 1.05 : W / 1080;           // base unit
+    const pad = Math.round((wide ? 64 : 80) * u);
+
+    // Background + glow
+    ctx.fillStyle = SK_BG; ctx.fillRect(0, 0, W, H);
+    let g = ctx.createRadialGradient(W * 0.85, H * 0.12, 0, W * 0.85, H * 0.12, Math.max(W, H) * 0.75);
+    g.addColorStop(0, 'rgba(255,107,26,0.22)'); g.addColorStop(1, 'rgba(255,107,26,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    g = ctx.createRadialGradient(W * 0.1, H * 0.95, 0, W * 0.1, H * 0.95, Math.max(W, H) * 0.6);
+    g.addColorStop(0, 'rgba(255,107,26,0.10)'); g.addColorStop(1, 'rgba(255,107,26,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(255,107,26,0.55)'; ctx.lineWidth = Math.max(4, 8 * u); ctx.strokeRect(ctx.lineWidth / 2, ctx.lineWidth / 2, W - ctx.lineWidth, H - ctx.lineWidth);
+
+    // Wordmark top-left
+    const wmH = Math.round((format === 'story' ? 92 : 70) * u);
+    if (wordmark) ctx.drawImage(wordmark, pad, pad, wmH * (3481 / 700), wmH);
+
+    // Footer: call to action
+    const footH = Math.round((format === 'story' ? 150 : 130) * u);
+    const fy = H - pad - footH;
+    skRoundRect(ctx, pad, fy, W - 2 * pad, footH, 28 * u);
+    ctx.fillStyle = SK_ORANGE; ctx.fill();
+    ctx.fillStyle = SK_BG; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `800 ${Math.round(66 * u)}px ${T}`;
+    const cta = kind === 'live' ? 'LISTEN LIVE FREE · ULTCAST.LIVE' : 'FOLLOW ON ULTCAST.LIVE';
+    ctx.fillText(cta, W / 2, fy + footH / 2 + 3 * u);
+
+    const top = pad + wmH + Math.round((format === 'story' ? 60 : 36) * u);
+    const bottom = fy - Math.round((format === 'story' ? 50 : 36) * u);
+    const textW = W - 2 * pad;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+
+    // Build the content at a given scale; shrink until it fits between the logo and the button
+    const buildBlocks = (k) => {
+      const u2 = u * k;
+      const blocks = [];
+      if (kind === 'live') {
+        const pillH = Math.round(70 * u2);
+        blocks.push({ h: pillH, gap: 40 * u2, draw: (y) => {
+          ctx.font = `800 ${Math.round(40 * u2)}px ${B}`;
+          const label = d.mine ? 'LIVE NOW' : 'LIVE NOW ON ULTCAST';
+          const pw = ctx.measureText(label).width + 110 * u2;
+          skRoundRect(ctx, pad, y, pw, pillH, pillH / 2); ctx.fillStyle = SK_RED; ctx.fill();
+          ctx.beginPath(); ctx.arc(pad + 40 * u2, y + pillH / 2, 12 * u2, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+          ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle'; ctx.fillText(label, pad + 66 * u2, y + pillH / 2 + 2 * u2); ctx.textBaseline = 'alphabetic';
+        }});
+        const comp = [d.sport, d.league].filter(Boolean).join(' · ').toUpperCase();
+        if (comp) {
+          ctx.font = `700 ${Math.round(44 * u2)}px ${B}`;
+          const cl = skWrap(ctx, comp, textW, 1);
+          blocks.push({ h: 52 * u2, gap: 18 * u2, draw: (y) => { ctx.font = `700 ${Math.round(44 * u2)}px ${B}`; ctx.fillStyle = SK_ORANGE; ctx.fillText(cl[0], pad, y + 44 * u2); } });
+        }
+        const maxL = format === 'story' ? 4 : 3;
+        const fit = skFit(ctx, String(d.game || '').toUpperCase(), 800, T, Math.round((format === 'story' ? 170 : 140) * u2), Math.round(56 * u2), textW, maxL);
+        const lh = fit.size * 1.0;
+        blocks.push({ h: lh * fit.lines.length, gap: 50 * u2, draw: (y) => {
+          ctx.font = `800 ${fit.size}px ${T}`; ctx.fillStyle = SK_CREAM;
+          fit.lines.forEach((l, i) => ctx.fillText(l, pad, y + lh * (i + 1) - fit.size * 0.12));
+        }});
+        const ar = Math.round(62 * u2);
+        blocks.push({ h: ar * 2, gap: 0, draw: (y) => {
+          skAvatar(ctx, useAvatar ? avatar : null, d.casterName, pad + ar, y + ar, ar);
+          ctx.fillStyle = SK_MUTED; ctx.font = `500 ${Math.round(34 * u2)}px ${B}`; ctx.fillText('Called live by', pad + ar * 2 + 30 * u2, y + ar - 10 * u2);
+          ctx.fillStyle = SK_CREAM; ctx.font = `700 ${Math.round(50 * u2)}px ${B}`;
+          ctx.fillText(skWrap(ctx, d.casterName, textW - ar * 2 - 30 * u2, 1)[0] || '', pad + ar * 2 + 30 * u2, y + ar + 42 * u2);
+        }});
+      } else {
+        const ar = Math.round((format === 'story' ? 190 : 130) * u2);
+        blocks.push({ h: ar * 2 + 14 * u2, gap: 40 * u2, draw: (y) => skAvatar(ctx, useAvatar ? avatar : null, d.name, W / 2, y + ar + 7 * u2, ar) });
+        const nameFit = skFit(ctx, String(d.name || '').toUpperCase(), 800, T, Math.round(130 * u2), Math.round(56 * u2), textW, 1);
+        blocks.push({ h: nameFit.size * 0.95, gap: 16 * u2, draw: (y) => { ctx.font = `800 ${nameFit.size}px ${T}`; ctx.fillStyle = SK_CREAM; ctx.textAlign = 'center'; ctx.fillText(nameFit.lines[0], W / 2, y + nameFit.size * 0.82); ctx.textAlign = 'left'; } });
+        if (d.handle) blocks.push({ h: 46 * u2, gap: 24 * u2, draw: (y) => { ctx.font = `600 ${Math.round(40 * u2)}px ${B}`; ctx.fillStyle = SK_ORANGE; ctx.textAlign = 'center'; ctx.fillText('@' + d.handle, W / 2, y + 38 * u2); ctx.textAlign = 'left'; } });
+        if (d.bio && format !== 'wide') {
+          ctx.font = `500 ${Math.round(38 * u2)}px ${B}`;
+          const bl = skWrap(ctx, d.bio, textW - 40 * u2, format === 'story' ? 3 : 2);
+          blocks.push({ h: bl.length * 52 * u2, gap: 36 * u2, draw: (y) => { ctx.font = `500 ${Math.round(38 * u2)}px ${B}`; ctx.fillStyle = SK_MUTED; ctx.textAlign = 'center'; bl.forEach((l, i) => ctx.fillText(l, W / 2, y + 40 * u2 + i * 52 * u2)); ctx.textAlign = 'left'; } });
+        }
+        const stats = [];
+        if (d.followers != null) stats.push([skDollars(d.followers), 'FOLLOWERS']);
+        if (d.casts != null) stats.push([skDollars(d.casts), 'BROADCASTS']);
+        if (stats.length) blocks.push({ h: 120 * u2, gap: 0, draw: (y) => {
+          const colW = Math.min(300 * u2, textW / stats.length); const x0 = W / 2 - (colW * stats.length) / 2;
+          stats.forEach(([n, l], i) => {
+            const cx = x0 + colW * (i + 0.5);
+            ctx.textAlign = 'center'; ctx.fillStyle = SK_ORANGE; ctx.font = `800 ${Math.round(84 * u2)}px ${T}`; ctx.fillText(n, cx, y + 72 * u2);
+            ctx.fillStyle = SK_MUTED; ctx.font = `700 ${Math.round(26 * u2)}px ${B}`; ctx.fillText(l, cx, y + 112 * u2); ctx.textAlign = 'left';
+          });
+        }});
+      }
+      return blocks;
+    };
+    const height = (bl) => bl.reduce((s, b, i) => s + b.h + (i < bl.length - 1 ? b.gap : 0), 0);
+    let k = 1, blocks = buildBlocks(k);
+    while (height(blocks) > bottom - top && k > 0.4) { k -= 0.05; blocks = buildBlocks(k); }
+    let y = top + Math.max(0, (bottom - top - height(blocks)) / 2);
+    blocks.forEach(b => { b.draw(y); y += b.h + b.gap; });
+    return c;
+  };
+
+  const toBlob = (c) => new Promise((res, rej) => { try { c.toBlob(b => b ? res(b) : rej(new Error('empty')), 'image/png'); } catch (e) { rej(e); } });
+  try { return await toBlob(draw(true)); }
+  catch (e) { avatar = null; return await toBlob(draw(false)); }   // photo couldn't be used: fall back to initials
+}
+
+const skIsIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+async function shareKitShareImage() {
+  if (!_sk.file) return;
+  const caption = document.getElementById('sk-caption').value;
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [_sk.file] })) {
+      await navigator.share({ files: [_sk.file], text: caption });
+      return;
+    }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  // No image sharing on this device: save it instead and copy the caption
+  shareKitSaveImage();
+  try { await navigator.clipboard.writeText(caption); showToast('📋 Caption copied. Image saved, add it to your post.'); } catch (e) {}
+}
+
+function shareKitSaveImage() {
+  if (!_sk.url) return;
+  if (skIsIOS()) {   // iPhone: downloads open a new page, so use press-and-hold instead
+    document.getElementById('sk-hint').style.display = 'block';
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = _sk.url; a.download = _sk.file?.name || 'ultcast.png';
+  document.body.appendChild(a); a.click(); a.remove();
+  showToast('🖼️ Image saved');
+}
+
+async function shareKitCopyCaption() {
+  const t = document.getElementById('sk-caption').value;
+  try { await navigator.clipboard.writeText(t); showToast('📋 Caption + link copied'); } catch (e) { showToast(t.slice(0, 80)); }
+}
+async function shareKitCopyLink() {
+  try { await navigator.clipboard.writeText(_sk.link); showToast('🔗 Link copied'); } catch (e) { showToast(_sk.link); }
+}
+
+// Listener: share the cast you're listening to
+async function shareCurrentCast() {
+  const row = window._currentCastRow || {};
+  const room = window._listeningRoom || row.room_name;
+  if (!room) { showToast('⚠️ Nothing to share yet'); return; }
+  let avatarUrl = '';
+  if (row.caster_id) {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${row.caster_id}&select=avatar_url`, { headers: restHeaders() });
+      avatarUrl = (await r.json())?.[0]?.avatar_url || '';
+    } catch (e) {}
+  }
+  openShareKit('live', {
+    room,
+    game: row.game || document.getElementById('pGameTitle')?.textContent || 'Live cast',
+    sport: row.sport || '', league: row.league || '',
+    casterName: row.caster_name || document.getElementById('pCasterName')?.textContent || 'a caster',
+    casterId: row.caster_id, avatarUrl,
+    mine: !!(currentUser && row.caster_id === currentUser.id),
+  });
+}
+
+// Your own profile
+async function shareMyProfile() {
+  if (guestBlocked('profile')) return;
+  const p = currentUserProfile || {};
+  const followers = await countRows('follows', `following_id=eq.${currentUser.id}`);
+  const casts = await countRows('casts', `caster_id=eq.${currentUser.id}`);
+  openShareKit('profile', {
+    id: currentUser.id,
+    name: p.display_name || p.username || 'Me',
+    handle: p.username || '', bio: p.bio || '', avatarUrl: p.avatar_url || '',
+    followers, casts, mine: true,
+  });
+}
+
+// ════════════════════════════════════════════════
 // HELP & FAQ
 // To edit: change the questions/answers below. `try` adds a button that does the thing.
 // ════════════════════════════════════════════════
@@ -3371,6 +3727,9 @@ async function openCasterProfile(casterId) {
   const rows = Array.isArray(casts) ? casts : [];
   const name = profile?.display_name || profile?.username || rows[0]?.caster_name || 'Caster';
   window._cp.name = name;
+  window._cp.profile = profile || null;
+  window._cp.followers = followers;
+  window._cp.total = total ?? rows.length;
   document.getElementById('cpName').textContent = name;
   document.getElementById('cpHandle').textContent = profile?.username ? '@' + profile.username : '';
   const bio = document.getElementById('cpBio');
@@ -3444,13 +3803,17 @@ function toggleBlockCaster() {
 }
 
 async function shareCasterProfile() {
-  const url = 'https://ultcast.live/demo?caster=' + window._cp.id;
-  const title = (window._cp.name || 'A caster') + ' on UltCast';
-  try {
-    if (navigator.share) { await navigator.share({ title, url }); return; }
-  } catch(e) { if (e && e.name === 'AbortError') return; }
-  try { await navigator.clipboard.writeText(url); showToast('🔗 Profile link copied'); }
-  catch(e) { showToast(url); }
+  const p = window._cp.profile || {};
+  openShareKit('profile', {
+    id: window._cp.id,
+    name: window._cp.name || p.display_name || p.username || 'Caster',
+    handle: p.username || '',
+    bio: p.bio || '',
+    avatarUrl: p.avatar_url || '',
+    followers: window._cp.followers,
+    casts: window._cp.total,
+    mine: !!(currentUser && currentUser.id === window._cp.id),
+  });
 }
 
 // ── Following list (Profile tab) ──
@@ -4128,14 +4491,17 @@ async function endBroadcast() {
 function shareLiveLink() {
   const room = window._activeCastRoomName;
   if (!room) { showToast('⚠️ Not live yet'); return; }
-  const link = window.location.origin + window.location.pathname + '?join=' + encodeURIComponent(room);
-  if (navigator.share) {
-    navigator.share({ title: 'Listen live on UltCast', url: link }).catch(() => {});
-  } else if (navigator.clipboard) {
-    navigator.clipboard.writeText(link).then(() => showToast('🔗 Link copied!')).catch(() => showToast(link));
-  } else {
-    showToast(link);
-  }
+  const val = (id) => document.getElementById(id)?.value || '';
+  openShareKit('live', {
+    room,
+    game: document.getElementById('onairGame')?.textContent || 'Live cast',
+    sport: val('cast-sport'),
+    league: val('cast-league'),
+    casterName: currentUserProfile?.display_name || currentUserProfile?.username || 'Me',
+    casterId: currentUser?.id,
+    avatarUrl: currentUserProfile?.avatar_url || '',
+    mine: true,
+  });
 }
 
 // ════════════════════════════════════════════════
