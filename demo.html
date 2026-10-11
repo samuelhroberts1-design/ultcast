@@ -678,6 +678,12 @@ body.mini-on .scroll { padding-bottom:150px; }
 .faq-contact { margin:26px 20px 30px; padding:18px; border-radius:14px; border:1px solid rgba(255,107,26,0.35); background:var(--accent-glow); text-align:center; }
 .faq-contact-title { font-family:var(--font-title); font-size:20px; letter-spacing:1.5px; color:var(--cream); margin-bottom:4px; }
 .faq-contact a { color:var(--accent); font-weight:800; text-decoration:none; }
+.age-check { display:none; align-items:flex-start; gap:10px; margin:2px 0 12px; padding:11px 12px; border:1px solid var(--line); border-radius:12px; background:var(--bg-2); cursor:pointer; font-size:13px; color:var(--muted2); line-height:1.45; text-align:left; }
+.age-check.on { border-color:var(--accent); background:var(--accent-glow); }
+.age-check .uc-box { margin-top:0; }
+.age-check.on .uc-box { background:var(--accent); border-color:var(--accent); }
+.age-check.on .uc-box svg { display:block; }
+.age-check strong { color:var(--cream); }
 .mini-player.hidden { transform:translateX(-50%) translateY(100px); opacity:0; pointer-events:none; }
 .mini-wave { display:flex; align-items:center; gap:2px; }
 .mini-bar { width:2px; background:var(--accent); border-radius:2px; animation:barAnim 1s ease-in-out infinite; }
@@ -917,7 +923,7 @@ body.mini-on .scroll { padding-bottom:150px; }
   <div class="uc-sheet">
     <div class="uc-sheet-handle"></div>
     <div class="uc-sheet-title" id="payouts-title">GET PAID FOR YOUR CASTS</div>
-    <div class="uc-sheet-sub" id="payouts-sub">UltCast uses Stripe to send you 80% of every tip, straight to your bank account. Set-up takes about 5 minutes and you'll need photo ID and your bank details.</div>
+    <div class="uc-sheet-sub" id="payouts-sub">UltCast uses Stripe to send you 80% of every tip, straight to your bank account. Set-up takes about 5 minutes and you'll need photo ID and your bank details. Payouts are for casters aged 18 or over.</div>
     <button class="btn-primary-full" id="payouts-go-btn" onclick="payoutsGo()">Set up payouts with Stripe</button>
     <button class="btn-ghost-full" onclick="closePayouts()">Not now</button>
   </div>
@@ -978,6 +984,10 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="password-wrap" id="confirm-pw-wrap" style="display:none">
       <input class="auth-input" id="auth-password-confirm" type="password" placeholder="Confirm password" style="margin-bottom:0" />
       <button class="pw-toggle" type="button" onclick="togglePw('auth-password-confirm', this)" tabindex="-1">👁</button>
+    </div>
+    <div class="age-check" id="age-check" onclick="this.classList.toggle('on')">
+      <div class="uc-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0E0D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div>I'm <strong>16 or older</strong> and agree to the <a href="https://ultcast.live/terms.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--accent)">Terms &amp; Privacy</a></div>
     </div>
     <div class="auth-error" id="auth-error"></div>
     <button class="auth-btn" id="auth-submit" onclick="handleAuth()">Continue →</button>
@@ -1569,6 +1579,23 @@ function updateProfileUI() {
   loadMySocial();
 }
 
+// Tips Earned = the caster's own 80% share of tips (refunds excluded), recorded by Stripe
+async function loadTipsEarned() {
+  const el = document.getElementById('stat-tips');
+  if (!el || !currentUser) return;
+  try {
+    const token = await freshToken();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/ultcast_my_tips`, {
+      method: 'POST', headers: restHeaders(token, { 'Content-Type': 'application/json' }), body: '{}',
+    });
+    if (!r.ok) return;   // leave as $0 if tips aren't set up yet
+    const d = await r.json();
+    const dollars = (d.earned_cents || 0) / 100;
+    el.textContent = '$' + (Number.isInteger(dollars) ? dollars.toLocaleString() : dollars.toFixed(2));
+    window._tipsHeldCents = d.held_cents || 0;
+  } catch(e) {}
+}
+
 async function loadProfileStats() {
   if (!currentUser) return;
   try {
@@ -1593,6 +1620,7 @@ async function loadProfileStats() {
 
     if (bEl) bEl.textContent = totalBroadcasts;
     if (lEl) lEl.textContent = totalListeners.toLocaleString();
+    loadTipsEarned();
   } catch(e) {
     console.warn('Could not load profile stats:', e.message);
   }
@@ -1608,6 +1636,7 @@ function setAuthTab(mode) {
   document.getElementById('auth-username').style.display = mode==='signup' ? 'block' : 'none';
   document.getElementById('confirm-pw-wrap').style.display = mode==='signup' ? 'block' : 'none';
   document.getElementById('forgot-link').style.display = mode==='login' ? 'block' : 'none';
+  document.getElementById('age-check').style.display = mode==='signup' ? 'flex' : 'none';
   document.getElementById('auth-note').innerHTML = mode==='login'
     ? 'New to UltCast? <a onclick="setAuthTab(\'signup\')">Create an account</a>'
     : 'Already have an account? <a onclick="setAuthTab(\'login\')">Log in</a>';
@@ -1641,8 +1670,10 @@ async function handleAuth() {
       const pwConfirm = document.getElementById('auth-password-confirm').value;
       if (password !== pwConfirm) { showAuthError('Passwords do not match.'); btn.disabled=false; btn.textContent='Continue →'; return; }
       if (password.length < 6) { showAuthError('Password must be at least 6 characters.'); btn.disabled=false; btn.textContent='Continue →'; return; }
+      if (!document.getElementById('age-check').classList.contains('on')) { showAuthError('Please confirm you are 16 or older to create an account. You can still listen as a guest.'); btn.disabled=false; btn.textContent='Continue →'; return; }
 
-      const { data, error } = await sb.auth.signUp({ email, password });
+      // The age confirmation (and when it was given) is saved with the account
+      const { data, error } = await sb.auth.signUp({ email, password, options: { data: { age_16_plus: true, age_confirmed_at: new Date().toISOString() } } });
       if (error) throw error;
 
       // Save profile
@@ -2629,7 +2660,8 @@ function selectTip(el, amount) {
 const FAQ = [
   { id: 'start', icon: '👋', title: 'Getting started', items: [
     { q: 'What is UltCast?', a: "UltCast is live sports audio made by fans. Real fans call the game live in their own words, with their own opinions, banter and stats. You can listen for free, go live yourself, and tip the casters you love." },
-    { q: 'Do I need an account?', a: "No. Tap <strong>Just listen, continue as guest</strong> on the welcome screen and you can listen and tip straight away. A free account lets you <strong>go live</strong>, <strong>follow casters</strong>, get <strong>live alerts</strong> and <strong>get paid</strong> for your casts." },
+    { q: 'Do I need an account?', a: "No. Tap <strong>Just listen, continue as guest</strong> on the welcome screen and you can listen and tip straight away. A free account (for ages <strong>16+</strong>) lets you <strong>go live</strong>, <strong>follow casters</strong>, get <strong>live alerts</strong> and <strong>get paid</strong> for your casts." },
+    { q: 'Is there an age limit?', a: "Anyone can listen as a guest. You need to be <strong>16 or older</strong> to create an account, and <strong>18 or older</strong> to receive payouts (Stripe checks your ID when you set them up)." },
     { q: 'Can I get UltCast as an app?', a: "Yes. Add it to your Home Screen and it opens full-screen like any other app.<br><br><strong>Android:</strong> tap <strong>Add</strong> on the banner, or your browser menu <strong>⋮</strong> then <strong>Add to Home screen</strong>.<br><strong>iPhone:</strong> in Safari, tap <strong>Share</strong> then <strong>Add to Home Screen</strong>.", try: ['Add to Home Screen', 'openInstall()'] },
     { q: 'Does it cost anything?', a: "Listening and casting are completely free. Tipping is always optional." },
   ]},
@@ -2662,7 +2694,7 @@ const FAQ = [
     { q: 'How long can a cast be?', a: "Up to 4 hours. Casts end automatically after that, and you can start a new one any time." },
   ]},
   { id: 'paid', icon: '💸', title: 'Getting paid', items: [
-    { q: 'How do I get paid for my casts?', a: "Go to <strong>Profile → Payment &amp; Payouts</strong> and set up with Stripe. It takes about 5 minutes and you'll need photo ID and your bank details. After that you get <strong>80% of every tip</strong>, paid straight to your bank.", try: ['Set up payouts', 'openPayouts()'] },
+    { q: 'How do I get paid for my casts?', a: "Go to <strong>Profile → Payment &amp; Payouts</strong> and set up with Stripe. It takes about 5 minutes and you'll need photo ID and your bank details (payouts are for ages <strong>18+</strong>). After that you get <strong>80% of every tip</strong>, paid straight to your bank. Your total shows as <strong>Tips Earned</strong> on your Profile.", try: ['Set up payouts', 'openPayouts()'] },
     { q: 'What if I go live before setting up payouts?', a: "You can still go live, but tips sent during that cast go to UltCast. We'll remind you before you go live, with a button to set it up first." },
     { q: 'Where can I see my earnings?', a: "Once you're set up, <strong>Profile → Payment &amp; Payouts</strong> opens your own Stripe dashboard with your tips, payouts and bank details." },
   ]},
@@ -3647,7 +3679,7 @@ function openPayouts() {
     b.textContent = 'Continue with Stripe';
   } else {
     t.textContent = 'GET PAID FOR YOUR CASTS';
-    s.textContent = "UltCast uses Stripe to send you 80% of every tip, straight to your bank account. Set-up takes about 5 minutes and you'll need photo ID and your bank details.";
+    s.textContent = "UltCast uses Stripe to send you 80% of every tip, straight to your bank account. Set-up takes about 5 minutes and you'll need photo ID and your bank details. Payouts are for casters aged 18 or over.";
     b.textContent = 'Set up payouts with Stripe';
   }
   document.getElementById('payouts-overlay').classList.add('show');
