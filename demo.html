@@ -705,6 +705,20 @@ body.mini-on .scroll { padding-bottom:150px; }
 .search-wrap { position:relative; }
 .people-results { padding:0 16px; }
 .person-row { display:flex; align-items:center; gap:12px; padding:10px 12px; margin-bottom:8px; border:1px solid var(--line); border-radius:12px; background:var(--bg-2); cursor:pointer; }
+.up-card { border:1px solid var(--line); border-radius:14px; background:var(--bg-2); padding:14px; margin:0 16px 10px; cursor:pointer; }
+.up-card.mine { border-color:rgba(255,107,26,0.4); }
+.up-when { display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:800; letter-spacing:0.6px; color:var(--accent); background:var(--accent-glow); border:1px solid rgba(255,107,26,0.35); border-radius:999px; padding:4px 10px; margin-bottom:8px; }
+.up-when.soon { color:#fff; background:var(--live-red); border-color:var(--live-red); }
+.up-game { font-size:16px; font-weight:800; color:var(--cream); line-height:1.25; }
+.up-meta { font-size:12px; color:var(--muted2); margin-top:3px; }
+.up-desc { font-size:13px; color:var(--muted2); margin-top:8px; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.up-actions { display:flex; align-items:center; gap:8px; margin-top:12px; }
+.up-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 13px; border-radius:999px; border:1.5px solid var(--accent); background:var(--accent-glow); color:var(--accent); font-family:var(--font-body); font-size:12px; font-weight:800; cursor:pointer; }
+.up-btn.on { background:var(--accent); color:var(--bg); }
+.up-btn.ghost { border-color:var(--line); background:transparent; color:var(--cream); }
+.up-count { font-size:12px; color:var(--muted); margin-left:auto; }
+.up-empty { padding:4px 20px 8px; font-size:13px; color:var(--muted); }
+#cpUpcoming .up-card { margin:0 0 10px; }
 .mini-player.hidden { transform:translateX(-50%) translateY(100px); opacity:0; pointer-events:none; }
 .mini-wave { display:flex; align-items:center; gap:2px; }
 .mini-bar { width:2px; background:var(--accent); border-radius:2px; animation:barAnim 1s ease-in-out infinite; }
@@ -812,6 +826,8 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="cp-section" id="cpContent">
       <div class="cp-section-title">LIVE NOW</div>
       <div id="cpLive"><div class="cp-empty">Not live right now.</div></div>
+      <div class="cp-section-title">UPCOMING</div>
+      <div id="cpUpcoming"><div class="cp-empty">Nothing scheduled yet.</div></div>
       <div class="cp-section-title">RECENT CASTS</div>
       <div id="cpRecent"><div class="cp-empty">Loading…</div></div>
     </div>
@@ -896,6 +912,14 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="tip-sheet-title" id="castnotice-title">YOU CAN'T GO LIVE</div>
     <div class="tip-modal-sub" id="castnotice-sub"></div>
     <button class="btn-primary-full" onclick="closeCastNotice()">OK</button>
+  </div>
+</div>
+
+<!-- ═══ UPCOMING CAST DETAIL ═══ -->
+<div class="uc-overlay uc-center" id="upcoming-overlay" onclick="if(event.target===this)closeUpcomingDetail()">
+  <div class="tip-modal" style="text-align:left">
+    <button class="tip-modal-close" onclick="closeUpcomingDetail()" aria-label="Close">✕</button>
+    <div id="upcoming-detail"></div>
   </div>
 </div>
 
@@ -1096,6 +1120,13 @@ body.mini-on .scroll { padding-bottom:150px; }
       <div class="cast-list" style="padding-top:12px" id="live-cast-list">
         <!-- Populated by fetchLiveCasts() -->
       </div>
+    </div>
+    <div id="home-upcoming-wrap" style="display:none">
+      <div style="padding:22px 20px 10px;display:flex;align-items:center;justify-content:space-between">
+        <span style="font-family:var(--font-title);font-size:22px;letter-spacing:2px;color:var(--cream)">UPCOMING</span>
+        <span class="up-btn ghost" style="padding:6px 11px" onclick="startScheduling()">＋ Schedule</span>
+      </div>
+      <div id="home-upcoming"></div>
     </div>
 
 
@@ -1359,8 +1390,21 @@ body.mini-on .scroll { padding-bottom:150px; }
         <label class="form-label">Style tags <span class="form-hint">(pick up to 5 so listeners can find you)</span></label>
         <div class="tags-input" id="cast-tags-selected"></div>
       </div>
+      <div id="schedule-fields" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Date &amp; time <span class="form-hint">(your local time)</span></label>
+          <input class="form-input" type="datetime-local" id="sched-when">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description <span class="form-hint">(optional, up to 280 characters)</span></label>
+          <textarea class="uc-textarea" id="sched-desc" maxlength="280" placeholder="e.g. Massive rivalry game. Come and yell at the umpire with me!"></textarea>
+        </div>
+      </div>
       <div id="cast-form-error" style="display:none;margin:-6px 0 14px;padding:11px 14px;border-radius:10px;background:rgba(240,54,74,0.1);border:1px solid rgba(240,54,74,0.45);color:#FF8A96;font-size:13px;font-weight:600;line-height:1.45"></div>
-      <button class="go-live-btn" onclick="openUnofficialCheck()"><svg width="20" height="20" viewBox="0 0 24 24" fill="#0F0E0D"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/></svg>GO LIVE</button>
+      <button class="btn-primary-full" id="sched-save-btn" style="display:none;padding:17px;font-size:15px" onclick="saveScheduledCast()">🗓️ Save upcoming cast</button>
+      <button class="go-live-btn" id="go-live-btn" onclick="openUnofficialCheck()"><svg width="20" height="20" viewBox="0 0 24 24" fill="#0F0E0D"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/></svg>GO LIVE</button>
+      <button class="btn-ghost-full" id="cast-mode-toggle" style="margin-top:12px;color:var(--cream);font-weight:700" onclick="toggleCastMode()">🗓️ Schedule for later instead</button>
+      <button class="btn-ghost-full" id="sched-delete-btn" style="display:none;color:#FF8A96;border-color:rgba(240,54,74,0.4)" onclick="deleteScheduledCast()">Cancel this upcoming cast</button>
     </div>
   </div>
   <nav class="bottom-nav">
@@ -1505,7 +1549,7 @@ window.addEventListener('load', async () => {
       hideLoading();
       // Returning guests (and anyone opening a shared cast link) skip the login screen
       const _bootParams = new URLSearchParams(window.location.search);
-      if (guestFlagSaved() || _bootParams.get('join') || _bootParams.get('caster') || _bootParams.get('listen') || _bootParams.get('tip') || getTipReturn()) {
+      if (guestFlagSaved() || _bootParams.get('join') || _bootParams.get('caster') || _bootParams.get('upcoming') || _bootParams.get('listen') || _bootParams.get('tip') || getTipReturn()) {
         enterGuestMode();
       } else {
         showScreen('auth-screen');
@@ -1547,6 +1591,12 @@ window.addEventListener('load', async () => {
   }
 
   // Jump straight into a shared cast link, e.g. ?join=collingwood-vs-richmond-1774068683702
+  const upcomingLink = params.get('upcoming');
+  if (upcomingLink && /^[0-9a-f-]{36}$/i.test(upcomingLink)) {
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(() => openUpcomingDetail(upcomingLink), 900);
+  }
+
   const listenLink = params.get('listen');
   if (listenLink) {
     window.history.replaceState({}, '', window.location.pathname);
@@ -1933,7 +1983,7 @@ function validateCastForm() {
 
 // Clear the warning as soon as the caster changes a dropdown
 document.addEventListener('change', (e) => {
-  if (!['cast-sport','cast-league','cast-home','cast-away'].includes(e.target?.id)) return;
+  if (!['cast-sport','cast-league','cast-home','cast-away','sched-when'].includes(e.target?.id)) return;
   e.target.style.borderColor = '';
   const box = document.getElementById('cast-form-error');
   if (box) box.style.display = 'none';
@@ -2053,6 +2103,7 @@ function switchMain(tab) {
   const map = { home:'home-screen', browse:'browse-screen', profile:'profile-screen' };
   if (map[tab]) showScreen(map[tab]);
   if (tab === 'browse') renderBrowseCasts(window._allLiveCasts || []);
+  if (tab === 'home') fetchUpcoming();
   if (tab === 'profile') { applyGuestUI(); loadProfileStats(); loadPayoutStatus(); refreshAlertsUI(); refreshInstallUI(); }
   setTimeout(() => setActiveNav(tab), 10);
 }
@@ -2080,6 +2131,7 @@ function showStartCast() {
   if (guestBlocked('cast')) return;
   if (window._isBroadcasting) { returnToOnAir(); return; }
   showScreen('startcast-screen');
+  try { window._fromScheduledId = null; window._editingScheduledId = null; setCastMode('live'); } catch(e) {}
   loadSportsData();
   setTimeout(() => setActiveNav('cast'), 10);
 }
@@ -2749,6 +2801,360 @@ function selectTip(el, amount) {
 }
 
 // ════════════════════════════════════════════════
+// UPCOMING CASTS — schedule, Home/profile lists, Remind me, sharing
+// ════════════════════════════════════════════════
+window._upcoming = [];
+window._upById = {};
+window._myReminders = new Set();
+window._reminderCounts = {};
+window._fromScheduledId = null;
+window._editingScheduledId = null;
+let _castMode = 'live';
+
+// "TODAY · 7:30 pm", "TOMORROW · 7:30 pm", "SAT · 7:30 pm", "SAT 25 OCT · 7:30 pm", "STARTING SOON"
+function upWhenText(iso, forCaption, withZone) {
+  const d = new Date(iso), now = new Date();
+  if (isNaN(d)) return '';
+  const time = d.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' }).replace(' ', '');
+  let zone = '';
+  if (withZone) { try { zone = ' ' + (new Intl.DateTimeFormat('en-AU', { timeZoneName: 'short' }).formatToParts(d).find(p => p.type === 'timeZoneName')?.value || ''); } catch(e) {} }
+  const startOf = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const days = Math.round((startOf(d) - startOf(now)) / 86400000);
+  const wd = d.toLocaleDateString('en-AU', { weekday: 'short' });
+  const dm = d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+  if (!withZone && d <= now) return forCaption ? 'starting now' : 'STARTING SOON';
+  if (forCaption) {
+    if (days === 0) return `tonight at ${time}`;
+    if (days === 1) return `tomorrow at ${time}`;
+    if (days < 7) return `${d.toLocaleDateString('en-AU', { weekday: 'long' })} at ${time}`;
+    return `${wd} ${dm} at ${time}`;
+  }
+  if (withZone) return `${wd} ${dm} · ${time}${zone}`;
+  if (days === 0) return `TODAY · ${time}`;
+  if (days === 1) return `TOMORROW · ${time}`;
+  if (days < 7) return `${wd.toUpperCase()} · ${time}`;
+  return `${wd.toUpperCase()} ${dm.toUpperCase()} · ${time}`;
+}
+
+function upRemember(rows) { (rows || []).forEach(r => { window._upById[r.id] = r; }); }
+
+async function fetchUpcoming() {
+  try {
+    const from = new Date(Date.now() - 3 * 3600e3).toISOString();
+    const to = new Date(Date.now() + 60 * 86400e3).toISOString();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/scheduled_casts?status=eq.scheduled&starts_at=gte.${encodeURIComponent(from)}&starts_at=lte.${encodeURIComponent(to)}&order=starts_at.asc&limit=40&select=*`, { headers: restHeaders() });
+    if (!r.ok) return;   // not set up yet: leave Home as it was
+    const rows = (await r.json()).filter(c => !isBlockedCaster(c.caster_id));
+    upRemember(rows);
+    window._upcoming = rows;
+    await loadReminderCounts(rows.map(x => x.id));
+    renderHomeUpcoming();
+  } catch(e) {}
+}
+
+async function loadReminderCounts(ids) {
+  if (!ids.length) return;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/ultcast_reminder_counts`, {
+      method: 'POST', headers: restHeaders(null, { 'Content-Type': 'application/json' }), body: JSON.stringify({ p_ids: ids }),
+    });
+    if (!r.ok) return;
+    (await r.json()).forEach(x => { window._reminderCounts[x.scheduled_id] = x.reminders; });
+  } catch(e) {}
+}
+
+async function loadMyReminders() {
+  window._myReminders = new Set();
+  if (!currentUser) return;
+  const token = await freshToken();
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/cast_reminders?user_id=eq.${currentUser.id}&select=scheduled_id`, { headers: restHeaders(token) });
+  if (r.ok) (await r.json()).forEach(x => window._myReminders.add(x.scheduled_id));
+}
+
+function upcomingCardHtml(c) {
+  const mine = currentUser && c.caster_id === currentUser.id;
+  const when = upWhenText(c.starts_at);
+  const soon = when === 'STARTING SOON';
+  const reminded = window._myReminders.has(c.id);
+  const n = window._reminderCounts[c.id] || 0;
+  const lang = (c.tags || [])[0] || '';
+  return `<div class="up-card${mine ? ' mine' : ''}" onclick="openUpcomingDetail('${c.id}')">
+    <div class="up-when${soon ? ' soon' : ''}">🗓️ ${escHtml(when)}</div>
+    <div class="up-game">${escHtml(c.game)}</div>
+    <div class="up-meta">${escHtml(c.sport)} · ${escHtml(c.league)} · ${escHtml(c.caster_name)}${isFollowingCaster(c.caster_id) ? '<span class="follow-badge">★ Following</span>' : ''}${lang ? ' · ' + escHtml(lang) : ''}</div>
+    ${c.description ? `<div class="up-desc">${escHtml(c.description)}</div>` : ''}
+    <div class="up-actions" onclick="event.stopPropagation()">
+      ${mine
+        ? `<button class="up-btn" onclick="goLiveFromScheduled('${c.id}')">🎙️ Go live now</button><button class="up-btn ghost" onclick="editScheduled('${c.id}')">Edit</button>`
+        : `<button class="up-btn${reminded ? ' on' : ''}" onclick="toggleReminder('${c.id}')">${reminded ? '🔔 Reminder set' : '🔔 Remind me'}</button>`}
+      <button class="up-btn ghost" onclick="shareUpcoming('${c.id}')" title="Share">📣 Share</button>
+      ${n ? `<span class="up-count">${n} reminded</span>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderHomeUpcoming() {
+  const wrap = document.getElementById('home-upcoming-wrap'), box = document.getElementById('home-upcoming');
+  if (!wrap || !box) return;
+  const rows = (window._upcoming || []).filter(c => !isBlockedCaster(c.caster_id)).slice(0, 10);
+  wrap.style.display = '';
+  box.innerHTML = rows.length ? rows.map(upcomingCardHtml).join('')
+    : `<div class="up-empty">Nothing scheduled yet. Casters: tap <strong>＋ Schedule</strong> to let people know when you're calling a game.</div>`;
+  if (document.getElementById('upcoming-overlay')?.classList.contains('show') && window._upOpenId) renderUpcomingDetail(window._upOpenId);
+}
+
+async function loadCasterUpcoming(casterId) {
+  const box = document.getElementById('cpUpcoming');
+  if (!box) return;
+  try {
+    const from = new Date(Date.now() - 3 * 3600e3).toISOString();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/scheduled_casts?caster_id=eq.${casterId}&status=eq.scheduled&starts_at=gte.${encodeURIComponent(from)}&order=starts_at.asc&limit=10&select=*`, { headers: restHeaders() });
+    const rows = r.ok ? await r.json() : [];
+    if (window._cp.id !== casterId) return;
+    upRemember(rows);
+    await loadReminderCounts(rows.map(x => x.id));
+    box.innerHTML = rows.length ? rows.map(upcomingCardHtml).join('') : '<div class="cp-empty">Nothing scheduled yet.</div>';
+  } catch(e) { box.innerHTML = '<div class="cp-empty">Nothing scheduled yet.</div>'; }
+}
+
+function refreshUpcomingEverywhere() {
+  renderHomeUpcoming();
+  if (document.getElementById('caster-screen')?.classList.contains('active') && window._cp.id) loadCasterUpcoming(window._cp.id);
+}
+
+// ── Detail pop-up (tap a card, or opened from a shared link) ──
+async function openUpcomingDetail(id) {
+  let c = window._upById[id];
+  if (!c) {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/scheduled_casts?id=eq.${id}&select=*`, { headers: restHeaders() });
+      c = r.ok ? (await r.json())[0] : null;
+      if (c) { upRemember([c]); await loadReminderCounts([c.id]); }
+    } catch(e) {}
+  }
+  window._upOpenId = id;
+  document.getElementById('upcoming-overlay').classList.add('show');
+  if (!c) { document.getElementById('upcoming-detail').innerHTML = '<div class="tip-sheet-title" style="font-size:22px">CAST NOT FOUND</div><div class="tip-modal-sub" style="text-align:left">This upcoming cast may have been cancelled.</div>'; return; }
+  renderUpcomingDetail(id);
+}
+function renderUpcomingDetail(id) {
+  const c = window._upById[id]; if (!c) return;
+  const mine = currentUser && c.caster_id === currentUser.id;
+  const reminded = window._myReminders.has(c.id);
+  const n = window._reminderCounts[c.id] || 0;
+  const liveNow = c.status === 'live' || (window._rawLiveCasts || []).some(x => x.caster_id === c.caster_id);
+  document.getElementById('upcoming-detail').innerHTML = `
+    <div class="up-when${upWhenText(c.starts_at) === 'STARTING SOON' ? ' soon' : ''}">🗓️ ${escHtml(upWhenText(c.starts_at, false, true))}</div>
+    <div class="tip-sheet-title" style="font-size:26px;line-height:1.05;margin:2px 0 6px">${escHtml(c.game).toUpperCase()}</div>
+    <div class="up-meta" style="font-size:13px">${escHtml(c.sport)} · ${escHtml(c.league)}</div>
+    <div class="up-meta" style="font-size:13px;margin-top:6px">Called by <a style="color:var(--accent);font-weight:800;cursor:pointer" onclick="closeUpcomingDetail();openCasterProfile('${c.caster_id}')">${escHtml(c.caster_name)}</a></div>
+    ${c.description ? `<div class="tip-modal-sub" style="text-align:left;margin:12px 0 4px">${escHtml(c.description)}</div>` : ''}
+    <div class="cast-tags" style="margin-top:10px">${(c.tags || []).map(t => `<span class="tag">${escHtml(t)}</span>`).join('')}</div>
+    <div class="up-meta" style="margin:12px 0 14px">${n ? `🔔 ${n} ${n === 1 ? 'person has' : 'people have'} asked to be reminded` : 'Be the first to set a reminder'}</div>
+    ${liveNow && !mine ? `<button class="btn-primary-full" onclick="listenFromUpcoming('${c.id}')">🔴 Live now: listen</button>` : ''}
+    ${mine ? `<button class="btn-primary-full" onclick="closeUpcomingDetail();goLiveFromScheduled('${c.id}')">🎙️ Go live now</button>
+              <button class="btn-ghost-full" onclick="closeUpcomingDetail();editScheduled('${c.id}')">Edit or cancel</button>`
+           : (!liveNow ? `<button class="btn-primary-full" onclick="toggleReminder('${c.id}')">${reminded ? '🔔 Reminder set (tap to remove)' : '🔔 Remind me'}</button>` : '')}
+    <button class="btn-ghost-full" onclick="shareUpcoming('${c.id}')">📣 Share</button>`;
+}
+function listenFromUpcoming(id) {
+  const c = window._upById[id]; if (!c) return;
+  const live = (window._rawLiveCasts || []).find(x => x.caster_id === c.caster_id);
+  const room = c.room_name || live?.room_name;
+  closeUpcomingDetail();
+  if (room) showListenPrompt(room); else showToast('⚠️ Could not find the live cast');
+}
+function closeUpcomingDetail() { document.getElementById('upcoming-overlay').classList.remove('show'); window._upOpenId = null; }
+
+// ── Remind me ──
+async function toggleReminder(id) {
+  if (guestBlocked('alerts')) return;
+  const c = window._upById[id]; if (!c) return;
+  if (c.caster_id === currentUser.id) { showToast("🎙️ That's your cast!"); return; }
+  const on = !window._myReminders.has(id);
+  const token = await freshToken();
+  try {
+    const res = on
+      ? await fetch(`${SUPABASE_URL}/rest/v1/cast_reminders`, { method: 'POST', headers: restHeaders(token, { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }), body: JSON.stringify({ user_id: currentUser.id, scheduled_id: id }) })
+      : await fetch(`${SUPABASE_URL}/rest/v1/cast_reminders?user_id=eq.${currentUser.id}&scheduled_id=eq.${id}`, { method: 'DELETE', headers: restHeaders(token) });
+    if (!res.ok && res.status !== 409) throw new Error('Reminder failed ' + res.status);
+  } catch(e) { showToast('⚠️ Could not update reminder. Please try again.'); return; }
+  if (on) window._myReminders.add(id); else window._myReminders.delete(id);
+  window._reminderCounts[id] = Math.max(0, (window._reminderCounts[id] || 0) + (on ? 1 : -1));
+  refreshUpcomingEverywhere();
+  if (document.getElementById('upcoming-overlay').classList.contains('show')) renderUpcomingDetail(id);
+  if (!on) { showToast('Reminder removed'); return; }
+  await refreshAlertsUI();
+  if (window._alertsOn) showToast("🔔 Reminder set. We'll notify you when it starts.");
+  else { closeUpcomingDetail(); openAlerts(c.caster_name); }   // reminders need alerts switched on
+}
+
+// ── Share ──
+async function shareUpcoming(id) {
+  const c = window._upById[id]; if (!c) return;
+  let avatarUrl = '';
+  try { const r = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${c.caster_id}&select=avatar_url`, { headers: restHeaders() }); avatarUrl = (await r.json())?.[0]?.avatar_url || ''; } catch(e) {}
+  openShareKit('upcoming', { id: c.id, game: c.game, sport: c.sport, league: c.league, casterName: c.caster_name, avatarUrl, startsAt: c.starts_at, description: c.description || '', mine: !!(currentUser && c.caster_id === currentUser.id) });
+}
+
+// ── Schedule form (re-uses the Start a Cast screen) ──
+function setCastMode(mode) {
+  _castMode = mode;
+  const sched = mode !== 'live';
+  document.getElementById('schedule-fields').style.display = sched ? '' : 'none';
+  document.getElementById('sched-save-btn').style.display = sched ? '' : 'none';
+  document.getElementById('sched-save-btn').textContent = mode === 'edit' ? '💾 Save changes' : '🗓️ Save upcoming cast';
+  document.getElementById('go-live-btn').style.display = sched ? 'none' : '';
+  document.getElementById('sched-delete-btn').style.display = mode === 'edit' ? '' : 'none';
+  document.getElementById('cast-mode-toggle').textContent = sched ? '🎙️ Go live now instead' : '🗓️ Schedule for later instead';
+  document.getElementById('cast-form-error').style.display = 'none';
+  if (sched) {
+    const w = document.getElementById('sched-when');
+    w.min = toLocalInput(new Date());
+    if (!w.value) { const d = new Date(); d.setMinutes(0, 0, 0); d.setHours(d.getHours() + 2); w.value = toLocalInput(d); }
+  }
+}
+function toggleCastMode() {
+  if (_castMode === 'live') { setCastMode('schedule'); return; }
+  if (_castMode === 'edit') window._fromScheduledId = window._editingScheduledId;   // going live for this one
+  setCastMode('live');
+}
+function toLocalInput(d) {
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function castFormError(msg) {
+  const box = document.getElementById('cast-form-error');
+  box.textContent = '⚠️ ' + msg; box.style.display = 'block';
+  box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function startScheduling() {
+  if (guestBlocked('cast')) return;
+  showStartCast();
+  document.getElementById('sched-when').value = '';
+  document.getElementById('sched-desc').value = '';
+  setCastMode('schedule');
+}
+
+async function prefillCastForm(c) {
+  await loadSportsData();
+  const sportEl = document.getElementById('cast-sport');
+  sportEl.value = c.sport; onSportChange();
+  document.getElementById('cast-league').value = c.league; await onLeagueChange();
+  document.getElementById('cast-home').value = c.home;
+  document.getElementById('cast-away').value = c.away;
+  const tags = c.tags || [];
+  const lang = LANGUAGES.includes(tags[0]) ? tags[0] : 'English';
+  document.getElementById('cast-language').value = lang;
+  _castStyleTags = tags.filter(t => t !== lang).slice(0, MAX_STYLE_TAGS);
+  renderCastTags();
+}
+
+async function goLiveFromScheduled(id) {
+  const c = window._upById[id]; if (!c) return;
+  showStartCast();
+  await prefillCastForm(c);
+  window._fromScheduledId = id;
+  setCastMode('live');
+  showToast('✅ Filled in for you. Check it, then tap GO LIVE.');
+}
+
+async function editScheduled(id) {
+  const c = window._upById[id]; if (!c) return;
+  showStartCast();
+  await prefillCastForm(c);
+  window._editingScheduledId = id;
+  document.getElementById('sched-when').value = toLocalInput(new Date(c.starts_at));
+  document.getElementById('sched-desc').value = c.description || '';
+  setCastMode('edit');
+}
+
+async function saveScheduledCast() {
+  if (guestBlocked('cast')) return;
+  if (!validateCastForm()) return;
+  const whenVal = document.getElementById('sched-when').value;
+  const when = whenVal ? new Date(whenVal) : null;
+  if (!when || isNaN(when)) { castFormError('Please pick a date and time.'); return; }
+  if (when < new Date(Date.now() - 5 * 60e3)) { castFormError('Please pick a time in the future.'); return; }
+  if (when > new Date(Date.now() + 60 * 86400e3)) { castFormError('You can schedule up to 60 days ahead.'); return; }
+  const ban = await checkMyBan();
+  if (ban) { showCastNotice('banned', ban.reason); return; }
+  const v = (id) => document.getElementById(id).value.trim();
+  const sportEl = document.getElementById('cast-sport'), leagueEl = document.getElementById('cast-league');
+  const home = v('cast-home'), away = v('cast-away');
+  const body = {
+    caster_name: (currentUserProfile?.display_name || currentUserProfile?.username || 'Caster').slice(0, 80),
+    sport: sportEl.options[sportEl.selectedIndex]?.text || v('cast-sport'),
+    league: leagueEl.options[leagueEl.selectedIndex]?.text || v('cast-league'),
+    home, away, game: `${home} vs ${away}`,
+    starts_at: when.toISOString(),
+    description: v('sched-desc').slice(0, 280) || null,
+    tags: getCastTags().slice(0, 6),
+  };
+  const btn = document.getElementById('sched-save-btn'); const label = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const token = await freshToken();
+    const editing = _castMode === 'edit' && window._editingScheduledId;
+    const res = editing
+      ? await fetch(`${SUPABASE_URL}/rest/v1/scheduled_casts?id=eq.${window._editingScheduledId}`, { method: 'PATCH', headers: restHeaders(token, { 'Content-Type': 'application/json', 'Prefer': 'return=representation' }), body: JSON.stringify(body) })
+      : await fetch(`${SUPABASE_URL}/rest/v1/scheduled_casts`, { method: 'POST', headers: restHeaders(token, { 'Content-Type': 'application/json', 'Prefer': 'return=representation' }), body: JSON.stringify({ ...body, caster_id: currentUser.id }) });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data && data.message) || ('Error ' + res.status));
+    const row = Array.isArray(data) ? data[0] : data;
+    upRemember([row]);
+    window._editingScheduledId = null;
+    btn.disabled = false; btn.textContent = label;
+    document.getElementById('sched-desc').value = '';
+    switchMain('home');
+    await fetchUpcoming();
+    showToast(editing ? '✅ Upcoming cast updated' : '🗓️ Upcoming cast saved');
+    if (!editing && row) setTimeout(() => shareUpcoming(row.id), 500);   // straight to hyping it
+  } catch(e) {
+    console.error(e);
+    castFormError('Could not save: ' + e.message);
+    btn.disabled = false; btn.textContent = label;
+  }
+}
+
+function deleteScheduledCast() {
+  const id = window._editingScheduledId; if (!id) return;
+  openConfirm('CANCEL THIS CAST?', "It'll be removed from Upcoming, and people who asked for a reminder won't be notified.", 'Cancel cast', async () => {
+    try {
+      const token = await freshToken();
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/scheduled_casts?id=eq.${id}`, { method: 'DELETE', headers: restHeaders(token) });
+      if (!res.ok) throw new Error('Error ' + res.status);
+      delete window._upById[id];
+      window._editingScheduledId = null;
+      switchMain('home');
+      await fetchUpcoming();
+      showToast('Upcoming cast cancelled');
+    } catch(e) { showToast('⚠️ Could not cancel. Please try again.'); }
+  });
+}
+
+// When a caster goes live, link it to their scheduled cast (this sends the reminders).
+// Uses the schedule they tapped "Go live now" on, or finds one for the same game within 6 hours.
+async function markScheduledLive(roomName, home, away) {
+  try {
+    if (!currentUser) return;
+    const token = window._accessToken || await freshToken();
+    let id = window._fromScheduledId; window._fromScheduledId = null;
+    if (!id) {
+      const from = new Date(Date.now() - 6 * 3600e3).toISOString(), to = new Date(Date.now() + 6 * 3600e3).toISOString();
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/scheduled_casts?caster_id=eq.${currentUser.id}&status=eq.scheduled&home=eq.${encodeURIComponent(home)}&away=eq.${encodeURIComponent(away)}&starts_at=gte.${encodeURIComponent(from)}&starts_at=lte.${encodeURIComponent(to)}&order=starts_at.asc&limit=1&select=id`, { headers: restHeaders(token) });
+      id = r.ok ? (await r.json())?.[0]?.id : null;
+    }
+    if (!id) return;
+    await fetch(`${SUPABASE_URL}/rest/v1/scheduled_casts?id=eq.${id}`, {
+      method: 'PATCH', headers: restHeaders(token, { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+      body: JSON.stringify({ status: 'live', room_name: roomName }),
+    });
+  } catch(e) { console.warn('Could not link scheduled cast:', e.message); }
+}
+
+// ════════════════════════════════════════════════
 // TAGS + LANGUAGE (cast set-up) and BROWSE SEARCH
 // To add or rename tags, edit TAG_GROUPS / LANGUAGES below.
 // ════════════════════════════════════════════════
@@ -2882,6 +3288,12 @@ function skAppUrl() { return (location.origin.includes('ultcast.live') ? locatio
 
 function skCaption(kind, d, link) {
   const tags = ['#UltCast', d.sport ? '#' + skHashtag(d.sport) : ''].filter(Boolean).join(' ');
+  if (kind === 'upcoming') {
+    const when = upWhenText(d.startsAt, true);
+    return d.mine
+      ? `🗓️ I'm calling ${d.game} live on UltCast, ${when}!${d.description ? ' ' + d.description : ''}\nSet a reminder 👉 ${link}\n${tags}`
+      : `🗓️ ${d.casterName} is calling ${d.game} live on UltCast, ${when}. Set a reminder 👉 ${link}\n${tags}`;
+  }
   if (kind === 'live') {
     const comp = d.league ? ` (${d.league})` : '';
     return d.mine
@@ -2895,8 +3307,10 @@ function skCaption(kind, d, link) {
 
 async function openShareKit(kind, data) {
   _sk.kind = kind; _sk.data = data; _sk.format = 'story';
-  _sk.link = kind === 'live' ? `${skAppUrl()}?join=${encodeURIComponent(data.room)}` : `${skAppUrl()}?caster=${data.id}`;
-  document.getElementById('sk-title').textContent = kind === 'live' ? (data.mine ? 'SHARE YOUR CAST' : 'SHARE THIS CAST') : (data.mine ? 'SHARE YOUR PROFILE' : 'SHARE PROFILE');
+  _sk.link = kind === 'live' ? `${skAppUrl()}?join=${encodeURIComponent(data.room)}` : kind === 'upcoming' ? `${skAppUrl()}?upcoming=${data.id}` : `${skAppUrl()}?caster=${data.id}`;
+  document.getElementById('sk-title').textContent = kind === 'live' ? (data.mine ? 'SHARE YOUR CAST' : 'SHARE THIS CAST')
+    : kind === 'upcoming' ? (data.mine ? 'HYPE YOUR UPCOMING CAST' : 'SHARE THIS UPCOMING CAST')
+    : (data.mine ? 'SHARE YOUR PROFILE' : 'SHARE PROFILE');
   document.getElementById('sk-caption').value = skCaption(kind, data, _sk.link);
   document.getElementById('sk-hint').style.display = 'none';
   document.querySelectorAll('.sk-chip').forEach(c => c.classList.toggle('on', c.dataset.f === 'story'));
@@ -3033,7 +3447,7 @@ async function drawShareImage(kind, d, format) {
     ctx.fillStyle = SK_ORANGE; ctx.fill();
     ctx.fillStyle = SK_BG; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.font = `800 ${Math.round(66 * u)}px ${T}`;
-    const cta = kind === 'live' ? 'LISTEN LIVE FREE · ULTCAST.LIVE' : 'FOLLOW ON ULTCAST.LIVE';
+    const cta = kind === 'live' ? 'LISTEN LIVE FREE · ULTCAST.LIVE' : kind === 'upcoming' ? 'SET A REMINDER · ULTCAST.LIVE' : 'FOLLOW ON ULTCAST.LIVE';
     ctx.fillText(cta, W / 2, fy + footH / 2 + 3 * u);
 
     const top = pad + wmH + Math.round((format === 'story' ? 60 : 36) * u);
@@ -3045,15 +3459,16 @@ async function drawShareImage(kind, d, format) {
     const buildBlocks = (k) => {
       const u2 = u * k;
       const blocks = [];
-      if (kind === 'live') {
+      if (kind === 'live' || kind === 'upcoming') {
+        const up = kind === 'upcoming';
         const pillH = Math.round(70 * u2);
         blocks.push({ h: pillH, gap: 40 * u2, draw: (y) => {
           ctx.font = `800 ${Math.round(40 * u2)}px ${B}`;
-          const label = d.mine ? 'LIVE NOW' : 'LIVE NOW ON ULTCAST';
+          const label = up ? 'UPCOMING LIVE CAST' : (d.mine ? 'LIVE NOW' : 'LIVE NOW ON ULTCAST');
           const pw = ctx.measureText(label).width + 110 * u2;
-          skRoundRect(ctx, pad, y, pw, pillH, pillH / 2); ctx.fillStyle = SK_RED; ctx.fill();
-          ctx.beginPath(); ctx.arc(pad + 40 * u2, y + pillH / 2, 12 * u2, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
-          ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle'; ctx.fillText(label, pad + 66 * u2, y + pillH / 2 + 2 * u2); ctx.textBaseline = 'alphabetic';
+          skRoundRect(ctx, pad, y, pw, pillH, pillH / 2); ctx.fillStyle = up ? SK_ORANGE : SK_RED; ctx.fill();
+          ctx.beginPath(); ctx.arc(pad + 40 * u2, y + pillH / 2, 12 * u2, 0, Math.PI * 2); ctx.fillStyle = up ? SK_BG : '#fff'; ctx.fill();
+          ctx.fillStyle = up ? SK_BG : '#fff'; ctx.textBaseline = 'middle'; ctx.fillText(label, pad + 66 * u2, y + pillH / 2 + 2 * u2); ctx.textBaseline = 'alphabetic';
         }});
         const comp = [d.sport, d.league].filter(Boolean).join(' · ').toUpperCase();
         if (comp) {
@@ -3061,17 +3476,27 @@ async function drawShareImage(kind, d, format) {
           const cl = skWrap(ctx, comp, textW, 1);
           blocks.push({ h: 52 * u2, gap: 18 * u2, draw: (y) => { ctx.font = `700 ${Math.round(44 * u2)}px ${B}`; ctx.fillStyle = SK_ORANGE; ctx.fillText(cl[0], pad, y + 44 * u2); } });
         }
-        const maxL = format === 'story' ? 4 : 3;
+        const maxL = format === 'story' ? 4 : (up ? 2 : 3);
         const fit = skFit(ctx, String(d.game || '').toUpperCase(), 800, T, Math.round((format === 'story' ? 170 : 140) * u2), Math.round(56 * u2), textW, maxL);
         const lh = fit.size * 1.0;
-        blocks.push({ h: lh * fit.lines.length, gap: 50 * u2, draw: (y) => {
+        blocks.push({ h: lh * fit.lines.length, gap: (up ? 30 : 50) * u2, draw: (y) => {
           ctx.font = `800 ${fit.size}px ${T}`; ctx.fillStyle = SK_CREAM;
           fit.lines.forEach((l, i) => ctx.fillText(l, pad, y + lh * (i + 1) - fit.size * 0.12));
         }});
+        if (up) {
+          const whenTxt = upWhenText(d.startsAt, false, true).toUpperCase();
+          const wf = skFit(ctx, whenTxt, 800, T, Math.round(76 * u2), Math.round(40 * u2), textW, 1);
+          blocks.push({ h: wf.size, gap: (d.description && format !== 'wide' ? 30 : 50) * u2, draw: (y) => { ctx.font = `800 ${wf.size}px ${T}`; ctx.fillStyle = SK_ORANGE; ctx.fillText(wf.lines[0], pad, y + wf.size * 0.85); } });
+          if (d.description && format !== 'wide') {
+            ctx.font = `500 ${Math.round(38 * u2)}px ${B}`;
+            const dl = skWrap(ctx, d.description, textW, format === 'story' ? 4 : 2);
+            blocks.push({ h: dl.length * 52 * u2, gap: 44 * u2, draw: (y) => { ctx.font = `500 ${Math.round(38 * u2)}px ${B}`; ctx.fillStyle = SK_MUTED; dl.forEach((l, i) => ctx.fillText(l, pad, y + 40 * u2 + i * 52 * u2)); } });
+          }
+        }
         const ar = Math.round(62 * u2);
         blocks.push({ h: ar * 2, gap: 0, draw: (y) => {
           skAvatar(ctx, useAvatar ? avatar : null, d.casterName, pad + ar, y + ar, ar);
-          ctx.fillStyle = SK_MUTED; ctx.font = `500 ${Math.round(34 * u2)}px ${B}`; ctx.fillText('Called live by', pad + ar * 2 + 30 * u2, y + ar - 10 * u2);
+          ctx.fillStyle = SK_MUTED; ctx.font = `500 ${Math.round(34 * u2)}px ${B}`; ctx.fillText(up ? 'Calling it live' : 'Called live by', pad + ar * 2 + 30 * u2, y + ar - 10 * u2);
           ctx.fillStyle = SK_CREAM; ctx.font = `700 ${Math.round(50 * u2)}px ${B}`;
           ctx.fillText(skWrap(ctx, d.casterName, textW - ar * 2 - 30 * u2, 1)[0] || '', pad + ar * 2 + 30 * u2, y + ar + 42 * u2);
         }});
@@ -3209,6 +3634,7 @@ const FAQ = [
     { q: 'How do I follow a caster?', a: "Tap <strong>Follow</strong> on the player, or on their profile. Casters you follow are <strong>pinned to the top</strong> of Home and Browse with a <strong>★ Following</strong> tag. See everyone you follow in <strong>Profile → Following</strong>." },
     { q: 'How do I see a caster\'s profile?', a: "Tap the caster's name or photo on the player. Their profile shows their bio, followers, broadcasts, recent casts and anything they're live with right now. Tap the share button to send their profile to a friend." },
     { q: 'Can I get notified when a caster goes live?', a: "Yes. Turn on <strong>Live alerts</strong> and you'll get a notification whenever someone you follow goes live. Tap it and you're one tap away from listening.<br><br><strong>iPhone:</strong> alerts work once UltCast is on your Home Screen (an Apple rule).", try: ['Turn on live alerts', 'openAlerts()'] },
+    { q: 'What does "Remind me" do?', a: "Tap <strong>🔔 Remind me</strong> on any upcoming cast and you'll get a notification the moment it goes live (Live alerts need to be on). Tap it again to remove the reminder." },
     { q: 'How do I check alerts are working?', a: "Go to <strong>Profile → Live alerts</strong> and tap <strong>Send me a test alert</strong>. You should get a notification within a few seconds." },
     { q: 'How do I turn alerts off?', a: "<strong>Profile → Live alerts → Turn off alerts</strong>. Logging out also turns them off on that phone." },
   ]},
@@ -3221,6 +3647,7 @@ const FAQ = [
   { id: 'cast', icon: '🎙️', title: 'Casting', items: [
     { q: 'How do I go live?', a: "Tap <strong>Cast</strong>, pick the <strong>sport, league and teams</strong>, set your <strong>commentary language</strong> and up to <strong>5 style tags</strong> (like Analytical, One-eyed or Stats) so listeners can find you, then tap <strong>GO LIVE</strong>. Confirm the quick checklist and you're on air.", try: ['Start a cast', 'showStartCast()'] },
     { q: 'What are the casting rules?', a: "Every UltCast cast is <strong>unofficial and in your own words</strong>:<br>• Don't claim to be official or use league or club logos<br>• No TV, radio or stream audio in your mic (use headphones)<br>• Don't cast from inside the venue<br>• No gambling promotion or betting odds<br><br>Casts that break these rules can be ended, and repeat offenders can be banned." },
+    { q: 'Can I schedule a cast in advance?', a: "Yes. On the Cast screen tap <strong>🗓️ Schedule for later instead</strong>, pick the game, date and time, add a description to build hype, and save. It appears under <strong>Upcoming</strong> on Home and on your profile, and you'll get a share image ready to post. When it's time, tap <strong>🎙️ Go live now</strong> on your upcoming cast and everything is filled in for you.", try: ['Schedule a cast', 'startScheduling()'] },
     { q: 'How do I get people listening?', a: "Tap the <strong>share</strong> button on your live screen to send a link straight to your cast. Your followers also get a <strong>live alert</strong> automatically when you go live." },
     { q: 'Can I use the app while I\'m live?', a: "Yes. Tap <strong>Browse app</strong> on your live screen. A red <strong>You're LIVE</strong> bar shows your time and listener count, with a mic button to mute yourself. Tap the bar to go back to your live screen. A few things (like opening another cast or logging out) wait until you've ended your cast so you can't end it by accident." },
     { q: 'Can I cast with my screen locked?', a: "Not yet. Phones pause the microphone for websites in the background, so <strong>keep UltCast open with the screen on</strong> while you're live. This is coming with the UltCast app." },
@@ -3300,6 +3727,7 @@ function faqTry(action) {
     'openAlerts()': () => openAlerts(),
     'showStartCast()': () => showStartCast(),
     'openPayouts()': () => openPayouts(),
+    'startScheduling()': () => startScheduling(),
   };
   (actions[action] || (() => {}))();
 }
@@ -3330,7 +3758,7 @@ if (PUSH_ENABLED && 'serviceWorker' in navigator) {
 }
 
 // Android/Chrome: capture the install prompt so our button can show it
-window.addEventListener('load', () => { try { refreshInstallUI(); } catch(e) {} try { renderCastTags(); setupBrowseLanguages(); } catch(e) {} });
+window.addEventListener('load', () => { try { refreshInstallUI(); } catch(e) {} try { renderCastTags(); setupBrowseLanguages(); } catch(e) {} setTimeout(() => { try { fetchUpcoming(); } catch(e) {} }, 600); setInterval(() => { try { fetchUpcoming(); } catch(e) {} }, 5 * 60 * 1000); });
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); _installPrompt = e; refreshInstallUI(); });
 window.addEventListener('appinstalled', () => { _installPrompt = null; refreshInstallUI(); showToast('✅ UltCast added to your Home Screen'); });
 
@@ -3750,6 +4178,7 @@ async function loadMySocial() {
     } catch(e) {}
   }
   window._mySocial = s;
+  try { await loadMyReminders(); } catch(e) {}
   updateFollowingCount();
   rerenderCastLists();
   if (document.getElementById('player-screen')?.classList.contains('active')) refreshPlayerFollow();
@@ -3900,6 +4329,7 @@ async function openCasterProfile(casterId) {
     countRows('casts', `caster_id=eq.${id}`),
   ]);
   if (window._cp.id !== casterId) return; // opened someone else meanwhile
+  loadCasterUpcoming(casterId);
 
   const rows = Array.isArray(casts) ? casts : [];
   const name = profile?.display_name || profile?.username || rows[0]?.caster_name || 'Caster';
@@ -4483,6 +4913,7 @@ async function goLive() {
     } else {
       castId = Array.isArray(data) ? data[0]?.id : data?.id;
       console.log('Cast saved, id:', castId);
+      markScheduledLive(roomName, home, away);   // tells people who tapped "Remind me"
     }
   } catch(e) {
     // Non-blocking — audio still works even if this fails
