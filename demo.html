@@ -719,6 +719,10 @@ body.mini-on .scroll { padding-bottom:150px; }
 .up-count { font-size:12px; color:var(--muted); margin-left:auto; }
 .up-empty { padding:4px 20px 8px; font-size:13px; color:var(--muted); }
 #cpUpcoming .up-card { margin:0 0 10px; }
+.sum-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0 6px; }
+.sum-stat { background:var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:12px 8px; }
+.sum-num { font-family:var(--font-title); font-size:30px; font-weight:800; color:var(--accent); line-height:1; }
+.sum-lbl { font-size:10px; font-weight:800; letter-spacing:0.8px; color:var(--muted); margin-top:5px; text-transform:uppercase; }
 .mini-player.hidden { transform:translateX(-50%) translateY(100px); opacity:0; pointer-events:none; }
 .mini-wave { display:flex; align-items:center; gap:2px; }
 .mini-bar { width:2px; background:var(--accent); border-radius:2px; animation:barAnim 1s ease-in-out infinite; }
@@ -912,6 +916,24 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="tip-sheet-title" id="castnotice-title">YOU CAN'T GO LIVE</div>
     <div class="tip-modal-sub" id="castnotice-sub"></div>
     <button class="btn-primary-full" onclick="closeCastNotice()">OK</button>
+  </div>
+</div>
+
+<!-- ═══ END-OF-CAST SUMMARY ═══ -->
+<div class="uc-overlay uc-center" id="summary-overlay" onclick="if(event.target===this)closeCastSummary()">
+  <div class="tip-modal">
+    <div class="tip-modal-emoji">🎉</div>
+    <div class="tip-sheet-title" style="font-size:26px">THAT'S A WRAP!</div>
+    <div class="tip-modal-sub" id="sum-game" style="margin-bottom:0"></div>
+    <div class="sum-grid">
+      <div class="sum-stat"><div class="sum-num" id="sum-time">0:00</div><div class="sum-lbl">Time live</div></div>
+      <div class="sum-stat"><div class="sum-num" id="sum-peak">0</div><div class="sum-lbl">Peak listeners</div></div>
+      <div class="sum-stat"><div class="sum-num" id="sum-followers">…</div><div class="sum-lbl">New followers</div></div>
+      <div class="sum-stat"><div class="sum-num" id="sum-tips">…</div><div class="sum-lbl">Tips (your share)</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Tips can take a minute to show up.</div>
+    <button class="btn-primary-full" onclick="shareCastSummary()">📣 Share your stats</button>
+    <button class="btn-ghost-full" onclick="closeCastSummary()">Done</button>
   </div>
 </div>
 
@@ -1438,7 +1460,7 @@ body.mini-on .scroll { padding-bottom:150px; }
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>
     </div>
   </div>
-  <button class="end-btn" onclick="endBroadcast()">End Broadcast</button>
+  <button class="end-btn" onclick="endBroadcastWithSummary()">End Broadcast</button>
 </div>
 
 <!-- ═══ PROFILE ═══ -->
@@ -1467,7 +1489,7 @@ body.mini-on .scroll { padding-bottom:150px; }
         <button class="btn-ghost-full" onclick="gateToAuth('login')">I already have an account</button>
       </div>
       <div class="p-section-title">Account</div>
-      <div class="p-row" id="row-share-me" onclick="shareMyProfile()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></div>Share my profile</div><div style="font-size:10px;font-weight:800;letter-spacing:0.5px;color:var(--accent)">SHARE ›</div></div>
+      <div class="p-row" id="row-share-me" onclick="shareMyProfile()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></div>Share my profile</div><div id="invites-badge" style="font-size:10px;font-weight:800;letter-spacing:0.5px;color:var(--accent)">SHARE ›</div></div>
       <div class="p-row" id="row-following" onclick="openFollowingList()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></div>Following</div><div id="following-count" style="font-size:12px;font-weight:700;color:var(--muted2)">0 ›</div></div>
       <div class="p-row" id="row-edit-profile" onclick="showEditProfile()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>Edit Profile</div><div class="p-row-chev">›</div></div>
       <div class="p-row" id="row-payouts" onclick="openPayouts()"><div class="p-row-left"><div class="p-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>Payment & Payouts</div><div id="payouts-badge" style="font-size:10px;font-weight:800;letter-spacing:0.5px;color:var(--accent)">SET UP ›</div></div>
@@ -1602,6 +1624,9 @@ window.addEventListener('load', async () => {
     window.history.replaceState({}, '', window.location.pathname);
     setTimeout(() => showListenPrompt(listenLink), 900);
   }
+
+  const refParam = params.get('ref');
+  if (refParam) recordRefVisit(refParam);
 
   const casterLink = params.get('caster');
   if (casterLink && /^[0-9a-f-]{36}$/i.test(casterLink)) {
@@ -1813,7 +1838,8 @@ async function handleAuth() {
       if (!document.getElementById('age-check').classList.contains('on')) { showAuthError('Please confirm you are 16 or older to create an account. You can still listen as a guest.'); btn.disabled=false; btn.textContent='Continue →'; return; }
 
       // The age confirmation (and when it was given) is saved with the account
-      const { data, error } = await sb.auth.signUp({ email, password, options: { data: { age_16_plus: true, age_confirmed_at: new Date().toISOString() } } });
+      const ref = getStoredRef();
+      const { data, error } = await sb.auth.signUp({ email, password, options: { data: { age_16_plus: true, age_confirmed_at: new Date().toISOString(), ...(ref ? { referred_by: ref } : {}) } } });
       if (error) throw error;
 
       // Save profile
@@ -2104,7 +2130,7 @@ function switchMain(tab) {
   if (map[tab]) showScreen(map[tab]);
   if (tab === 'browse') renderBrowseCasts(window._allLiveCasts || []);
   if (tab === 'home') fetchUpcoming();
-  if (tab === 'profile') { applyGuestUI(); loadProfileStats(); loadPayoutStatus(); refreshAlertsUI(); refreshInstallUI(); }
+  if (tab === 'profile') { applyGuestUI(); loadProfileStats(); loadPayoutStatus(); refreshAlertsUI(); refreshInstallUI(); loadMyInvites(); }
   setTimeout(() => setActiveNav(tab), 10);
 }
 
@@ -2801,6 +2827,112 @@ function selectTip(el, amount) {
 }
 
 // ════════════════════════════════════════════════
+// END-OF-CAST SUMMARY
+// ════════════════════════════════════════════════
+let _summary = null;
+
+function fmtDuration(secs) {
+  const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
+  return h ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
+}
+
+async function endBroadcastWithSummary() {
+  const sel = (id) => { const el = document.getElementById(id); return el?.options?.[el.selectedIndex]?.text || ''; };
+  const s = {
+    castId: window._activeCastId,
+    game: document.getElementById('onairGame')?.textContent || 'your cast',
+    sport: sel('cast-sport'), league: sel('cast-league'),
+    secs: bSecs || 0,
+    peak: window._peakListeners || 0,
+    startedAt: window._castStartedAt || new Date(Date.now() - (bSecs || 0) * 1000),
+    followers: null, shareCents: null,
+  };
+  await endBroadcast();
+  try { showCastSummary(s); } catch(e) { console.warn('Summary failed:', e.message); }
+}
+
+async function showCastSummary(s) {
+  _summary = s;
+  document.getElementById('sum-game').textContent = s.game;
+  document.getElementById('sum-time').textContent = fmtDuration(s.secs);
+  document.getElementById('sum-peak').textContent = s.peak.toLocaleString();
+  document.getElementById('sum-followers').textContent = '…';
+  document.getElementById('sum-tips').textContent = '…';
+  document.getElementById('summary-overlay').classList.add('show');
+  if (!currentUser) return;
+  // New followers since the cast started
+  countRows('follows', `following_id=eq.${currentUser.id}&created_at=gte.${encodeURIComponent(s.startedAt.toISOString())}`).then(n => {
+    s.followers = n ?? 0;
+    if (_summary === s) document.getElementById('sum-followers').textContent = (n ?? 0).toLocaleString();
+  });
+  // Tips during this cast (your 80% share)
+  let cents = 0;
+  if (s.castId) {
+    try {
+      const token = await freshToken();
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/ultcast_cast_summary`, {
+        method: 'POST', headers: restHeaders(token, { 'Content-Type': 'application/json' }), body: JSON.stringify({ p_cast: s.castId }),
+      });
+      if (r.ok) cents = (await r.json())?.share_cents || 0;
+    } catch(e) {}
+  }
+  s.shareCents = cents;
+  const dollars = cents / 100;
+  if (_summary === s) document.getElementById('sum-tips').textContent = '$' + (Number.isInteger(dollars) ? dollars : dollars.toFixed(2));
+}
+
+function closeCastSummary() { document.getElementById('summary-overlay').classList.remove('show'); }
+
+function shareCastSummary() {
+  const s = _summary; if (!s) return;
+  closeCastSummary();
+  openShareKit('summary', {
+    id: currentUser?.id, game: s.game, sport: s.sport, league: s.league,
+    casterName: currentUserProfile?.display_name || currentUserProfile?.username || 'Me',
+    avatarUrl: currentUserProfile?.avatar_url || '',
+    timeText: fmtDuration(s.secs), peak: s.peak, followers: s.followers, mine: true,
+  });
+}
+
+// ════════════════════════════════════════════════
+// INVITE TRACKING — shared links carry the sharer's tag (?ref=…)
+// ════════════════════════════════════════════════
+const REF_DAYS = 30;
+const isUuid = (v) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v || '');
+
+function getStoredRef() {
+  try {
+    const r = JSON.parse(localStorage.getItem('uc_ref') || 'null');
+    if (r && isUuid(r.id) && Date.now() - r.ts < REF_DAYS * 86400e3 && r.id !== currentUser?.id) return r.id;
+  } catch(e) {}
+  return null;
+}
+
+// Remember who invited this person (first invite wins) and count one visit per day per device
+function recordRefVisit(ref) {
+  if (!isUuid(ref) || ref === currentUser?.id) return;
+  try { if (!getStoredRef()) localStorage.setItem('uc_ref', JSON.stringify({ id: ref, ts: Date.now() })); } catch(e) {}
+  const key = 'uc_refv_' + ref, today = new Date().toDateString();
+  try { if (localStorage.getItem(key) === today) return; localStorage.setItem(key, today); } catch(e) {}
+  fetch(`${SUPABASE_URL}/rest/v1/ref_visits`, {
+    method: 'POST', headers: restHeaders(null, { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+    body: JSON.stringify({ ref_user: ref }),
+  }).catch(() => {});
+}
+
+async function loadMyInvites() {
+  const b = document.getElementById('invites-badge');
+  if (!b || !currentUser) return;
+  try {
+    const token = await freshToken();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/ultcast_my_invites`, { method: 'POST', headers: restHeaders(token, { 'Content-Type': 'application/json' }), body: '{}' });
+    if (!r.ok) return;
+    const d = await r.json();
+    b.textContent = d.signups ? `${d.signups} JOINED ›` : d.visits ? `${d.visits} VISITS ›` : 'SHARE ›';
+  } catch(e) {}
+}
+
+// ════════════════════════════════════════════════
 // UPCOMING CASTS — schedule, Home/profile lists, Remind me, sharing
 // ════════════════════════════════════════════════
 window._upcoming = [];
@@ -3288,6 +3420,10 @@ function skAppUrl() { return (location.origin.includes('ultcast.live') ? locatio
 
 function skCaption(kind, d, link) {
   const tags = ['#UltCast', d.sport ? '#' + skHashtag(d.sport) : ''].filter(Boolean).join(' ');
+  if (kind === 'summary') {
+    const peak = d.peak ? `${d.peak} ${d.peak === 1 ? 'listener' : 'listeners'} at peak 🔥 ` : '';
+    return `🎙️ Just wrapped my live call of ${d.game} on UltCast. ${peak}Follow me so you don't miss the next one 👉 ${link}\n${tags}`;
+  }
   if (kind === 'upcoming') {
     const when = upWhenText(d.startsAt, true);
     return d.mine
@@ -3307,9 +3443,11 @@ function skCaption(kind, d, link) {
 
 async function openShareKit(kind, data) {
   _sk.kind = kind; _sk.data = data; _sk.format = 'story';
-  _sk.link = kind === 'live' ? `${skAppUrl()}?join=${encodeURIComponent(data.room)}` : kind === 'upcoming' ? `${skAppUrl()}?upcoming=${data.id}` : `${skAppUrl()}?caster=${data.id}`;
+  _sk.link = (kind === 'live' ? `${skAppUrl()}?join=${encodeURIComponent(data.room)}` : kind === 'upcoming' ? `${skAppUrl()}?upcoming=${data.id}` : `${skAppUrl()}?caster=${data.id}`)
+    + (currentUser ? `&ref=${currentUser.id}` : '');
   document.getElementById('sk-title').textContent = kind === 'live' ? (data.mine ? 'SHARE YOUR CAST' : 'SHARE THIS CAST')
     : kind === 'upcoming' ? (data.mine ? 'HYPE YOUR UPCOMING CAST' : 'SHARE THIS UPCOMING CAST')
+    : kind === 'summary' ? 'SHARE YOUR STATS'
     : (data.mine ? 'SHARE YOUR PROFILE' : 'SHARE PROFILE');
   document.getElementById('sk-caption').value = skCaption(kind, data, _sk.link);
   document.getElementById('sk-hint').style.display = 'none';
@@ -3447,7 +3585,7 @@ async function drawShareImage(kind, d, format) {
     ctx.fillStyle = SK_ORANGE; ctx.fill();
     ctx.fillStyle = SK_BG; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.font = `800 ${Math.round(66 * u)}px ${T}`;
-    const cta = kind === 'live' ? 'LISTEN LIVE FREE · ULTCAST.LIVE' : kind === 'upcoming' ? 'SET A REMINDER · ULTCAST.LIVE' : 'FOLLOW ON ULTCAST.LIVE';
+    const cta = kind === 'live' ? 'LISTEN LIVE FREE · ULTCAST.LIVE' : kind === 'upcoming' ? 'SET A REMINDER · ULTCAST.LIVE' : kind === 'summary' ? 'FOLLOW ME · ULTCAST.LIVE' : 'FOLLOW ON ULTCAST.LIVE';
     ctx.fillText(cta, W / 2, fy + footH / 2 + 3 * u);
 
     const top = pad + wmH + Math.round((format === 'story' ? 60 : 36) * u);
@@ -3459,16 +3597,17 @@ async function drawShareImage(kind, d, format) {
     const buildBlocks = (k) => {
       const u2 = u * k;
       const blocks = [];
-      if (kind === 'live' || kind === 'upcoming') {
+      if (kind === 'live' || kind === 'upcoming' || kind === 'summary') {
         const up = kind === 'upcoming';
+        const wrap = kind === 'summary';
         const pillH = Math.round(70 * u2);
         blocks.push({ h: pillH, gap: 40 * u2, draw: (y) => {
           ctx.font = `800 ${Math.round(40 * u2)}px ${B}`;
-          const label = up ? 'UPCOMING LIVE CAST' : (d.mine ? 'LIVE NOW' : 'LIVE NOW ON ULTCAST');
+          const label = wrap ? "THAT'S A WRAP" : up ? 'UPCOMING LIVE CAST' : (d.mine ? 'LIVE NOW' : 'LIVE NOW ON ULTCAST');
           const pw = ctx.measureText(label).width + 110 * u2;
-          skRoundRect(ctx, pad, y, pw, pillH, pillH / 2); ctx.fillStyle = up ? SK_ORANGE : SK_RED; ctx.fill();
-          ctx.beginPath(); ctx.arc(pad + 40 * u2, y + pillH / 2, 12 * u2, 0, Math.PI * 2); ctx.fillStyle = up ? SK_BG : '#fff'; ctx.fill();
-          ctx.fillStyle = up ? SK_BG : '#fff'; ctx.textBaseline = 'middle'; ctx.fillText(label, pad + 66 * u2, y + pillH / 2 + 2 * u2); ctx.textBaseline = 'alphabetic';
+          skRoundRect(ctx, pad, y, pw, pillH, pillH / 2); ctx.fillStyle = (up || wrap) ? SK_ORANGE : SK_RED; ctx.fill();
+          ctx.beginPath(); ctx.arc(pad + 40 * u2, y + pillH / 2, 12 * u2, 0, Math.PI * 2); ctx.fillStyle = (up || wrap) ? SK_BG : '#fff'; ctx.fill();
+          ctx.fillStyle = (up || wrap) ? SK_BG : '#fff'; ctx.textBaseline = 'middle'; ctx.fillText(label, pad + 66 * u2, y + pillH / 2 + 2 * u2); ctx.textBaseline = 'alphabetic';
         }});
         const comp = [d.sport, d.league].filter(Boolean).join(' · ').toUpperCase();
         if (comp) {
@@ -3483,6 +3622,18 @@ async function drawShareImage(kind, d, format) {
           ctx.font = `800 ${fit.size}px ${T}`; ctx.fillStyle = SK_CREAM;
           fit.lines.forEach((l, i) => ctx.fillText(l, pad, y + lh * (i + 1) - fit.size * 0.12));
         }});
+        if (wrap) {
+          const stats = [[d.timeText || '0:00', 'TIME LIVE'], [skDollars(d.peak || 0), 'PEAK LISTENERS']];
+          if (d.followers != null) stats.push([skDollars(d.followers), 'NEW FOLLOWERS']);
+          blocks.push({ h: 120 * u2, gap: 50 * u2, draw: (y) => {
+            const colW = textW / stats.length;
+            stats.forEach(([n, l], i) => {
+              const x = pad + colW * i;
+              ctx.textAlign = 'left'; ctx.fillStyle = SK_ORANGE; ctx.font = `800 ${Math.round(88 * u2)}px ${T}`; ctx.fillText(n, x, y + 76 * u2);
+              ctx.fillStyle = SK_MUTED; ctx.font = `700 ${Math.round(24 * u2)}px ${B}`; ctx.fillText(l, x, y + 114 * u2);
+            });
+          }});
+        }
         if (up) {
           const whenTxt = upWhenText(d.startsAt, false, true).toUpperCase();
           const wf = skFit(ctx, whenTxt, 800, T, Math.round(76 * u2), Math.round(40 * u2), textW, 1);
@@ -3650,6 +3801,7 @@ const FAQ = [
     { q: 'Can I schedule a cast in advance?', a: "Yes. On the Cast screen tap <strong>🗓️ Schedule for later instead</strong>, pick the game, date and time, add a description to build hype, and save. It appears under <strong>Upcoming</strong> on Home and on your profile, and you'll get a share image ready to post. When it's time, tap <strong>🎙️ Go live now</strong> on your upcoming cast and everything is filled in for you.", try: ['Schedule a cast', 'startScheduling()'] },
     { q: 'How do I get people listening?', a: "Tap the <strong>share</strong> button on your live screen to send a link straight to your cast. Your followers also get a <strong>live alert</strong> automatically when you go live." },
     { q: 'Can I use the app while I\'m live?', a: "Yes. Tap <strong>Browse app</strong> on your live screen. A red <strong>You're LIVE</strong> bar shows your time and listener count, with a mic button to mute yourself. Tap the bar to go back to your live screen. A few things (like opening another cast or logging out) wait until you've ended your cast so you can't end it by accident." },
+    { q: 'Can I see how my cast went?', a: "Yes. When you tap <strong>End Broadcast</strong> you'll get a summary: time live, peak listeners, new followers and tips earned during the cast. Tap <strong>Share your stats</strong> to post it." },
     { q: 'Can I cast with my screen locked?', a: "Not yet. Phones pause the microphone for websites in the background, so <strong>keep UltCast open with the screen on</strong> while you're live. This is coming with the UltCast app." },
     { q: 'How long can a cast be?', a: "Up to 4 hours. Casts end automatically after that, and you can start a new one any time." },
   ]},
@@ -3664,6 +3816,7 @@ const FAQ = [
     { q: 'What happens to casters who break the rules?', a: "We can end their cast straight away, and casters who keep breaking the rules are banned from going live." },
   ]},
   { id: 'account', icon: '👤', title: 'Your account', items: [
+    { q: 'What does "joined" mean next to Share my profile?', a: "Every link you share from UltCast carries your tag. When someone opens it we count a <strong>visit</strong>, and if they sign up within 30 days they count as <strong>joined</strong> thanks to you. It's how we know which casters are growing UltCast, so keep sharing!" },
     { q: 'How do I change my name, photo or bio?', a: "<strong>Profile → Edit Profile</strong>, or tap your photo on the Profile page." },
     { q: 'I forgot my password', a: "On the login screen tap <strong>Forgot your password?</strong> and we'll email you a reset link." },
     { q: 'How do I delete my account?', a: "<strong>Profile → Delete my account</strong> (under Log Out), then type DELETE to confirm. This permanently removes your login, profile, photo and cast history. If you set up payouts, your Stripe account stays with Stripe so you can still access money owed to you." },
@@ -4926,6 +5079,8 @@ async function goLive() {
 
   // Start broadcast timer
   bSecs = 0;
+  window._peakListeners = 0;
+  window._castStartedAt = new Date();
   clearInterval(broadcastInterval);
   document.getElementById('oa-listeners').textContent = '—';
   broadcastInterval = setInterval(() => {
@@ -4971,6 +5126,7 @@ async function connectAsBroadcaster(roomName) {
       if (!lkRoom) return;
       const count = countLiveListeners(lkRoom, false);
       document.getElementById('oa-listeners').textContent = count;
+      window._peakListeners = Math.max(window._peakListeners || 0, count);
       // Save to database (only when the number changes) so Home/Browse show it too
       if (count === window._lastSavedListenerCount) return;
       window._lastSavedListenerCount = count;
