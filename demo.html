@@ -723,6 +723,27 @@ body.mini-on .scroll { padding-bottom:150px; }
 .sum-stat { background:var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:12px 8px; }
 .sum-num { font-family:var(--font-title); font-size:30px; font-weight:800; color:var(--accent); line-height:1; }
 .sum-lbl { font-size:10px; font-weight:800; letter-spacing:0.8px; color:var(--muted); margin-top:5px; text-transform:uppercase; }
+#confirm-overlay, #gate-overlay { z-index:330; }
+.chat-card { margin:4px 16px 24px; border:1px solid var(--line); border-radius:14px; background:var(--bg-2); overflow:hidden; }
+.chat-head { display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border-bottom:1px solid var(--line); font-family:var(--font-title); font-size:17px; letter-spacing:1.5px; color:var(--cream); }
+.chat-head small { font-family:var(--font-body); font-size:11px; letter-spacing:0; color:var(--muted); font-weight:600; }
+.chat-list { height:280px; overflow-y:auto; padding:10px 14px; display:flex; flex-direction:column; gap:7px; overscroll-behavior:contain; }
+#oaChatList { height:52vh; }
+.chat-msg { font-size:14px; line-height:1.4; color:var(--cream); word-wrap:break-word; overflow-wrap:anywhere; cursor:pointer; padding:2px 0; text-align:left; }
+.chat-name { font-weight:800; color:var(--muted2); margin-right:6px; }
+.chat-name.caster { color:var(--accent); }
+.chat-name.me { color:#7FD8FF; }
+.chat-pill { display:inline-block; font-size:9px; font-weight:800; letter-spacing:0.5px; padding:1px 6px; border-radius:999px; background:var(--accent); color:var(--bg); margin-right:6px; vertical-align:1px; }
+.chat-empty { margin:auto; text-align:center; font-size:13px; color:var(--muted); line-height:1.5; }
+.chat-input-row { display:flex; gap:8px; padding:10px 12px; border-top:1px solid var(--line); align-items:center; }
+.chat-input-row input { flex:1; min-width:0; background:var(--bg); border:1px solid var(--line); border-radius:999px; padding:10px 14px; color:var(--cream); font-family:var(--font-body); font-size:16px; outline:none; }
+.chat-input-row input:focus { border-color:var(--accent); }
+.chat-send { flex-shrink:0; width:40px; height:40px; border-radius:50%; border:none; background:var(--accent); color:var(--bg); font-size:16px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.chat-send:disabled { opacity:0.4; }
+.chat-hint { font-size:11px; color:var(--muted); padding:0 14px 10px; }
+.chat-badge { position:absolute; top:-4px; right:-4px; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--live-red); color:#fff; font-size:10px; font-weight:800; display:none; align-items:center; justify-content:center; box-sizing:border-box; }
+.chat-ticker { max-width:100%; margin:-20px 0 22px; padding:8px 14px; border-radius:999px; background:var(--bg-2); border:1px solid var(--line); font-size:13px; color:var(--muted2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+.chat-ticker strong { color:var(--cream); }
 .mini-player.hidden { transform:translateX(-50%) translateY(100px); opacity:0; pointer-events:none; }
 .mini-wave { display:flex; align-items:center; gap:2px; }
 .mini-bar { width:2px; background:var(--accent); border-radius:2px; animation:barAnim 1s ease-in-out infinite; }
@@ -916,6 +937,27 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="tip-sheet-title" id="castnotice-title">YOU CAN'T GO LIVE</div>
     <div class="tip-modal-sub" id="castnotice-sub"></div>
     <button class="btn-primary-full" onclick="closeCastNotice()">OK</button>
+  </div>
+</div>
+
+<!-- ═══ CASTER CHAT ═══ -->
+<div class="uc-overlay" id="castchat-overlay" onclick="if(event.target===this)closeCasterChat()">
+  <div class="uc-sheet" style="padding:16px 0 calc(10px + env(safe-area-inset-bottom, 0px))">
+    <div class="uc-sheet-handle"></div>
+    <div class="chat-head" style="border-top:1px solid var(--line)"><span>💬 YOUR LIVE CHAT</span><small>Tap a message to remove or mute</small></div>
+    <div class="chat-list" id="oaChatList"></div>
+    <div class="chat-input-row" id="oaChatInputRow"></div>
+    <div style="padding:0 16px"><button class="btn-ghost-full" style="margin-top:4px" onclick="closeCasterChat()">Back to my cast</button></div>
+  </div>
+</div>
+
+<!-- ═══ CHAT MESSAGE OPTIONS ═══ -->
+<div class="uc-overlay" id="chatmsg-overlay" onclick="if(event.target===this)closeChatMsgMenu()">
+  <div class="uc-sheet">
+    <div class="uc-sheet-handle"></div>
+    <div class="uc-sheet-sub" id="chatmsg-preview" style="margin-bottom:12px;color:var(--cream)"></div>
+    <div id="chatmsg-actions"></div>
+    <button class="btn-ghost-full" style="border:none" onclick="closeChatMsgMenu()">Cancel</button>
   </div>
 </div>
 
@@ -1238,6 +1280,7 @@ body.mini-on .scroll { padding-bottom:150px; }
     </div>
 
     <div class="player-controls">
+      <div class="ctrl-btn" id="pChatJump" onclick="scrollToChat()" title="Live chat" style="display:none;position:relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="chat-badge" id="pChatBadge"></span></div>
       <div class="ctrl-btn ctrl-play" id="muteListenerBtn" onclick="toggleListenerMute()" title="Mute / Unmute">
         <svg id="muteListenerIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
           <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
@@ -1254,6 +1297,13 @@ body.mini-on .scroll { padding-bottom:150px; }
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span id="followBtnText">Follow</span>
       </button>
+    </div>
+
+    <div class="chat-card" id="pChatWrap" style="display:none">
+      <div class="chat-head"><span>💬 LIVE CHAT</span><small>Tap a message for options</small></div>
+      <div class="chat-list" id="pChatList"></div>
+      <div class="chat-input-row" id="pChatInputRow"></div>
+      <div class="chat-hint">Be kind. No hate, spam or betting talk.</div>
     </div>
 
 
@@ -1452,10 +1502,12 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="ostat"><div class="ostat-num" id="oa-listeners">—</div><div class="ostat-label">Listeners</div></div>
     <div class="ostat"><div class="ostat-num" id="oa-time">0:00</div><div class="ostat-label">Duration</div></div>
   </div>
+  <div class="chat-ticker" id="oaChatTicker" onclick="openCasterChat()" style="display:none"></div>
   <div class="onair-controls">
     <div class="onair-mute" id="muteBtn" onclick="toggleMute()">
       <svg id="muteBtnIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="currentColor" stroke-width="2" fill="none"/><line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2"/></svg>
     </div>
+    <div class="onair-mute" id="oaChatBtn" onclick="openCasterChat()" title="Live chat" style="display:none;position:relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="chat-badge" id="oaChatBadge"></span></div>
     <div class="onair-mute" onclick="shareLiveLink()" title="Share link to this cast">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>
     </div>
@@ -1912,6 +1964,7 @@ function exitGuestMode() {
 }
 
 function applyGuestUI() {
+  try { if (window._chat?.castId) renderChatInputs(); } catch(e) {}
   const guest = isGuest && !currentUser;
   const show = (id, on, type) => { const el = document.getElementById(id); if (el) el.style.display = on ? (type || 'block') : 'none'; };
 
@@ -1958,6 +2011,7 @@ function guestBlocked(kind) {
     follow:  ['FOLLOW YOUR CASTERS', 'Create a free account to follow casters and find them again easily.'],
     profile: ['MAKE IT YOURS', 'Create a free account to set up your profile, name and photo.'],
     payouts: ['GET PAID TO CAST', 'Create a free account to go live and receive tips.'],
+    chat:    ['JOIN THE CHAT', 'Create a free account to chat with casters and other fans.'],
     alerts:  ['GET LIVE ALERTS', 'Create a free account to follow casters and get notified when they go live.'],
   }[kind] || ['CREATE A FREE ACCOUNT', 'You need an account for this.'];
   document.getElementById('gate-title').textContent = copy[0];
@@ -2112,6 +2166,7 @@ async function stopListeningQuietly() {
   stopAudioKeepalive();
   if (navigator.mediaSession) navigator.mediaSession.playbackState = 'none';
   window._currentCastRow = null;
+  closeChat();
   setMiniActive(false);
 }
 
@@ -2144,6 +2199,7 @@ async function goBack() {
   if (navigator.mediaSession) navigator.mediaSession.playbackState = 'none';
   window._currentCastRow = null;
   window._listeningRoom = null;
+  closeChat();
   setMiniActive(false);
   showScreen(prevScreen || 'home-screen');
 }
@@ -2403,12 +2459,13 @@ async function openPlayer(game, league, caster, sport, roomName) {
   isPlaying = true; isFollowing = false; listenerMuted = false;
   document.getElementById('followBtn').classList.remove('following');
   refreshPlayerFollow();
+  if (window._currentCastRow?.id) openChat(window._currentCastRow.id, 'listener');
   // If we opened this cast from a link (no list row yet), look it up so follow/tips/reports know the caster
   if (!window._currentCastRow && room) {
     fetch(`${SUPABASE_URL}/rest/v1/casts?room_name=eq.${encodeURIComponent(room)}&select=*`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
     }).then(r => r.json()).then(d => {
-      if (d?.[0] && window._listeningRoom === room && !window._currentCastRow) { window._currentCastRow = d[0]; refreshPlayerFollow(); }
+      if (d?.[0] && window._listeningRoom === room && !window._currentCastRow) { window._currentCastRow = d[0]; refreshPlayerFollow(); openChat(d[0].id, 'listener'); }
     }).catch(() => {});
   }
 
@@ -2824,6 +2881,244 @@ function selectTip(el, amount) {
   if (hint) { hint.textContent = 'Minimum $2'; hint.classList.remove('bad'); }
   document.getElementById('tipSendBtn').disabled = false;
   document.getElementById('tipSendBtn').textContent = 'Send ' + amount + ' Tip 💰';
+}
+
+// ════════════════════════════════════════════════
+// LIVE CHAT
+// Messages are saved in Supabase and arrive in real time. The database enforces
+// the rules (log in, 200 characters, slow mode, mutes, bans, blocked words).
+// OFF SWITCH: set CHAT_ENABLED to false to hide chat everywhere.
+// ════════════════════════════════════════════════
+const CHAT_ENABLED = true;
+const CHAT_MAX = 200;
+const _chatBlank = () => ({ castId: null, channel: null, msgs: [], mode: null, unread: 0, lastSent: 0, open: false });
+window._chat = _chatBlank();
+
+function chatShow(on) {
+  const listener = _chat.mode === 'listener', caster = _chat.mode === 'caster';
+  document.getElementById('pChatWrap').style.display = on && listener ? '' : 'none';
+  document.getElementById('pChatJump').style.display = on && listener ? 'flex' : 'none';
+  document.getElementById('oaChatBtn').style.display = on && caster ? 'flex' : 'none';
+  document.getElementById('oaChatTicker').style.display = on && caster ? '' : 'none';
+}
+
+async function openChat(castId, mode) {
+  if (!CHAT_ENABLED || !castId) return;
+  if (_chat.castId === castId && _chat.channel) return;
+  closeChat();
+  window._chat = { ..._chatBlank(), castId, mode };
+  renderChatInputs();
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/cast_messages?cast_id=eq.${castId}&hidden=eq.false&order=id.desc&limit=50&select=id,cast_id,user_id,username,body,is_caster,created_at`, { headers: restHeaders() });
+    if (!r.ok) return;   // chat not set up yet: stay hidden
+    if (_chat.castId !== castId) return;
+    _chat.msgs = (await r.json()).reverse();
+  } catch(e) { return; }
+  chatShow(true);
+  renderChat(true);
+  try {
+    _chat.channel = sb.channel('chat-' + castId)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cast_messages', filter: `cast_id=eq.${castId}` }, onChatEvent)
+      .subscribe();
+  } catch(e) { console.warn('Chat live updates unavailable:', e.message); }
+}
+
+function closeChat() {
+  if (_chat.channel) { try { sb.removeChannel(_chat.channel); } catch(e) {} }
+  window._chat = _chatBlank();
+  try { chatShow(false); } catch(e) {}
+}
+
+function onChatEvent(p) {
+  const m = p?.new;
+  if (!m || m.cast_id !== _chat.castId) return;
+  if (m.hidden) {
+    const before = _chat.msgs.length;
+    _chat.msgs = _chat.msgs.filter(x => x.id !== m.id);
+    if (_chat.msgs.length !== before) renderChat(false);
+    return;
+  }
+  if (p.eventType !== 'INSERT' || _chat.msgs.some(x => x.id === m.id)) return;
+  _chat.msgs.push(m);
+  if (_chat.msgs.length > 200) _chat.msgs.shift();
+  if (m.user_id !== currentUser?.id && !isBlockedCaster(m.user_id)) {
+    const looking = _chat.mode === 'caster' ? _chat.open : chatInView();
+    if (!looking) _chat.unread++;
+  }
+  renderChat(false);
+}
+
+function chatInView() {
+  const el = document.getElementById('pChatList');
+  if (!el || !document.getElementById('player-screen').classList.contains('active')) return false;
+  const r = el.getBoundingClientRect();
+  return r.top < window.innerHeight && r.bottom > 0;
+}
+
+function chatMsgHtml(m) {
+  const mine = currentUser && m.user_id === currentUser.id;
+  return `<div class="chat-msg" onclick="openChatMsgMenu(${Number(m.id)})">` +
+    (m.is_caster ? '<span class="chat-pill">CASTER</span>' : '') +
+    `<span class="chat-name${m.is_caster ? ' caster' : ''}${mine && !m.is_caster ? ' me' : ''}">${escHtml(m.username || 'Listener')}</span>` +
+    `<span>${escHtml(m.body)}</span></div>`;
+}
+
+function renderChat(forceBottom) {
+  const list = document.getElementById(_chat.mode === 'caster' ? 'oaChatList' : 'pChatList');
+  if (!list) return;
+  const visible = _chat.msgs.filter(m => !isBlockedCaster(m.user_id));
+  const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 60;
+  list.innerHTML = visible.length ? visible.map(chatMsgHtml).join('')
+    : `<div class="chat-empty">${_chat.mode === 'caster' ? 'No messages yet.<br>Ask your listeners to say hi! 👋' : 'No messages yet.<br>Say hi to the caster! 👋'}</div>`;
+  if (forceBottom || nearBottom) list.scrollTop = list.scrollHeight;
+  // Badges + caster ticker
+  const n = _chat.unread, badge = _chat.mode === 'caster' ? 'oaChatBadge' : 'pChatBadge';
+  ['oaChatBadge', 'pChatBadge'].forEach(id => { const b = document.getElementById(id); if (b) b.style.display = 'none'; });
+  const b = document.getElementById(badge);
+  if (b && n > 0) { b.textContent = n > 99 ? '99+' : n; b.style.display = 'flex'; }
+  if (_chat.mode === 'caster') {
+    const last = visible[visible.length - 1];
+    document.getElementById('oaChatTicker').innerHTML = last
+      ? `💬 <strong>${escHtml(last.username)}:</strong> ${escHtml(last.body)}`
+      : '💬 Live chat is open. Messages from listeners appear here.';
+  }
+}
+
+function renderChatInputs() {
+  const html = (id) => currentUser
+    ? `<input id="${id}" type="text" maxlength="${CHAT_MAX}" placeholder="${_chat.mode === 'caster' ? 'Reply to your listeners…' : 'Say something…'}" enterkeyhint="send" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();sendChat('${id}')}">
+       <button class="chat-send" onclick="sendChat('${id}')" aria-label="Send">➤</button>`
+    : `<button class="btn-primary-full" style="padding:11px" onclick="gateToAuth('signup')">Sign up free to chat</button>`;
+  document.getElementById('pChatInputRow').innerHTML = html('pChatInput');
+  document.getElementById('oaChatInputRow').innerHTML = html('oaChatInput');
+}
+
+async function sendChat(inputId) {
+  if (guestBlocked('chat')) return;
+  const el = document.getElementById(inputId);
+  const body = (el?.value || '').trim();
+  if (!body || !_chat.castId) return;
+  if (body.length > CHAT_MAX) { showToast(`Keep it under ${CHAT_MAX} characters`); return; }
+  if (_chat.mode !== 'caster' && Date.now() - _chat.lastSent < 3000) { showToast('Slow down a little'); return; }
+  el.disabled = true;
+  try {
+    const token = await freshToken();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/cast_messages?select=id,cast_id,user_id,username,body,is_caster,created_at`, {
+      method: 'POST',
+      headers: restHeaders(token, { 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+      body: JSON.stringify({ cast_id: _chat.castId, body, user_id: currentUser.id }),
+    });
+    const d = await r.json().catch(() => null);
+    if (!r.ok) {
+      const msg = (d && (d.message || d.hint)) || 'Could not send';
+      showToast('⚠️ ' + (msg.length < 80 ? msg : 'Could not send. Please try again.'));
+      return;
+    }
+    const row = Array.isArray(d) ? d[0] : d;
+    _chat.lastSent = Date.now();
+    el.value = '';
+    if (row && !_chat.msgs.some(x => x.id === row.id)) { _chat.msgs.push(row); renderChat(true); }
+  } catch(e) {
+    showToast('⚠️ Could not send. Check your connection.');
+  } finally {
+    el.disabled = false;
+    try { el.focus(); } catch(e) {}
+  }
+}
+
+// Clear the unread badge once the listener scrolls down to the chat
+document.addEventListener('scroll', (e) => {
+  if (e.target?.closest?.('#player-screen') && window._chat?.unread && _chat.mode === 'listener' && chatInView()) { _chat.unread = 0; renderChat(false); }
+}, true);
+
+function scrollToChat() {
+  document.getElementById('pChatWrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  _chat.unread = 0; renderChat(false);
+  setTimeout(() => document.getElementById('pChatInput')?.focus(), 400);
+}
+
+function openCasterChat() {
+  _chat.open = true; _chat.unread = 0;
+  document.getElementById('castchat-overlay').classList.add('show');
+  renderChat(true);
+}
+function closeCasterChat() {
+  _chat.open = false;
+  document.getElementById('castchat-overlay')?.classList.remove('show');
+}
+
+// ── Message options ──
+function openChatMsgMenu(id) {
+  const m = _chat.msgs.find(x => x.id === id); if (!m) return;
+  const mine = currentUser && m.user_id === currentUser.id;
+  const iAmCaster = _chat.mode === 'caster';
+  const name = escHtml(m.username || 'Listener');
+  const btn = (label, fn, danger) => `<button class="btn-ghost-full" style="margin-top:0;margin-bottom:8px;text-align:left;padding:14px 16px;font-weight:700;color:${danger ? '#FF8A96' : 'var(--cream)'}" onclick="${fn}">${label}</button>`;
+  let h = '';
+  if (!m.is_caster || !iAmCaster) h += btn(`👤&nbsp;&nbsp;View ${name}'s profile`, `closeChatMsgMenu();openCasterProfile('${m.user_id}')`);
+  if (mine) h += btn('🗑️&nbsp;&nbsp;Remove my message', `chatRemove(${id})`, true);
+  if (iAmCaster && !mine) {
+    h += btn('🗑️&nbsp;&nbsp;Remove this message', `chatRemove(${id})`, true);
+    h += btn(`🔇&nbsp;&nbsp;Mute ${name} in my chats`, `chatMute('${m.user_id}', ${id})`, true);
+  }
+  if (!mine) {
+    h += btn('🚩&nbsp;&nbsp;Report this message', `chatReport(${id})`);
+    if (!m.is_caster) h += btn(`🚫&nbsp;&nbsp;Block ${name}`, `chatBlock('${m.user_id}', ${id})`);
+  }
+  document.getElementById('chatmsg-preview').innerHTML = `<strong>${name}:</strong> ${escHtml(m.body)}`;
+  document.getElementById('chatmsg-actions').innerHTML = h;
+  document.getElementById('chatmsg-overlay').classList.add('show');
+}
+function closeChatMsgMenu() { document.getElementById('chatmsg-overlay').classList.remove('show'); }
+
+async function chatRpc(name, args) {
+  const token = await freshToken();
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, { method: 'POST', headers: restHeaders(token, { 'Content-Type': 'application/json' }), body: JSON.stringify(args) });
+  if (!r.ok) throw new Error('Error ' + r.status);
+}
+
+async function chatRemove(id) {
+  closeChatMsgMenu();
+  try { await chatRpc('ultcast_remove_message', { p_id: id }); _chat.msgs = _chat.msgs.filter(x => x.id !== id); renderChat(false); showToast('Message removed'); }
+  catch(e) { showToast('⚠️ Could not remove. Please try again.'); }
+}
+
+function chatMute(userId, id) {
+  closeChatMsgMenu();
+  const m = _chat.msgs.find(x => x.id === id);
+  openConfirm(`MUTE ${(m?.username || 'THIS PERSON').toUpperCase()}?`, "Their messages will be removed and they won't be able to chat in any of your casts. They can still listen. You can't undo this from the app yet; email support if you need to.", 'Mute', async () => {
+    try { await chatRpc('ultcast_mute_chatter', { p_user: userId, p_mute: true }); _chat.msgs = _chat.msgs.filter(x => x.user_id !== userId); renderChat(false); showToast('🔇 Muted'); }
+    catch(e) { showToast('⚠️ Could not mute. Please try again.'); }
+  });
+}
+
+async function chatReport(id) {
+  closeChatMsgMenu();
+  const m = _chat.msgs.find(x => x.id === id); if (!m) return;
+  const row = window._currentCastRow || {};
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/reports`, {
+      method: 'POST',
+      headers: restHeaders(window._accessToken || SUPABASE_KEY, { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+      body: JSON.stringify({
+        cast_id: _chat.castId, room_name: window._listeningRoom || window._activeCastRoomName || null,
+        caster_id: row.caster_id || null, caster_name: row.caster_name || null,
+        reporter_id: currentUser?.id || null, reason: 'Chat message',
+        details: `From ${m.username} (user ${m.user_id}): "${m.body}"`.slice(0, 500),
+      }),
+    });
+    if (!r.ok) throw new Error();
+    showToast('🚩 Thanks. We review every report within 24 hours.');
+  } catch(e) { showToast('⚠️ Could not send report. Please try again.'); }
+}
+
+function chatBlock(userId, id) {
+  closeChatMsgMenu();
+  const m = _chat.msgs.find(x => x.id === id);
+  openConfirm(`BLOCK ${(m?.username || 'THIS PERSON').toUpperCase()}?`, "You won't see their messages any more. They won't be told.", 'Block', async () => {
+    const ok = await setBlocked(userId, true);
+    if (ok) { renderChat(false); showToast('🚫 Blocked'); }
+  });
 }
 
 // ════════════════════════════════════════════════
@@ -3778,6 +4073,7 @@ const FAQ = [
     { q: 'Can I keep listening with my screen locked?', a: "Yes. Lock your phone or switch to another app and the cast keeps playing. You can mute or stop it from your lock screen or notification bar. Tip: on iPhone, adding UltCast to your Home Screen gives the best results." },
     { q: 'Can I browse the app while I listen?', a: "Yes. Tap the <strong>back arrow</strong> on the player and the cast keeps playing in a <strong>mini player</strong> at the bottom. Tap the speaker button to mute, or tap the mini player to open the full player again. <strong>Stop Listening</strong> ends it." },
     { q: 'How do I find a cast in my language, or a certain style?', a: "Go to <strong>Browse</strong>. Search for anything (a team, a caster, a league, or a tag like <em>Stats</em> or <em>Beginner-friendly</em>), and use the <strong>🌐 language</strong> filter to only see casts in your language. Searching also finds <strong>casters</strong> by name, even when they're not live." },
+    { q: 'How does live chat work?', a: "Every live cast has a <strong>chat</strong> under the player (tap 💬 to jump to it). Anyone can read it; you need a free account to post. Messages are up to 200 characters, with a short pause between messages to keep things readable. The caster sees chat on their live screen and can reply. Tap any message to view the person's profile, report it, or block them." },
     { q: 'Is the listener count live?', a: "Yes. The number of listeners updates in real time as people join and leave, both for you and for the caster." },
     { q: 'What if a cast ends while I\'m listening?', a: "You'll see a message that the cast has ended, and you can pick another one from Home." },
   ]},
@@ -3813,6 +4109,7 @@ const FAQ = [
   { id: 'safety', icon: '🛡️', title: 'Safety', items: [
     { q: 'How do I report a cast?', a: "Tap <strong>⋮</strong> on the player, then <strong>Report this cast</strong>, and pick a reason. Reports are private: the caster never sees who sent it. We review every report within 24 hours." },
     { q: 'How do I block a caster?', a: "Open their profile and tap <strong>Block this caster</strong>. Their casts disappear from your Home and Browse, you stop following them, and they're never told. You can unblock them from their profile any time." },
+    { q: 'How is chat kept safe?', a: "Casters can <strong>remove</strong> any message in their chat and <strong>mute</strong> people. Anyone can report a message or block the sender. Banned accounts can't chat, and messages with certain words are blocked automatically." },
     { q: 'What happens to casters who break the rules?', a: "We can end their cast straight away, and casters who keep breaking the rules are banned from going live." },
   ]},
   { id: 'account', icon: '👤', title: 'Your account', items: [
@@ -5067,6 +5364,7 @@ async function goLive() {
       castId = Array.isArray(data) ? data[0]?.id : data?.id;
       console.log('Cast saved, id:', castId);
       markScheduledLive(roomName, home, away);   // tells people who tapped "Remind me"
+      openChat(castId, 'caster');
     }
   } catch(e) {
     // Non-blocking — audio still works even if this fails
@@ -5216,6 +5514,7 @@ function toggleMute() {
 }
 async function endBroadcast() {
   window._endingBroadcast = true;
+  try { closeChat(); closeCasterChat(); } catch(e) {}
   window._isBroadcasting = false;
   if (window._casterBarTick) { clearInterval(window._casterBarTick); window._casterBarTick = null; }
   try { updateCasterBar(); } catch(e) {}
