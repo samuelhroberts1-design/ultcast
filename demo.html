@@ -753,6 +753,13 @@ body.mini-on .scroll { padding-bottom:150px; }
 .tip-alert { position:fixed; top:calc(70px + env(safe-area-inset-top, 0px)); left:50%; transform:translateX(-50%); width:calc(100% - 32px); max-width:400px; z-index:320; background:var(--accent); color:var(--bg); border-radius:16px; padding:14px 16px; box-shadow:0 12px 40px rgba(0,0,0,0.55); display:none; text-align:left; animation:tipPop 0.25s ease-out; }
 .tip-alert .ta-top { font-family:var(--font-title); font-size:22px; letter-spacing:1px; font-weight:800; }
 .tip-alert .ta-body { font-size:15px; font-weight:700; margin-top:3px; overflow-wrap:anywhere; }
+.oa-pinned { display:none; width:100%; max-width:360px; margin:-8px 0 22px; padding:12px 14px; border-radius:14px; background:var(--accent); color:var(--bg); text-align:left; cursor:pointer; box-shadow:0 8px 28px rgba(255,107,26,0.25); }
+.oa-pinned .op-top { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.oa-pinned .op-amt { font-family:var(--font-title); font-size:26px; font-weight:800; letter-spacing:0.5px; line-height:1; }
+.oa-pinned .op-left { font-size:11px; font-weight:800; opacity:0.8; white-space:nowrap; }
+.oa-pinned .op-body { font-size:15px; font-weight:700; margin-top:5px; overflow-wrap:anywhere; }
+.chat-ticker.tip { background:linear-gradient(90deg, rgba(255,107,26,0.25), rgba(255,107,26,0.08)); border-color:rgba(255,107,26,0.6); color:var(--cream); }
+.chat-ticker.tip strong { color:var(--accent); }
 .mini-player.hidden { transform:translateX(-50%) translateY(100px); opacity:0; pointer-events:none; }
 .mini-wave { display:flex; align-items:center; gap:2px; }
 .mini-bar { width:2px; background:var(--accent); border-radius:2px; animation:barAnim 1s ease-in-out infinite; }
@@ -1519,6 +1526,7 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="ostat"><div class="ostat-num" id="oa-time">0:00</div><div class="ostat-label">Duration</div></div>
   </div>
   <div class="chat-ticker" id="oaChatTicker" onclick="openCasterChat()" style="display:none"></div>
+  <div class="oa-pinned" id="oaPinnedTip"></div>
   <div class="tip-alert" id="oaTipAlert" onclick="this.style.display='none';openCasterChat()"><div class="ta-top" id="oaTipAlertTop"></div><div class="ta-body" id="oaTipAlertBody"></div></div>
   <div class="onair-controls">
     <div class="onair-mute" id="muteBtn" onclick="toggleMute()">
@@ -2951,7 +2959,7 @@ async function openChat(castId, mode) {
 
 function closeChat() {
   clearInterval(window._pinTimer);
-  try { document.getElementById('oaTipAlert').style.display = 'none'; } catch(e) {}
+  try { document.getElementById('oaTipAlert').style.display = 'none'; document.getElementById('oaPinnedTip').style.display = 'none'; } catch(e) {}
   if (_chat.channel) { try { sb.removeChannel(_chat.channel); } catch(e) {} }
   window._chat = _chatBlank();
   try { chatShow(false); } catch(e) {}
@@ -3014,6 +3022,16 @@ function renderPinned() {
   ['oaChatPinned', 'pChatPinned'].forEach(id => { const e = document.getElementById(id); if (e && e !== el) e.style.display = 'none'; });
   if (!el) return;
   const p = activePinnedTip();
+  // Caster: also show the pinned tip big on the live screen itself
+  const oa = document.getElementById('oaPinnedTip');
+  if (oa) {
+    if (_chat.mode === 'caster' && p) {
+      const left = Math.max(1, Math.ceil(p.left / 60));
+      oa.innerHTML = `<div class="op-top"><span class="op-amt">💰 ${tipDollars(p.m.tip_cents)} from ${escHtml(p.m.username || 'A listener')}</span><span class="op-left">📌 ${left} min</span></div><div class="op-body">${escHtml(p.m.body)}</div>`;
+      oa.onclick = () => openCasterChat();
+      oa.style.display = 'block';
+    } else oa.style.display = 'none';
+  }
   if (!p) { el.style.display = 'none'; return; }
   const mins = Math.max(1, Math.ceil(p.left / 60));
   el.innerHTML = `<div class="pin-top"><span>📌 ${escHtml(p.m.username || 'A listener')} · ${tipDollars(p.m.tip_cents)}</span><span>${mins} min</span></div><div class="pin-body">${escHtml(p.m.body)}</div>`;
@@ -3048,6 +3066,7 @@ function renderChat(forceBottom) {
   if (b && n > 0) { b.textContent = n > 99 ? '99+' : n; b.style.display = 'flex'; }
   if (_chat.mode === 'caster') {
     const last = visible[visible.length - 1];
+    document.getElementById('oaChatTicker').classList.toggle('tip', last?.kind === 'tip');
     document.getElementById('oaChatTicker').innerHTML = last
       ? (last.kind === 'tip' ? `💰 <strong>${escHtml(last.username)} tipped ${tipDollars(last.tip_cents)}</strong>${last.body ? ': ' + escHtml(last.body) : ''}` : `💬 <strong>${escHtml(last.username)}:</strong> ${escHtml(last.body)}`)
       : '💬 Live chat is open. Messages from listeners appear here.';
