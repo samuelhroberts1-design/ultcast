@@ -7,7 +7,7 @@
 (function(){try{
   var p=new URLSearchParams(location.search), fresh=false;
   try{var r=JSON.parse(localStorage.getItem('uc_tip_return')||'null');fresh=!!(r&&Date.now()-r.ts<3600000);}catch(e){}
-  if(p.get('tip')||(fresh&&/stripe\.com/.test(document.referrer||''))){location.replace('/demo'+location.search);}
+  if(p.get('tip')||(fresh&&/stripe\.com/.test(document.referrer||''))){location.replace('/app'+location.search);}
 }catch(e){}})();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -640,7 +640,7 @@ footer { padding: 44px 24px; background: var(--surface); border-top: 1px solid v
     <a href="#why" class="nav-link">Why Choose Us</a>
     <a href="#signup" class="nav-link">Sign Up</a>
   </div>
-  <a href="https://ultcast.live/demo" class="nav-cta">Try Beta →</a>
+  <a href="https://ultcast.live/app" class="nav-cta">Try Beta →</a>
 </nav>
 
 <!-- ════ BLOCK 1: HERO ════ -->
@@ -667,7 +667,7 @@ footer { padding: 44px 24px; background: var(--surface); border-top: 1px solid v
       <p class="hero-desc">Keep the pictures. Change the voices. UltCast is the live listen-along app for sport: fans go live with their own take on the game, and you tune in while you watch. Any sport, any style, free and bet-free. <strong style="color:var(--cream)">UltCast: Your sport, your voice, your choice.</strong></p>
       <div class="hero-actions">
         <a href="#signup" class="btn-primary">Get Early Access</a>
-        <a href="https://ultcast.live/demo" class="btn-secondary">Try the Beta →</a>
+        <a href="https://ultcast.live/app" class="btn-secondary">Try the Beta →</a>
       </div>
     </div>
   </div>
@@ -1058,7 +1058,7 @@ footer { padding: 44px 24px; background: var(--surface); border-top: 1px solid v
           <h4 style="color:var(--cream)">Beta is Live Now</h4>
           <p>Try it in your browser — no download needed. Or sign up below for early access.</p>
         </div>
-        <a href="https://ultcast.live/demo" class="btn-slim-primary" style="flex-shrink:0;white-space:nowrap">Try the Beta →</a>
+        <a href="https://ultcast.live/app" class="btn-slim-primary" style="flex-shrink:0;white-space:nowrap">Try the Beta →</a>
       </div>
 
       <div class="signup-creator-callout">
@@ -1110,7 +1110,7 @@ footer { padding: 44px 24px; background: var(--surface); border-top: 1px solid v
   <div class="footer-inner">
     <svg class="uc-logo footer-logo" viewBox="0 0 3481 700" role="img" aria-label="UltCast"><use href="#uc-wordmark"/></svg>
     <div class="footer-links">
-      <a href="https://ultcast.live/demo" class="footer-link">Beta App</a>
+      <a href="https://ultcast.live/app" class="footer-link">Beta App</a>
       <a href="https://ultcast.live/terms.html" class="footer-link">Terms &amp; Privacy</a>
     </div>
     <div class="footer-copy">© 2026 UltCast · Melbourne, Australia<br><span style="opacity:0.8">Independent and unofficial. Not affiliated with any league, club or broadcaster.</span></div>

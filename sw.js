@@ -15,19 +15,19 @@ self.addEventListener('push', (event) => {
     badge: '/badge-96.png',
     tag: data.tag || 'ultcast-live',
     renotify: true,
-    data: { url: data.url || '/demo' },
+    data: { url: String(data.url || '/app').replace(/^\/demo(?=$|[?#])/, '/app') },
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const target = new URL(event.notification.data?.url || '/demo', self.location.origin).href;
+  const target = new URL(event.notification.data?.url || '/app', self.location.origin).href;
   event.waitUntil((async () => {
     const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     // Reuse an open UltCast window if there is one
     for (const w of wins) {
-      if (w.url.includes('/demo')) {
+      if (w.url.includes('/app') || w.url.includes('/demo')) {
         try { await w.focus(); } catch (e) {}
         try { w.postMessage({ type: 'uc-open', url: target }); return; } catch (e) {}
       }

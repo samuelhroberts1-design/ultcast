@@ -3,7 +3,7 @@
   "short_name": "UltCast",
   "description": "Live sports audio from fan casters.",
   "id": "/demo",
-  "start_url": "/demo",
+  "start_url": "/app",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
