@@ -1339,6 +1339,7 @@ body.mini-on .scroll { padding-bottom:150px; }
     </div>
 
     <!-- Audio status -->
+    <button id="soundPrompt" onclick="enableSound()" style="display:none;margin:0 auto 14px;padding:13px 22px;border-radius:999px;border:none;background:var(--accent);color:var(--bg);font-family:var(--font-body);font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 6px 24px rgba(255,107,26,0.35)">🔊 Tap to turn on sound</button>
     <div class="audio-connecting" id="audioStatus">
       <div class="loading-spin" style="width:14px;height:14px;border-width:2px"></div>
       Connecting to audio...
@@ -2274,7 +2275,7 @@ async function stopListeningQuietly() {
   if (navigator.mediaSession) navigator.mediaSession.playbackState = 'none';
   window._currentCastRow = null;
   closeChat();
-  try { leaveCallsQuietly(); } catch(e) {}
+  try { leaveCallsQuietly(); hideSoundPrompt(); } catch(e) {}
   setMiniActive(false);
 }
 
@@ -2308,7 +2309,7 @@ async function goBack() {
   window._currentCastRow = null;
   window._listeningRoom = null;
   closeChat();
-  try { leaveCallsQuietly(); } catch(e) {}
+  try { leaveCallsQuietly(); hideSoundPrompt(); } catch(e) {}
   setMiniActive(false);
   showScreen(prevScreen || 'home-screen');
 }
@@ -2665,12 +2666,20 @@ async function connectAsListener(roomName) {
         const audioEl = track.attach();
         audioEl.autoplay = true;
         document.body.appendChild(audioEl);
+        // Some browsers (TVs, some phones) block sound that starts on its own: offer a tap to start it
+        try { const p = audioEl.play(); if (p && p.catch) p.catch(() => showSoundPrompt()); } catch(e) {}
       }
     });
 
     lkRoom.on(RoomEvent.TrackUnsubscribed, (track) => {
       track.detach().forEach(el => el.remove());
     });
+
+    if (RoomEvent.AudioPlaybackStatusChanged) {
+      lkRoom.on(RoomEvent.AudioPlaybackStatusChanged, () => {
+        if (lkRoom && lkRoom.canPlaybackAudio === false) showSoundPrompt(); else hideSoundPrompt();
+      });
+    }
 
     await lkRoom.connect(LK_URL, token);
 
@@ -3303,6 +3312,22 @@ function chatBlock(userId, id) {
     const ok = await setBlocked(userId, true);
     if (ok) { renderChat(false); showToast('🚫 Blocked'); }
   });
+}
+
+// ════════════════════════════════════════════════
+// BLOCKED SOUND: one tap to start every voice in the cast
+// ════════════════════════════════════════════════
+function showSoundPrompt() {
+  const b = document.getElementById('soundPrompt'); if (b) b.style.display = 'block';
+}
+function hideSoundPrompt() { const b = document.getElementById('soundPrompt'); if (b) b.style.display = 'none'; }
+async function enableSound() {
+  try { if (lkRoom && lkRoom.startAudio) await lkRoom.startAudio(); } catch(e) {}
+  const tries = [...document.querySelectorAll('audio')].filter(el => !el.muted).map(el => el.play().catch(() => 'blocked'));
+  const results = await Promise.all(tries);
+  if (results.includes('blocked')) { showToast('⚠️ Still blocked. Check the volume and your browser sound settings.'); return; }
+  hideSoundPrompt();
+  showToast('🔊 Sound on');
 }
 
 // ════════════════════════════════════════════════
