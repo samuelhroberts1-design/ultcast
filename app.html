@@ -760,6 +760,35 @@ body.mini-on .scroll { padding-bottom:150px; }
 .oa-pinned .op-body { font-size:15px; font-weight:700; margin-top:5px; overflow-wrap:anywhere; }
 .chat-ticker.tip { background:linear-gradient(90deg, rgba(255,107,26,0.25), rgba(255,107,26,0.08)); border-color:rgba(255,107,26,0.6); color:var(--cream); }
 .chat-ticker.tip strong { color:var(--accent); }
+.seg { display:flex; gap:8px; }
+.seg button { flex:1; padding:12px; border-radius:12px; border:1.5px solid var(--line); background:var(--bg-2); color:var(--muted2); font-family:var(--font-body); font-size:14px; font-weight:800; cursor:pointer; }
+.seg button.on { border-color:var(--accent); color:var(--accent); background:var(--accent-glow); }
+.call-pill { display:none; margin:0 auto 18px; padding:11px 18px; border-radius:999px; border:1.5px solid var(--accent); background:var(--accent-glow); color:var(--accent); font-family:var(--font-body); font-size:14px; font-weight:800; cursor:pointer; }
+.call-status { display:none; margin:0 16px 18px; padding:14px; border-radius:14px; border:1px solid rgba(255,107,26,0.45); background:var(--accent-glow); text-align:left; }
+.call-status.onair { background:var(--live-red); border-color:var(--live-red); color:#fff; }
+.call-status .cs-title { font-family:var(--font-title); font-size:20px; letter-spacing:1px; font-weight:800; }
+.call-status .cs-sub { font-size:13px; margin-top:3px; line-height:1.45; opacity:0.9; }
+.call-status .cs-row { display:flex; gap:8px; margin-top:12px; }
+.call-status .cs-row button { flex:1; padding:11px; border-radius:12px; border:none; font-family:var(--font-body); font-size:14px; font-weight:800; cursor:pointer; }
+.cs-light { background:rgba(255,255,255,0.18); color:inherit; }
+.cs-dark { background:var(--bg); color:var(--cream); }
+.cs-ghost { background:transparent; border:1px solid var(--line) !important; color:var(--cream); }
+.oa-callbar { display:none; width:100%; max-width:360px; margin:-8px 0 22px; padding:12px 14px; border-radius:14px; background:var(--live-red); color:#fff; text-align:left; }
+.oa-callbar .cb-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.oa-callbar .cb-name { font-family:var(--font-title); font-size:22px; font-weight:800; letter-spacing:0.5px; }
+.oa-callbar .cb-time { font-size:13px; font-weight:800; opacity:0.9; }
+.oa-callbar .cb-topic { font-size:13px; margin-top:3px; opacity:0.92; }
+.oa-callbar button { margin-top:10px; width:100%; padding:12px; border-radius:12px; border:none; background:#fff; color:var(--live-red); font-family:var(--font-body); font-size:15px; font-weight:800; cursor:pointer; }
+.cq-row { display:flex; align-items:center; gap:10px; padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--bg-2); margin-bottom:8px; text-align:left; }
+.cq-info { flex:1; min-width:0; }
+.cq-name { font-size:14px; font-weight:800; color:var(--cream); }
+.cq-topic { font-size:12px; color:var(--muted2); margin-top:2px; overflow-wrap:anywhere; }
+.cq-btn { flex-shrink:0; padding:9px 12px; border-radius:10px; border:none; font-family:var(--font-body); font-size:12px; font-weight:800; cursor:pointer; }
+.cq-go { background:var(--accent); color:var(--bg); }
+.cq-no { background:transparent; border:1px solid var(--line); color:var(--muted2); }
+.cq-toggle { width:100%; padding:14px; border-radius:12px; border:none; font-family:var(--font-body); font-size:15px; font-weight:800; cursor:pointer; margin-bottom:6px; }
+.cq-toggle.open { background:var(--live-red); color:#fff; }
+.cq-toggle.closed { background:var(--accent); color:var(--bg); }
 .mini-player.hidden { transform:translateX(-50%) translateY(100px); opacity:0; pointer-events:none; }
 .mini-wave { display:flex; align-items:center; gap:2px; }
 .mini-bar { width:2px; background:var(--accent); border-radius:2px; animation:barAnim 1s ease-in-out infinite; }
@@ -953,6 +982,33 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="tip-sheet-title" id="castnotice-title">YOU CAN'T GO LIVE</div>
     <div class="tip-modal-sub" id="castnotice-sub"></div>
     <button class="btn-primary-full" onclick="closeCastNotice()">OK</button>
+  </div>
+</div>
+
+<!-- ═══ CALL-INS (caster) ═══ -->
+<div class="uc-overlay" id="calls-overlay" onclick="if(event.target===this)closeCallSheet()">
+  <div class="uc-sheet">
+    <div class="uc-sheet-handle"></div>
+    <div class="uc-sheet-title">📞 CALL-INS</div>
+    <div class="uc-sheet-sub" id="calls-sub" style="margin-bottom:12px"></div>
+    <button class="cq-toggle closed" id="calls-toggle" onclick="toggleCallIns()">Open call-ins</button>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.4">Use headphones while a caller is on air to avoid echo. Calls end automatically after 5 minutes.</div>
+    <div class="sk-label">Queue</div>
+    <div id="calls-queue"></div>
+    <button class="btn-ghost-full" onclick="closeCallSheet()">Back to my cast</button>
+  </div>
+</div>
+
+<!-- ═══ CALL-IN REQUEST (listener) ═══ -->
+<div class="uc-overlay" id="callreq-overlay" onclick="if(event.target===this)closeCallRequest()">
+  <div class="uc-sheet">
+    <div class="uc-sheet-handle"></div>
+    <div class="uc-sheet-title">📞 CALL IN TO THE SHOW</div>
+    <div class="uc-sheet-sub" id="callreq-sub"></div>
+    <input class="uc-input" id="callreq-topic" type="text" maxlength="100" placeholder="What do you want to talk about? (optional)" style="text-align:left;letter-spacing:0;font-weight:500;font-size:16px">
+    <div class="uc-check" id="callreq-consent" onclick="this.classList.toggle('on')"><div class="uc-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0E0D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="uc-check-text"><strong>My voice will be broadcast live</strong>I'll keep it clean and follow the chat rules. 🎧 Headphones on to avoid echo.</div></div>
+    <button class="btn-primary-full" id="callreq-btn" onclick="submitCallRequest()">Join the queue</button>
+    <button class="btn-ghost-full" onclick="closeCallRequest()">Cancel</button>
   </div>
 </div>
 
@@ -1321,6 +1377,8 @@ body.mini-on .scroll { padding-bottom:150px; }
       </button>
     </div>
 
+    <div style="text-align:center"><button class="call-pill" id="pCallBtn" onclick="openCallRequest()">📞 Call in to the show</button></div>
+    <div class="call-status" id="pCallStatus"></div>
     <div class="chat-card" id="pChatWrap" style="display:none">
       <div class="chat-head"><span>💬 LIVE CHAT</span><small>Tap a message for options</small></div>
       <div class="chat-pinned" id="pChatPinned"></div>
@@ -1485,6 +1543,23 @@ body.mini-on .scroll { padding-bottom:150px; }
         <label class="form-label">Style tags <span class="form-hint">(pick up to 5 so listeners can find you)</span></label>
         <div class="tags-input" id="cast-tags-selected"></div>
       </div>
+      <div class="form-group" id="callins-group">
+        <label class="form-label">Paid call-ins? <span class="form-hint">(you open call-ins once you're live)</span></label>
+        <div class="seg" id="callin-seg">
+          <button type="button" class="on" data-v="no" onclick="setCallinPaid(false)">No, free</button>
+          <button type="button" data-v="yes" onclick="setCallinPaid(true)">Yes, paid</button>
+        </div>
+        <div id="callin-price-wrap" style="display:none;margin-top:10px">
+          <select class="form-select" id="callin-price">
+            <option value="200">$2 per call</option>
+            <option value="500" selected>$5 per call</option>
+            <option value="1000">$10 per call</option>
+            <option value="1500">$15 per call</option>
+            <option value="2000">$20 per call</option>
+          </select>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.45">Callers' cards are only charged if they're on air for 30 seconds or more. You get 80% (with payouts set up).</div>
+        </div>
+      </div>
       <div id="schedule-fields" style="display:none">
         <div class="form-group">
           <label class="form-label">Date &amp; time <span class="form-hint">(your local time)</span></label>
@@ -1526,12 +1601,14 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="ostat"><div class="ostat-num" id="oa-time">0:00</div><div class="ostat-label">Duration</div></div>
   </div>
   <div class="chat-ticker" id="oaChatTicker" onclick="openCasterChat()" style="display:none"></div>
+  <div class="oa-callbar" id="oaCallBar"><div class="cb-top"><span class="cb-name" id="oaCallName">🔴 ON AIR</span><span class="cb-time" id="oaCallTime">0:00</span></div><div class="cb-topic" id="oaCallTopic"></div><button onclick="dropCaller()">Drop caller</button></div>
   <div class="oa-pinned" id="oaPinnedTip"></div>
   <div class="tip-alert" id="oaTipAlert" onclick="this.style.display='none';openCasterChat()"><div class="ta-top" id="oaTipAlertTop"></div><div class="ta-body" id="oaTipAlertBody"></div></div>
   <div class="onair-controls">
     <div class="onair-mute" id="muteBtn" onclick="toggleMute()">
       <svg id="muteBtnIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="currentColor" stroke-width="2" fill="none"/><line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2"/></svg>
     </div>
+    <div class="onair-mute" id="oaCallBtn" onclick="openCallSheet()" title="Call-ins" style="display:none;position:relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg><span class="chat-badge" id="oaCallBadge"></span></div>
     <div class="onair-mute" id="oaChatBtn" onclick="openCasterChat()" title="Live chat" style="display:none;position:relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="chat-badge" id="oaChatBadge"></span></div>
     <div class="onair-mute" onclick="shareLiveLink()" title="Share link to this cast">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>
@@ -1696,6 +1773,10 @@ window.addEventListener('load', async () => {
     setTimeout(() => openUpcomingDetail(upcomingLink), 900);
   }
 
+  const callinParam = params.get('callin');
+  if (callinParam) setTimeout(() => showToast(callinParam === 'queued'
+    ? "📞 You're in the call queue! Tap Listen now to rejoin the cast."
+    : "No worries, you weren't charged."), 1500);
   const listenLink = params.get('listen');
   if (listenLink) {
     window.history.replaceState({}, '', window.location.pathname);
@@ -2036,6 +2117,7 @@ function guestBlocked(kind) {
     follow:  ['FOLLOW YOUR CASTERS', 'Create a free account to follow casters and find them again easily.'],
     profile: ['MAKE IT YOURS', 'Create a free account to set up your profile, name and photo.'],
     payouts: ['GET PAID TO CAST', 'Create a free account to go live and receive tips.'],
+    calls:   ['CALL IN TO THE SHOW', 'Create a free account to call in and talk live with casters.'],
     chat:    ['JOIN THE CHAT', 'Create a free account to chat with casters and other fans.'],
     alerts:  ['GET LIVE ALERTS', 'Create a free account to follow casters and get notified when they go live.'],
   }[kind] || ['CREATE A FREE ACCOUNT', 'You need an account for this.'];
@@ -2192,6 +2274,7 @@ async function stopListeningQuietly() {
   if (navigator.mediaSession) navigator.mediaSession.playbackState = 'none';
   window._currentCastRow = null;
   closeChat();
+  try { leaveCallsQuietly(); } catch(e) {}
   setMiniActive(false);
 }
 
@@ -2225,6 +2308,7 @@ async function goBack() {
   window._currentCastRow = null;
   window._listeningRoom = null;
   closeChat();
+  try { leaveCallsQuietly(); } catch(e) {}
   setMiniActive(false);
   showScreen(prevScreen || 'home-screen');
 }
@@ -2238,7 +2322,7 @@ function showStartCast() {
   if (guestBlocked('cast')) return;
   if (window._isBroadcasting) { returnToOnAir(); return; }
   showScreen('startcast-screen');
-  try { window._fromScheduledId = null; window._editingScheduledId = null; setCastMode('live'); } catch(e) {}
+  try { window._fromScheduledId = null; window._editingScheduledId = null; setCastMode('live'); setCallinPaid(false); } catch(e) {}
   loadSportsData();
   setTimeout(() => setActiveNav('cast'), 10);
 }
@@ -2292,6 +2376,7 @@ function renderLiveCasts(casts) {
         <div class="cast-row-caster">${escHtml(cast.caster_name)}${isFollowingCaster(cast.caster_id) ? '<span class="follow-badge">★ Following</span>' : ''}</div>
         <div class="cast-tags">
           <span class="tag gold">${escHtml(cast.sport)}</span>
+          ${cast.call_ins_open ? '<span class="tag following-tag">📞 Call-ins open</span>' : ''}
           ${(cast.tags||[]).map(t=>`<span class="tag">${escHtml(t)}</span>`).join('')}
         </div>
       </div>
@@ -2379,6 +2464,12 @@ function subscribeToLiveCasts() {
             showCastNotice(ban ? 'banned' : 'ended', ban?.reason);
           });
           return;
+        }
+
+        // Call-ins opened/closed (or price changed) on the cast I'm listening to
+        if (changed && window._currentCastRow && changed.id === window._currentCastRow.id) {
+          Object.assign(window._currentCastRow, changed);
+          try { refreshCallButton(); } catch(e) {}
         }
 
         const listeningTo = window._listeningRoom || window._currentCastRow?.room_name;
@@ -2948,6 +3039,7 @@ async function openChat(castId, mode) {
   } catch(e) { return; }
   chatShow(true);
   renderChat(true);
+  try { openCalls(castId, mode); } catch(e) { console.warn('Call-ins unavailable:', e.message); }
   clearInterval(window._pinTimer);
   window._pinTimer = setInterval(() => { try { renderPinned(); } catch(e) {} }, 15000);
   try {
@@ -3211,6 +3303,334 @@ function chatBlock(userId, id) {
     const ok = await setBlocked(userId, true);
     if (ok) { renderChat(false); showToast('🚫 Blocked'); }
   });
+}
+
+// ════════════════════════════════════════════════
+// CALL-INS
+// Listeners join a queue; the caster brings one caller on air at a time (max 5 min).
+// The server unmutes/mutes the caller in the live audio. Paid call-ins: the card is only
+// HELD, and charged only if the caller was on air for 30+ seconds.
+// OFF SWITCH: set CALLINS_ENABLED to false to hide call-ins everywhere.
+// ════════════════════════════════════════════════
+const CALLINS_ENABLED = true;
+const CALL_MAX_SECS = 300;
+const _callsBlank = () => ({ castId: null, mode: null, channel: null, reqs: [], timer: null, autoEnding: false });
+window._calls = _callsBlank();
+let _callinPaid = false;
+
+function setCallinPaid(on) {
+  _callinPaid = !!on;
+  document.querySelectorAll('#callin-seg button').forEach(b => b.classList.toggle('on', (b.dataset.v === 'yes') === _callinPaid));
+  document.getElementById('callin-price-wrap').style.display = _callinPaid ? '' : 'none';
+}
+function callinPriceChosen() {
+  if (!CALLINS_ENABLED || !_callinPaid) return null;
+  const v = parseInt(document.getElementById('callin-price')?.value, 10);
+  return v >= 200 && v <= 2000 ? v : null;
+}
+
+async function callApi(body) {
+  const token = await freshToken();
+  const r = await fetch(`${TOKEN_SERVER}/api/call`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(body),
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || 'Something went wrong');
+  return d;
+}
+
+async function openCalls(castId, mode) {
+  if (!CALLINS_ENABLED || !castId) return;
+  if (_calls.castId === castId && _calls.channel) return;
+  closeCalls();
+  window._calls = { ..._callsBlank(), castId, mode };
+  if (mode === 'caster') document.getElementById('oaCallBtn').style.display = 'flex';
+  if (mode === 'listener') {
+    // Get this cast's current call-in settings (open/closed, price)
+    try {
+      const cr = await fetch(`${SUPABASE_URL}/rest/v1/casts?id=eq.${castId}&select=*`, { headers: restHeaders() });
+      const row = cr.ok ? (await cr.json())[0] : null;
+      if (row && window._currentCastRow?.id === castId) Object.assign(window._currentCastRow, row);
+    } catch(e) {}
+  }
+  refreshCallButton();
+  if (!currentUser) return;   // guests: just the button (which asks them to sign up)
+  try {
+    const token = await freshToken();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/call_requests?cast_id=eq.${castId}&status=in.(waiting,on_air)&order=created_at.asc&select=*`, { headers: restHeaders(token) });
+    if (!r.ok) { if (mode === 'caster') document.getElementById('oaCallBtn').style.display = 'none'; return; }   // call-ins not set up yet
+    if (_calls.castId !== castId) return;
+    _calls.reqs = await r.json();
+  } catch(e) { return; }
+  try {
+    _calls.channel = sb.channel('calls-' + castId)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'call_requests', filter: `cast_id=eq.${castId}` }, onCallEvent)
+      .subscribe();
+  } catch(e) {}
+  clearInterval(_calls.timer);
+  _calls.timer = setInterval(callTick, 1000);
+  renderCalls();
+}
+
+function closeCalls() {
+  if (_calls.channel) { try { sb.removeChannel(_calls.channel); } catch(e) {} }
+  clearInterval(_calls.timer);
+  stopCallMic();
+  window._calls = _callsBlank();
+  try {
+    document.getElementById('oaCallBtn').style.display = 'none';
+    document.getElementById('oaCallBar').style.display = 'none';
+    document.getElementById('pCallBtn').style.display = 'none';
+    document.getElementById('pCallStatus').style.display = 'none';
+  } catch(e) {}
+}
+
+function onCallEvent(p) {
+  const r = p?.new; if (!r || r.cast_id !== _calls.castId) return;
+  const before = _calls.reqs.find(x => x.id === r.id);
+  const i = _calls.reqs.findIndex(x => x.id === r.id);
+  if (i >= 0) _calls.reqs[i] = r; else _calls.reqs.push(r);
+  if (_calls.mode === 'caster' && !before && r.status === 'waiting') showToast(`📞 ${r.username} wants to call in`);
+  if (_calls.mode === 'listener' && currentUser && r.user_id === currentUser.id) onMyCallChange(before, r);
+  renderCalls();
+}
+
+const activeCalls = () => _calls.reqs.filter(r => r.status === 'waiting' || r.status === 'on_air');
+const myCall = () => currentUser ? _calls.reqs.filter(r => r.user_id === currentUser.id && (r.status === 'waiting' || r.status === 'on_air')).pop() : null;
+const onAirCall = () => _calls.reqs.find(r => r.status === 'on_air');
+const fmtClock = (s) => `${Math.floor(s / 60)}:${String(Math.max(0, s) % 60).padStart(2, '0')}`;
+const secsSince = (iso) => Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
+
+function refreshCallButton() {
+  const btn = document.getElementById('pCallBtn');
+  if (!btn) return;
+  const c = window._currentCastRow;
+  const show = CALLINS_ENABLED && _calls.mode === 'listener' && c && c.call_ins_open && !myCall();
+  btn.textContent = c?.call_price_cents ? `📞 Call in to the show · ${tipDollars(c.call_price_cents)}` : '📞 Call in to the show';
+  btn.style.display = show ? 'inline-block' : 'none';
+}
+
+function renderCalls() {
+  refreshCallButton();
+  if (_calls.mode === 'caster') {
+    const waiting = _calls.reqs.filter(r => r.status === 'waiting');
+    const b = document.getElementById('oaCallBadge');
+    b.textContent = waiting.length; b.style.display = waiting.length ? 'flex' : 'none';
+    const live = onAirCall();
+    const bar = document.getElementById('oaCallBar');
+    if (live) {
+      document.getElementById('oaCallName').textContent = `🔴 ON AIR: ${live.username}`;
+      document.getElementById('oaCallTopic').textContent = live.topic ? `“${live.topic}”` : (live.price_cents ? `💰 Paid call-in · ${tipDollars(live.price_cents)}` : 'Free call-in');
+      bar.style.display = 'block';
+    } else bar.style.display = 'none';
+    // Sheet
+    const open = !!window._myCastOpen;
+    const t = document.getElementById('calls-toggle');
+    t.textContent = open ? 'Close call-ins' : 'Open call-ins';
+    t.className = 'cq-toggle ' + (open ? 'open' : 'closed');
+    const price = window._myCastPrice;
+    document.getElementById('calls-sub').textContent = (open ? 'Call-ins are OPEN. ' : 'Call-ins are closed. ') +
+      (price ? `Paid: ${tipDollars(price)} per call (charged only after 30 seconds on air).` : 'Free to call in.');
+    const q = document.getElementById('calls-queue');
+    q.innerHTML = (live ? `<div class="cq-row" style="border-color:var(--live-red)"><div class="cq-info"><div class="cq-name">🔴 ${escHtml(live.username)} · on air</div><div class="cq-topic">${escHtml(live.topic || '')}</div></div><button class="cq-btn cq-no" style="color:#FF8A96;border-color:rgba(240,54,74,0.5)" onclick="dropCaller()">Drop</button></div>` : '') +
+      (waiting.length ? waiting.map(r => `<div class="cq-row"><div class="cq-info"><div class="cq-name">${escHtml(r.username)}${r.price_cents ? ` <span class="follow-badge">💰 ${tipDollars(r.price_cents)}</span>` : ''}</div><div class="cq-topic">${r.topic ? '“' + escHtml(r.topic) + '”' : 'No topic'} · waiting ${fmtClock(secsSince(r.created_at))}</div></div><button class="cq-btn cq-no" onclick="declineCaller('${r.id}')">Decline</button><button class="cq-btn cq-go" ${live ? 'disabled style="opacity:0.4"' : ''} onclick="acceptCaller('${r.id}')">On air</button></div>`).join('')
+        : (live ? '' : `<div class="cp-empty" style="padding:4px 0 10px">${open ? 'No one waiting yet. Tell your listeners the lines are open!' : 'Open call-ins to let listeners join the queue.'}</div>`));
+  } else {
+    renderMyCallStatus();
+  }
+}
+
+function callTick() {
+  const live = onAirCall();
+  if (_calls.mode === 'caster' && live?.on_air_at) {
+    const s = secsSince(live.on_air_at);
+    document.getElementById('oaCallTime').textContent = `${fmtClock(s)} / 5:00`;
+    if (s >= CALL_MAX_SECS && !_calls.autoEnding) { _calls.autoEnding = true; showToast('⏱️ 5-minute call limit reached'); endCall(live.id).finally(() => { _calls.autoEnding = false; }); }
+  }
+  if (_calls.mode === 'listener') {
+    const mine = myCall();
+    const el = document.getElementById('pCallTimer');
+    if (mine?.status === 'on_air' && mine.on_air_at && el) el.textContent = fmtClock(secsSince(mine.on_air_at));
+  }
+  if (document.getElementById('calls-overlay')?.classList.contains('show') && Date.now() % 5000 < 1000) renderCalls();
+}
+
+// ── Caster ──
+function openCallSheet() {
+  const row = window._myCastRow || {};
+  renderCalls();
+  document.getElementById('calls-overlay').classList.add('show');
+}
+function closeCallSheet() { document.getElementById('calls-overlay')?.classList.remove('show'); }
+
+async function toggleCallIns() {
+  const open = !window._myCastOpen;
+  try {
+    const token = await freshToken();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/casts?id=eq.${_calls.castId}`, {
+      method: 'PATCH', headers: restHeaders(token, { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+      body: JSON.stringify({ call_ins_open: open }),
+    });
+    if (!r.ok) throw new Error();
+    window._myCastOpen = open;
+    renderCalls();
+    showToast(open ? '📞 Call-ins are open! Let your listeners know.' : 'Call-ins closed');
+  } catch(e) { showToast('⚠️ Could not change call-ins. Please try again.'); }
+}
+
+async function acceptCaller(id) {
+  if (onAirCall()) { showToast('Drop the current caller first'); return; }
+  try { await callApi({ action: 'accept', requestId: id }); showToast('🔴 Caller is on air'); }
+  catch(e) { showToast('⚠️ ' + e.message); }
+}
+async function endCall(id) {
+  try { await callApi({ action: 'end', requestId: id }); }
+  catch(e) { showToast('⚠️ ' + e.message); }
+}
+function dropCaller() { const c = onAirCall(); if (c) endCall(c.id); }
+function declineCaller(id) { endCall(id); }
+
+// When the cast ends: release every hold / end any call (sent even if the page is closing)
+function casterCloseAllCalls() {
+  if (_calls.mode !== 'caster' || !_calls.castId || !activeCalls().length) return;
+  const castId = _calls.castId;
+  freshToken().then(token => fetch(`${TOKEN_SERVER}/api/call`, {
+    method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify({ action: 'close_all', castId }),
+  })).catch(() => {});
+}
+
+// ── Listener / caller ──
+function openCallRequest() {
+  if (guestBlocked('calls')) return;
+  const c = window._currentCastRow || {};
+  document.getElementById('callreq-sub').textContent = c.call_price_cents
+    ? `This is a paid call-in: ${tipDollars(c.call_price_cents)}. Your card is only charged if you're on air for 30 seconds or more. If the caster doesn't get to you, you pay nothing.`
+    : `Join the queue and ${c.caster_name || 'the caster'} can bring you on air to talk live. It's free.`;
+  document.getElementById('callreq-btn').textContent = c.call_price_cents ? `Continue to payment (${tipDollars(c.call_price_cents)} hold)` : 'Join the queue';
+  document.getElementById('callreq-btn').disabled = false;
+  document.getElementById('callreq-topic').value = '';
+  document.getElementById('callreq-consent').classList.remove('on');
+  document.getElementById('callreq-overlay').classList.add('show');
+}
+function closeCallRequest() { document.getElementById('callreq-overlay').classList.remove('show'); }
+
+async function submitCallRequest() {
+  if (!document.getElementById('callreq-consent').classList.contains('on')) { showToast('Please tick to confirm your voice will be broadcast live'); return; }
+  const c = window._currentCastRow || {};
+  const topic = document.getElementById('callreq-topic').value.trim().slice(0, 100);
+  const btn = document.getElementById('callreq-btn'); btn.disabled = true;
+  try {
+    if (c.call_price_cents) {
+      const d = await callApi({ action: 'pay', castId: c.id, topic });
+      if (!d.url) throw new Error('Could not open payment');
+      window.location.href = d.url;
+      return;
+    }
+    const token = await freshToken();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/call_requests?select=*`, {
+      method: 'POST', headers: restHeaders(token, { 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+      body: JSON.stringify({ cast_id: c.id, topic, user_id: currentUser.id }),
+    });
+    const d = await r.json().catch(() => null);
+    if (!r.ok) throw new Error((d && d.message) || 'Could not join the queue');
+    const row = Array.isArray(d) ? d[0] : d;
+    if (row && !_calls.reqs.some(x => x.id === row.id)) _calls.reqs.push(row);
+    closeCallRequest();
+    renderCalls();
+    showToast("📞 You're in the queue!");
+  } catch(e) { showToast('⚠️ ' + e.message); btn.disabled = false; }
+}
+
+function renderMyCallStatus() {
+  const el = document.getElementById('pCallStatus');
+  if (!el) return;
+  const mine = myCall();
+  if (!mine) { el.style.display = 'none'; return; }
+  if (mine.status === 'waiting') {
+    el.className = 'call-status';
+    el.innerHTML = `<div class="cs-title">📞 YOU'RE IN THE QUEUE</div><div class="cs-sub">Keep listening. ${escHtml(window._currentCastRow?.caster_name || 'The caster')} can bring you on air any moment. 🎧 Headphones on!${mine.price_cents ? ` Your ${tipDollars(mine.price_cents)} is only charged if you're on air for 30+ seconds.` : ''}</div><div class="cs-row"><button class="cs-ghost" onclick="hangUpMyCall()">Leave the queue</button></div>`;
+  } else {
+    el.className = 'call-status onair';
+    el.innerHTML = `<div class="cs-title">🔴 YOU'RE ON AIR · <span id="pCallTimer">0:00</span></div><div class="cs-sub" id="pCallMicNote">${window._callTrack ? 'Everyone listening can hear you. Calls last up to 5 minutes.' : 'Turning on your mic…'}</div><div class="cs-row">${window._callTrack ? `<button class="cs-light" id="pCallMuteBtn" onclick="toggleCallMute()">${window._callMuted ? 'Unmute' : 'Mute'}</button>` : `<button class="cs-light" onclick="goOnAir()">🎙️ Turn on my mic</button>`}<button class="cs-dark" onclick="hangUpMyCall()">Hang up</button></div>`;
+  }
+  el.style.display = 'block';
+}
+
+function onMyCallChange(before, r) {
+  if (r.status === 'on_air' && before?.status !== 'on_air') {
+    try { document.getElementById('player-screen').classList.contains('active') || openPlayerFromMini(); } catch(e) {}
+    showToast("🔴 You're on air! Say hi 👋");
+    goOnAir();
+  }
+  if (['done', 'declined', 'cancelled'].includes(r.status) && before && ['waiting', 'on_air'].includes(before.status)) {
+    stopCallMic();
+    const paid = r.price_cents;
+    if (r.status === 'done') showToast(paid ? (r.charged ? `📞 Thanks for calling in! ${tipDollars(paid)} charged.` : "📞 Thanks for calling in! You weren't charged.") : '📞 Thanks for calling in!');
+    else if (r.status === 'declined') showToast(`The caster couldn't take your call this time.${paid ? ' Your card hold has been released.' : ''}`);
+  }
+}
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+async function goOnAir() {
+  if (window._callTrack || window._goingOnAir) return;
+  window._goingOnAir = true;
+  let lastErr = null;
+  try {
+    for (let i = 0; i < 8; i++) {
+      const mine = myCall();
+      if (!mine || mine.status !== 'on_air' || !lkRoom?.localParticipant) return;
+      let track = null;
+      try {
+        track = await LivekitClient.createLocalAudioTrack({ echoCancellation: true, noiseSuppression: true, autoGainControl: true });
+        await lkRoom.localParticipant.publishTrack(track);
+        window._callTrack = track; window._callMuted = false;
+        renderMyCallStatus();
+        return;
+      } catch(e) {
+        lastErr = e;
+        try { track && track.stop(); } catch(x) {}
+        if (e && /permission|denied|notallowed/i.test(String(e.name || '') + String(e.message || ''))) break;   // mic blocked: ask the user
+        await sleep(700);   // the room may not have updated our permission yet
+      }
+    }
+    console.warn('Could not go on air:', lastErr?.message);
+    showToast('⚠️ Could not turn on your mic. Tap "Turn on my mic" or allow the microphone.');
+    renderMyCallStatus();
+  } finally { window._goingOnAir = false; }
+}
+
+function toggleCallMute() {
+  if (!window._callTrack) return;
+  window._callMuted = !window._callMuted;
+  try { window._callTrack.mediaStreamTrack.enabled = !window._callMuted; } catch(e) {}
+  renderMyCallStatus();
+}
+
+function stopCallMic() {
+  const t = window._callTrack; window._callTrack = null; window._callMuted = false;
+  if (!t) return;
+  try { lkRoom?.localParticipant?.unpublishTrack(t); } catch(e) {}
+  try { t.stop(); } catch(e) {}
+}
+
+async function hangUpMyCall() {
+  const mine = myCall(); if (!mine) return;
+  stopCallMic();
+  try { await callApi({ action: 'end', requestId: mine.id }); } catch(e) { showToast('⚠️ ' + e.message); }
+}
+
+// Leaving the cast while queued or on air: end the request quietly
+function leaveCallsQuietly() {
+  const mine = _calls.mode === 'listener' ? myCall() : null;
+  if (mine) {
+    stopCallMic();
+    freshToken().then(token => fetch(`${TOKEN_SERVER}/api/call`, {
+      method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ action: 'end', requestId: mine.id }),
+    })).catch(() => {});
+  }
+  if (_calls.mode === 'listener') closeCalls();
 }
 
 // ════════════════════════════════════════════════
@@ -3526,6 +3946,7 @@ function setCastMode(mode) {
   document.getElementById('go-live-btn').style.display = sched ? 'none' : '';
   document.getElementById('sched-delete-btn').style.display = mode === 'edit' ? '' : 'none';
   document.getElementById('cast-mode-toggle').textContent = sched ? '🎙️ Go live now instead' : '🗓️ Schedule for later instead';
+  document.getElementById('callins-group').style.display = sched ? 'none' : '';
   document.getElementById('cast-form-error').style.display = 'none';
   if (sched) {
     const w = document.getElementById('sched-when');
@@ -4166,6 +4587,8 @@ const FAQ = [
     { q: 'Can I browse the app while I listen?', a: "Yes. Tap the <strong>back arrow</strong> on the player and the cast keeps playing in a <strong>mini player</strong> at the bottom. Tap the speaker button to mute, or tap the mini player to open the full player again. <strong>Stop Listening</strong> ends it." },
     { q: 'How do I find a cast in my language, or a certain style?', a: "Go to <strong>Browse</strong>. Search for anything (a team, a caster, a league, or a tag like <em>Stats</em> or <em>Beginner-friendly</em>), and use the <strong>🌐 language</strong> filter to only see casts in your language. Searching also finds <strong>casters</strong> by name, even when they're not live." },
     { q: 'How does live chat work?', a: "Every live cast has a <strong>chat</strong> under the player (tap 💬 to jump to it). Anyone can read it; you need a free account to post. Messages are up to 200 characters, with a short pause between messages to keep things readable. The caster sees chat on their live screen and can reply. Tap any message to view the person's profile, report it, or block them." },
+    { q: 'Can I call in to a cast?', a: "Yes, when the caster has opened call-ins (look for <strong>📞 Call-ins open</strong>). Tap <strong>📞 Call in to the show</strong> under the player, add what you'd like to talk about, and join the queue. When the caster brings you on air, your mic turns on and everyone listening can hear you. Calls last up to 5 minutes. Use headphones to avoid echo. You need a free account to call in." },
+    { q: 'How do paid call-ins work?', a: "Some casters charge for call-ins. When you join the queue your card is only <strong>held</strong>, not charged. You're only charged if you're actually on air for <strong>30 seconds or more</strong>. If the caster doesn't get to you, declines, or the cast ends, the hold is released and you pay nothing." },
     { q: 'Is the listener count live?', a: "Yes. The number of listeners updates in real time as people join and leave, both for you and for the caster." },
     { q: 'What if a cast ends while I\'m listening?', a: "You'll see a message that the cast has ended, and you can pick another one from Home." },
   ]},
@@ -4191,6 +4614,7 @@ const FAQ = [
     { q: 'How do I get people listening?', a: "Tap the <strong>share</strong> button on your live screen to send a link straight to your cast. Your followers also get a <strong>live alert</strong> automatically when you go live." },
     { q: 'Can I use the app while I\'m live?', a: "Yes. Tap <strong>Browse app</strong> on your live screen. A red <strong>You're LIVE</strong> bar shows your time and listener count, with a mic button to mute yourself. Tap the bar to go back to your live screen. A few things (like opening another cast or logging out) wait until you've ended your cast so you can't end it by accident." },
     { q: 'Can I see how my cast went?', a: "Yes. When you tap <strong>End Broadcast</strong> you'll get a summary: time live, peak listeners, new followers and tips earned during the cast. Tap <strong>Share your stats</strong> to post it." },
+    { q: 'How do call-ins work for casters?', a: "When you set up your cast, choose <strong>Paid call-ins?</strong> No (free) or Yes (pick a price). Once you're live, tap <strong>📞</strong> on your live screen and <strong>Open call-ins</strong>. Listeners join a queue; tap <strong>On air</strong> to bring someone on, and <strong>Drop caller</strong> to end it anytime. One caller at a time, up to 5 minutes. Paid call-ins only charge the caller after 30 seconds on air, and you get 80%. Wear headphones to avoid echo." },
     { q: 'Can I cast with my screen locked?', a: "Not yet. Phones pause the microphone for websites in the background, so <strong>keep UltCast open with the screen on</strong> while you're live. This is coming with the UltCast app." },
     { q: 'How long can a cast be?', a: "Up to 4 hours. Casts end automatically after that, and you can start a new one any time." },
   ]},
@@ -5443,6 +5867,7 @@ async function goLive() {
         tags: activeTags,
         room_name: roomName,
         is_live: true,
+        ...(callinPriceChosen() ? { call_price_cents: callinPriceChosen() } : {}),
         listener_count: 0,
       }),
     });
@@ -5461,6 +5886,8 @@ async function goLive() {
       castId = Array.isArray(data) ? data[0]?.id : data?.id;
       console.log('Cast saved, id:', castId);
       markScheduledLive(roomName, home, away);   // tells people who tapped "Remind me"
+      window._myCastOpen = false;
+      window._myCastPrice = callinPriceChosen();
       openChat(castId, 'caster');
     }
   } catch(e) {
@@ -5559,6 +5986,11 @@ async function connectAsBroadcaster(roomName) {
 
     lkRoom.on(RoomEvent.ParticipantConnected, () => updateListenerCount());
     lkRoom.on(RoomEvent.ParticipantDisconnected, () => updateListenerCount());
+    // Play other voices in the room (callers) so the caster can hear them. Nobody else can speak unless brought on air.
+    lkRoom.on(RoomEvent.TrackSubscribed, (track) => {
+      if (track.kind === 'audio') { const el = track.attach(); el.autoplay = true; document.body.appendChild(el); }
+    });
+    lkRoom.on(RoomEvent.TrackUnsubscribed, (track) => { try { track.detach().forEach(el => el.remove()); } catch(e) {} });
 
     window._lastSavedListenerCount = null;
     await lkRoom.connect(LK_URL, token);
@@ -5578,7 +6010,9 @@ async function getBroadcasterToken(roomName) {
   try {
     const userId = currentUser?.id || 'caster-' + Math.random().toString(36).substr(2,8);
     const username = currentUserProfile?.username || 'Caster';
-    const res = await fetch(`${TOKEN_SERVER}/api/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(userId)}&name=${encodeURIComponent(username)}&canPublish=true`);
+    // Send the caster's login so the server can confirm this is their own live cast
+    const login = await freshToken();
+    const res = await fetch(`${TOKEN_SERVER}/api/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(userId)}&name=${encodeURIComponent(username)}&canPublish=true&access_token=${encodeURIComponent(login || '')}`);
     if (!res.ok) return null;
     const data = await res.json();
     return data.token;
@@ -5611,6 +6045,7 @@ function toggleMute() {
 }
 async function endBroadcast() {
   window._endingBroadcast = true;
+  try { casterCloseAllCalls(); closeCalls(); closeCallSheet(); } catch(e) {}
   try { closeChat(); closeCasterChat(); } catch(e) {}
   window._isBroadcasting = false;
   if (window._casterBarTick) { clearInterval(window._casterBarTick); window._casterBarTick = null; }
