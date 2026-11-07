@@ -458,6 +458,16 @@ body::after {
 .go-live-btn:active { opacity:0.85; }
 
 /* ─── ON AIR ─── */
+#cohost-screen {
+  background:var(--bg); align-items:center; justify-content:center;
+  text-align:center; padding:40px 24px; gap:0;
+}
+.co-with { font-size:14px; font-weight:700; color:var(--accent); margin:-26px 0 30px; }
+.tip-pick { display:none; gap:8px; margin:0 0 14px; }
+.tip-pick button { flex:1; padding:10px 6px; border-radius:12px; border:1.5px solid var(--line); background:var(--bg-2); color:var(--cream); font-family:var(--font-body); font-size:13px; font-weight:800; cursor:pointer; line-height:1.25; }
+.tip-pick button.on { border-color:var(--accent); background:var(--accent-glow); color:var(--accent); }
+.tip-pick button:disabled { opacity:0.45; cursor:not-allowed; }
+.tip-pick small { display:block; font-size:10px; font-weight:600; color:var(--muted); }
 #onair-screen {
   background:var(--bg); align-items:center; justify-content:center;
   text-align:center; padding:40px 24px; gap:0;
@@ -985,6 +995,44 @@ body.mini-on .scroll { padding-bottom:150px; }
   </div>
 </div>
 
+<!-- ═══ CO-CASTER LIVE SCREEN ═══ -->
+<div class="screen" id="cohost-screen">
+  <div class="onair-badge" style="border-color:var(--accent);color:var(--accent);background:var(--accent-glow)"><div class="onair-badge-dot" style="background:var(--accent);box-shadow:0 0 8px var(--accent)"></div>YOU'RE CO-CASTING</div>
+  <div class="onair-game" id="ccGame">—</div>
+  <div class="onair-sport" id="ccWith">with —</div>
+  <div class="onair-stats">
+    <div class="ostat"><div class="ostat-num" id="ccListeners">0</div><div class="ostat-label">Listeners</div></div>
+    <div class="ostat"><div class="ostat-num" id="ccTime">0:00</div><div class="ostat-label">Duration</div></div>
+  </div>
+  <div class="onair-controls">
+    <div class="onair-mute" id="ccMuteBtn" onclick="toggleCohostMute()" title="Mute / unmute"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="currentColor" stroke-width="2" fill="none"/><line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2"/></svg></div>
+    <div class="onair-mute" id="ccChatBtn" onclick="openCasterChat()" title="Live chat" style="position:relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="chat-badge" id="ccChatBadge"></span></div>
+  </div>
+  <div style="font-size:12px;color:var(--muted);margin:0 0 18px;max-width:300px;line-height:1.45">🎧 Wear headphones so your co-caster's voice doesn't echo. The host runs call-ins.</div>
+  <button class="end-btn" onclick="leaveCohost()">Leave co-cast</button>
+</div>
+
+<!-- ═══ CO-CAST (host sheet) ═══ -->
+<div class="uc-overlay" id="cohost-overlay" onclick="if(event.target===this)closeCohostSheet()">
+  <div class="uc-sheet">
+    <div class="uc-sheet-handle"></div>
+    <div class="uc-sheet-title">👥 CO-CAST</div>
+    <div id="cohost-body"></div>
+    <button class="btn-ghost-full" onclick="closeCohostSheet()">Back to my cast</button>
+  </div>
+</div>
+
+<!-- ═══ CO-CAST INVITE (invitee) ═══ -->
+<div class="uc-overlay uc-center" id="coinvite-overlay">
+  <div class="tip-modal">
+    <div class="tip-modal-emoji">🎙️</div>
+    <div class="tip-sheet-title" style="font-size:22px" id="coinvite-title">YOU'RE INVITED TO CO-CAST</div>
+    <div class="tip-modal-sub" id="coinvite-sub"></div>
+    <button class="btn-primary-full" id="coinvite-join" onclick="acceptCohostInvite()">🎙️ Join as co-caster</button>
+    <button class="btn-ghost-full" onclick="declineCohostInvite()">No thanks</button>
+  </div>
+</div>
+
 <!-- ═══ CALL-INS (caster) ═══ -->
 <div class="uc-overlay" id="calls-overlay" onclick="if(event.target===this)closeCallSheet()">
   <div class="uc-sheet">
@@ -1167,6 +1215,7 @@ body.mini-on .scroll { padding-bottom:150px; }
       <input id="tipCustom" type="text" inputmode="decimal" autocomplete="off" placeholder="Other amount" oninput="customTipInput()" onfocus="customTipInput()">
     </div>
     <div class="tip-custom-hint" id="tipCustomHint">Minimum $2</div>
+    <div class="tip-pick" id="tipPick"></div>
     <div id="tipMsgWrap" style="display:none;margin:0 0 12px;text-align:left">
       <textarea class="uc-textarea" id="tipMessage" maxlength="150" placeholder="Add a message (optional). It's highlighted and pinned in chat." style="min-height:56px;margin:0"></textarea>
       <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4">Bigger tips stay pinned longer (up to 10 min). Casters aren't obliged to act on requests.</div>
@@ -1322,6 +1371,7 @@ body.mini-on .scroll { padding-bottom:150px; }
       </div>
       <div>
         <div class="player-caster-name" id="pCasterName">—</div>
+        <div id="pCohostLine" style="display:none;font-size:12px;font-weight:700;color:var(--accent);margin-top:1px"></div>
         <div class="player-listeners-label" id="pListeners">—</div>
         <div id="pBio" style="font-size:11px;color:var(--muted);margin-top:2px;display:none"></div>
       </div>
@@ -1592,6 +1642,7 @@ body.mini-on .scroll { padding-bottom:150px; }
   <div class="onair-badge"><div class="onair-badge-dot"></div>YOU'RE LIVE</div>
   <div class="onair-game" id="onairGame">—</div>
   <div class="onair-sport" id="onairSport">—</div>
+  <div class="co-with" id="oaCohostLine" style="display:none"></div>
   <div class="onair-blob">
     <svg class="ring" viewBox="0 0 200 200"><path d="M44.3,-54.6C59.2,-43.5,74,-30.6,78.1,-14.8C82.3,1,75.9,19.7,65.4,34.8C54.9,49.9,40.4,61.3,24.1,67.5C7.9,73.6,-10.1,74.4,-26.4,68.4C-42.7,62.4,-57.4,49.5,-65.4,33.4C-73.5,17.3,-75,-1.9,-70,-18.7C-65.1,-35.5,-53.8,-49.8,-40,-59.4C-26.2,-69,-9.8,-74,4.9,-80C19.5,-86,29.4,-65.7,44.3,-54.6Z" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" transform="translate(100 100)"/></svg>
     <svg class="ring2" viewBox="0 0 200 200"><path d="M39.5,-52.1C50.3,-40.7,57.4,-27.2,62.4,-11.5C67.4,4.2,70.4,22.2,63.7,35.8C57,49.4,40.7,58.6,24,64.1C7.4,69.5,-9.6,71.3,-25.7,66.6C-41.8,61.9,-56.9,50.7,-64.3,36C-71.7,21.2,-71.3,3,-67.3,-14.1C-63.3,-31.2,-55.7,-47.2,-43.5,-58.4C-31.2,-69.6,-14.3,-76,-0.2,-75.8C13.9,-75.5,28.7,-63.5,39.5,-52.1Z" fill="none" stroke="rgba(255,107,26,0.4)" stroke-width="1.5" transform="translate(100 100)"/></svg>
@@ -1609,6 +1660,7 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="onair-mute" id="muteBtn" onclick="toggleMute()">
       <svg id="muteBtnIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="currentColor" stroke-width="2" fill="none"/><line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2"/></svg>
     </div>
+    <div class="onair-mute" id="oaCoBtn" onclick="openCohostSheet()" title="Co-cast" style="position:relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
     <div class="onair-mute" id="oaCallBtn" onclick="openCallSheet()" title="Call-ins" style="display:none;position:relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg><span class="chat-badge" id="oaCallBadge"></span></div>
     <div class="onair-mute" id="oaChatBtn" onclick="openCasterChat()" title="Live chat" style="display:none;position:relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="chat-badge" id="oaChatBadge"></span></div>
     <div class="onair-mute" onclick="shareLiveLink()" title="Share link to this cast">
@@ -1768,6 +1820,12 @@ window.addEventListener('load', async () => {
   }
 
   // Jump straight into a shared cast link, e.g. ?join=collingwood-vs-richmond-1774068683702
+  const cohostLink = params.get('cohost');
+  if (cohostLink && /^[0-9a-f-]{36}$/i.test(cohostLink)) {
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(() => openCohostInviteById(cohostLink), 1200);
+  }
+
   const upcomingLink = params.get('upcoming');
   if (upcomingLink && /^[0-9a-f-]{36}$/i.test(upcomingLink)) {
     window.history.replaceState({}, '', window.location.pathname);
@@ -2322,6 +2380,7 @@ function showCastHub() { showStartCast(); } // Cast Hub removed — go straight 
 function showStartCast() {
   if (guestBlocked('cast')) return;
   if (window._isBroadcasting) { returnToOnAir(); return; }
+  if (window._isCoCasting) { showScreen('cohost-screen'); return; }
   showScreen('startcast-screen');
   try { window._fromScheduledId = null; window._editingScheduledId = null; setCastMode('live'); setCallinPaid(false); } catch(e) {}
   loadSportsData();
@@ -2374,7 +2433,7 @@ function renderLiveCasts(casts) {
       <div class="cast-row-body">
         <div class="cast-row-league">${escHtml(cast.sport)} · ${escHtml(cast.league)}</div>
         <div class="cast-row-game">${escHtml(cast.game)}</div>
-        <div class="cast-row-caster">${escHtml(cast.caster_name)}${isFollowingCaster(cast.caster_id) ? '<span class="follow-badge">★ Following</span>' : ''}</div>
+        <div class="cast-row-caster">${escHtml(cast.caster_name)}${cast.cohost_name ? ' &amp; ' + escHtml(cast.cohost_name) : ''}${isFollowingCaster(cast.caster_id) ? '<span class="follow-badge">★ Following</span>' : ''}</div>
         <div class="cast-tags">
           <span class="tag gold">${escHtml(cast.sport)}</span>
           ${cast.call_ins_open ? '<span class="tag following-tag">📞 Call-ins open</span>' : ''}
@@ -2409,7 +2468,7 @@ function renderBrowseCasts(casts, filter) {
       <div class="cast-row-body">
         <div class="cast-row-league">${escHtml(cast.sport)} · ${escHtml(cast.league)}</div>
         <div class="cast-row-game">${escHtml(cast.game)}</div>
-        <div class="cast-row-caster">${escHtml(cast.caster_name)}${isFollowingCaster(cast.caster_id) ? '<span class="follow-badge">★ Following</span>' : ''} <span style="color:var(--muted)">· ${cast.listener_count||0} listeners</span></div>
+        <div class="cast-row-caster">${escHtml(cast.caster_name)}${cast.cohost_name ? ' &amp; ' + escHtml(cast.cohost_name) : ''}${isFollowingCaster(cast.caster_id) ? '<span class="follow-badge">★ Following</span>' : ''} <span style="color:var(--muted)">· ${cast.listener_count||0} listeners</span></div>
         <div class="cast-tags">
           <span class="tag gold">${escHtml(cast.sport)}</span>
           ${(cast.tags||[]).map(t=>`<span class="tag">${escHtml(t)}</span>`).join('')}
@@ -2470,7 +2529,13 @@ function subscribeToLiveCasts() {
         // Call-ins opened/closed (or price changed) on the cast I'm listening to
         if (changed && window._currentCastRow && changed.id === window._currentCastRow.id) {
           Object.assign(window._currentCastRow, changed);
-          try { refreshCallButton(); } catch(e) {}
+          try { refreshCallButton(); refreshCohostLine(); } catch(e) {}
+        }
+
+        // Co-caster: the host ended the cast
+        if (changed && changed.is_live === false && window._isCoCasting && changed.room_name === window._co?.room) {
+          endCohostUI("📻 The host ended the cast. Thanks for co-casting!");
+          return;
         }
 
         const listeningTo = window._listeningRoom || window._currentCastRow?.room_name;
@@ -2504,7 +2569,7 @@ function openBrowseCastByIndex(i) {
 }
 
 async function openPlayer(game, league, caster, sport, roomName) {
-  if (window._isBroadcasting) { showToast("🎙️ You're live. End your cast to listen to others."); return; }
+  if (window._isBroadcasting || window._isCoCasting) { showToast("🎙️ You're live. End your cast to listen to others."); return; }
   const _room = roomName || game.replace(/\s+/g,'-').toLowerCase();
   // Already listening to this exact cast: just bring the player back up
   if (window._listeningRoom === _room && lkRoom && lkRoom.state !== 'disconnected') { openPlayerFromMini(); return; }
@@ -2930,6 +2995,7 @@ function toggleTip() {
     document.getElementById('tipMsgWrap').style.display = currentUser && canChat ? '' : 'none';
     document.getElementById('tipMsgGuest').style.display = !currentUser && canChat ? '' : 'none';
     document.getElementById('tipMessage').value = '';
+    try { setupTipPicker(); } catch(e) {}
   }
   p.classList.toggle('show');
 }
@@ -3048,7 +3114,7 @@ async function openChat(castId, mode) {
   } catch(e) { return; }
   chatShow(true);
   renderChat(true);
-  try { openCalls(castId, mode); } catch(e) { console.warn('Call-ins unavailable:', e.message); }
+  if (mode !== 'cohost') { try { openCalls(castId, mode); } catch(e) { console.warn('Call-ins unavailable:', e.message); } }
   clearInterval(window._pinTimer);
   window._pinTimer = setInterval(() => { try { renderPinned(); } catch(e) {} }, 15000);
   try {
@@ -3099,11 +3165,11 @@ function chatMsgHtml(m) {
   const mine = currentUser && m.user_id === currentUser.id;
   if (m.kind === 'tip') {
     return `<div class="chat-msg tip" onclick="openChatMsgMenu(${Number(m.id)})">` +
-      `<div class="chat-tip-head">💰 ${escHtml(m.username || 'A listener')} tipped ${tipDollars(m.tip_cents)}</div>` +
+      `<div class="chat-tip-head">💰 ${escHtml(m.username || 'A listener')} tipped ${m.tip_to_name ? escHtml(m.tip_to_name) + ' ' : ''}${tipDollars(m.tip_cents)}</div>` +
       (m.body ? `<div class="chat-tip-body">${escHtml(m.body)}</div>` : '') + '</div>';
   }
   return `<div class="chat-msg" onclick="openChatMsgMenu(${Number(m.id)})">` +
-    (m.is_caster ? '<span class="chat-pill">CASTER</span>' : '') +
+    (m.is_caster ? '<span class="chat-pill">CASTER</span>' : (m.user_id && m.user_id === chatCohostId() ? '<span class="chat-pill">CO-CASTER</span>' : '')) +
     `<span class="chat-name${m.is_caster ? ' caster' : ''}${mine && !m.is_caster ? ' me' : ''}">${escHtml(m.username || 'Listener')}</span>` +
     `<span>${escHtml(m.body)}</span></div>`;
 }
@@ -3119,7 +3185,7 @@ function activePinnedTip() {
     .sort((a, b) => (b.m.tip_cents - a.m.tip_cents) || (b.m.id - a.m.id))[0] || null;
 }
 function renderPinned() {
-  const el = document.getElementById(_chat.mode === 'caster' ? 'oaChatPinned' : 'pChatPinned');
+  const el = document.getElementById(_chat.mode === 'listener' ? 'pChatPinned' : 'oaChatPinned');
   ['oaChatPinned', 'pChatPinned'].forEach(id => { const e = document.getElementById(id); if (e && e !== el) e.style.display = 'none'; });
   if (!el) return;
   const p = activePinnedTip();
@@ -3152,7 +3218,7 @@ function showTipAlert(m) {
 }
 
 function renderChat(forceBottom) {
-  const list = document.getElementById(_chat.mode === 'caster' ? 'oaChatList' : 'pChatList');
+  const list = document.getElementById(_chat.mode === 'listener' ? 'pChatList' : 'oaChatList');
   if (!list) return;
   const visible = _chat.msgs.filter(m => !isBlockedCaster(m.user_id));
   const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 60;
@@ -3161,8 +3227,8 @@ function renderChat(forceBottom) {
   if (forceBottom || nearBottom) list.scrollTop = list.scrollHeight;
   try { renderPinned(); } catch(e) {}
   // Badges + caster ticker
-  const n = _chat.unread, badge = _chat.mode === 'caster' ? 'oaChatBadge' : 'pChatBadge';
-  ['oaChatBadge', 'pChatBadge'].forEach(id => { const b = document.getElementById(id); if (b) b.style.display = 'none'; });
+  const n = _chat.unread, badge = _chat.mode === 'caster' ? 'oaChatBadge' : _chat.mode === 'cohost' ? 'ccChatBadge' : 'pChatBadge';
+  ['oaChatBadge', 'pChatBadge', 'ccChatBadge'].forEach(id => { const b = document.getElementById(id); if (b) b.style.display = 'none'; });
   const b = document.getElementById(badge);
   if (b && n > 0) { b.textContent = n > 99 ? '99+' : n; b.style.display = 'flex'; }
   if (_chat.mode === 'caster') {
@@ -3331,6 +3397,310 @@ async function enableSound() {
 }
 
 // ════════════════════════════════════════════════
+// CO-CASTING
+// The host invites one co-caster. Once they join, both voices go out live.
+// Listeners choose who to tip. Only the host runs call-ins and can remove the co-caster.
+// OFF SWITCH: set COCAST_ENABLED to false to hide co-casting.
+// ════════════════════════════════════════════════
+const COCAST_ENABLED = true;
+window._co = { invite: null, room: null, castId: null, hostName: '', game: '', startedAt: null, track: null, muted: false, timer: null };
+window._hostCo = { castId: null, row: null, channel: null };
+let _inviteChannel = null;
+
+async function cohostApi(body) {
+  const token = await freshToken();
+  const r = await fetch(`${TOKEN_SERVER}/api/cohost`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(body),
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || 'Something went wrong');
+  return d;
+}
+
+function chatCohostId() {
+  if (_chat.mode === 'listener') return window._currentCastRow?.cohost_id || null;
+  if (_chat.mode === 'caster') return window._hostCo.row?.status === 'joined' ? window._hostCo.row.user_id : null;
+  if (_chat.mode === 'cohost') return currentUser?.id || null;
+  return null;
+}
+
+// ── Listener: "with Bob" + who to tip ──
+function refreshCohostLine() {
+  const el = document.getElementById('pCohostLine'); if (!el) return;
+  const n = window._currentCastRow?.cohost_name;
+  el.textContent = n ? `🎙️ with ${n}` : '';
+  el.style.display = n ? 'block' : 'none';
+}
+
+async function setupTipPicker() {
+  const box = document.getElementById('tipPick');
+  const c = window._currentCastRow || {};
+  window._tipTarget = null;
+  if (!COCAST_ENABLED || !c.cohost_id || !c.caster_id) { box.style.display = 'none'; return; }
+  const people = [{ id: c.caster_id, name: c.caster_name || 'Host' }, { id: c.cohost_id, name: c.cohost_name || 'Co-caster' }];
+  const draw = (ready) => {
+    const anyReady = people.some(p => ready[p.id]);
+    if (!window._tipTarget) window._tipTarget = people.find(p => !anyReady || ready[p.id]) || people[0];
+    box.innerHTML = people.map(p => {
+      const blocked = anyReady && !ready[p.id];
+      return `<button type="button" class="${window._tipTarget.id === p.id ? 'on' : ''}" ${blocked ? 'disabled' : ''} onclick="pickTipTarget('${p.id}')">${escHtml(p.name)}${blocked ? '<small>payouts not set up yet</small>' : ''}</button>`;
+    }).join('');
+    document.getElementById('tipTitle').textContent = 'Tip ' + window._tipTarget.name;
+  };
+  window._tipPeople = people;
+  box.style.display = 'flex';
+  draw({ [people[0].id]: true, [people[1].id]: true });
+  try {
+    const r = await fetch(`${TOKEN_SERVER}/api/cohost`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'payout_ready', userIds: people.map(p => p.id) }) });
+    const d = await r.json();
+    if (r.ok && d.ready) { window._tipReady = d.ready; window._tipTarget = null; draw(d.ready); }
+  } catch(e) {}
+}
+function pickTipTarget(id) {
+  const p = (window._tipPeople || []).find(x => x.id === id); if (!p) return;
+  window._tipTarget = p;
+  document.querySelectorAll('#tipPick button').forEach(b => b.classList.toggle('on', b.getAttribute('onclick').includes(id)));
+  document.getElementById('tipTitle').textContent = 'Tip ' + p.name;
+}
+
+// ── Host ──
+async function hostWatchCohost(castId) {
+  if (!COCAST_ENABLED || !castId) return;
+  hostCohostCleanup();
+  window._hostCo = { castId, row: null, channel: null };
+  try {
+    const token = await freshToken();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/cast_cohosts?cast_id=eq.${castId}&status=in.(invited,joined)&select=*`, { headers: restHeaders(token) });
+    if (!r.ok) { document.getElementById('oaCoBtn').style.display = 'none'; return; }   // not set up yet
+    window._hostCo.row = (await r.json())[0] || null;
+    window._hostCo.channel = sb.channel('cohost-' + castId)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cast_cohosts', filter: `cast_id=eq.${castId}` }, onHostCohostEvent)
+      .subscribe();
+  } catch(e) {}
+  renderHostCohost();
+}
+function hostCohostCleanup() {
+  if (window._hostCo.channel) { try { sb.removeChannel(window._hostCo.channel); } catch(e) {} }
+  window._hostCo = { castId: null, row: null, channel: null };
+  closeCohostSheet();
+  try { document.getElementById('oaCohostLine').style.display = 'none'; document.getElementById('oaCoBtn').style.display = ''; } catch(e) {}
+}
+function onHostCohostEvent(p) {
+  const r = p?.new; if (!r || r.cast_id !== window._hostCo.castId) return;
+  const before = window._hostCo.row?.id === r.id ? window._hostCo.row.status : null;
+  window._hostCo.row = r;
+  if (r.status === 'joined' && before !== 'joined') showToast(`🎙️ ${r.username} joined your cast!`);
+  if (r.status === 'declined') showToast(`${r.username} can't join right now`);
+  if (r.status === 'left' && before === 'joined') showToast(`${r.username} left the co-cast`);
+  renderHostCohost();
+}
+function renderHostCohost() {
+  const r = window._hostCo.row;
+  const line = document.getElementById('oaCohostLine');
+  line.textContent = r?.status === 'joined' ? `🎙️ with ${r.username}` : '';
+  line.style.display = r?.status === 'joined' ? 'block' : 'none';
+  const body = document.getElementById('cohost-body'); if (!body) return;
+  if (r?.status === 'joined') {
+    body.innerHTML = `<div class="uc-sheet-sub"><strong style="color:var(--cream)">🎙️ ${escHtml(r.username)}</strong> is co-casting with you. Listeners can tip either of you.</div>
+      <button class="btn-danger-full" onclick="removeCohost()">Remove ${escHtml(r.username)}</button>`;
+  } else if (r?.status === 'invited') {
+    body.innerHTML = `<div class="uc-sheet-sub">Invite sent to <strong style="color:var(--cream)">${escHtml(r.username)}</strong>. Waiting for them to join…</div>
+      <button class="btn-ghost-full" style="margin-top:0;color:#FF8A96" onclick="cancelCohostInvite()">Cancel invite</button>`;
+  } else {
+    body.innerHTML = `<div class="uc-sheet-sub">Invite one person to call the game with you. They'll get a notification and join from their own phone.</div>
+      <input class="uc-input" id="cohost-search" type="text" placeholder="Search by name or @username" oninput="searchCohost()" style="text-align:left;letter-spacing:0;font-weight:500;font-size:16px">
+      <div id="cohost-results"><div class="cp-empty">Loading people you follow…</div></div>`;
+    loadCohostSuggestions();
+  }
+}
+function openCohostSheet() { renderHostCohost(); document.getElementById('cohost-overlay').classList.add('show'); }
+function closeCohostSheet() { document.getElementById('cohost-overlay')?.classList.remove('show'); }
+
+function cohostPersonRow(p) {
+  const nm = p.display_name || p.username || 'Caster';
+  return `<div class="person-row" onclick="inviteCohost('${p.id}', this)">
+    <div class="fl-avatar" ${p.avatar_url ? `style="background-image:url('${escHtml(p.avatar_url)}')"` : ''}>${p.avatar_url ? '' : escHtml(nm.substring(0, 2).toUpperCase())}</div>
+    <div class="fl-name">${escHtml(nm)}<span>${p.username ? '@' + escHtml(p.username) : ''}</span></div>
+    <span class="up-btn" style="padding:6px 11px">Invite</span></div>`;
+}
+async function loadCohostSuggestions() {
+  const box = document.getElementById('cohost-results'); if (!box) return;
+  const ids = [...(window._mySocial?.following || [])].slice(0, 20);
+  if (!ids.length) { box.innerHTML = '<div class="cp-empty">Search for someone above.</div>'; return; }
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=in.(${ids.join(',')})&select=id,username,display_name,avatar_url`, { headers: restHeaders() });
+    const people = (r.ok ? await r.json() : []).filter(p => p.id !== currentUser?.id);
+    box.innerHTML = people.length ? '<div class="sk-label">People you follow</div>' + people.map(cohostPersonRow).join('') : '<div class="cp-empty">Search for someone above.</div>';
+  } catch(e) {}
+}
+let _coSearchT = null;
+function searchCohost() {
+  clearTimeout(_coSearchT);
+  _coSearchT = setTimeout(async () => {
+    const q = (document.getElementById('cohost-search')?.value || '').replace(/[^\p{L}\p{N} _.-]/gu, '').trim().slice(0, 40);
+    const box = document.getElementById('cohost-results'); if (!box) return;
+    if (q.length < 2) { loadCohostSuggestions(); return; }
+    const pat = encodeURIComponent(`*${q}*`);
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/profiles?or=(username.ilike.${pat},display_name.ilike.${pat})&select=id,username,display_name,avatar_url&limit=8`, { headers: restHeaders() });
+    const people = (r.ok ? await r.json() : []).filter(p => p.id !== currentUser?.id && !isBlockedCaster(p.id));
+    box.innerHTML = people.length ? people.map(cohostPersonRow).join('') : '<div class="cp-empty">No one found.</div>';
+  }, 300);
+}
+async function inviteCohost(userId, el) {
+  if (el) el.style.opacity = '0.5';
+  try {
+    await cohostApi({ action: 'invite', castId: window._hostCo.castId, userId });
+    const token = await freshToken();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/cast_cohosts?cast_id=eq.${window._hostCo.castId}&status=in.(invited,joined)&select=*`, { headers: restHeaders(token) });
+    window._hostCo.row = r.ok ? (await r.json())[0] || null : window._hostCo.row;
+    renderHostCohost();
+    showToast('🎙️ Invite sent');
+  } catch(e) { showToast('⚠️ ' + e.message); if (el) el.style.opacity = ''; }
+}
+async function cancelCohostInvite() {
+  const r = window._hostCo.row; if (!r) return;
+  try { await cohostApi({ action: 'cancel', inviteId: r.id }); window._hostCo.row = null; renderHostCohost(); showToast('Invite cancelled'); }
+  catch(e) { showToast('⚠️ ' + e.message); }
+}
+function removeCohost() {
+  const r = window._hostCo.row; if (!r) return;
+  openConfirm(`REMOVE ${r.username.toUpperCase()}?`, "They'll be taken off the cast straight away. You can invite someone else after.", 'Remove', async () => {
+    try { await cohostApi({ action: 'remove', inviteId: r.id }); window._hostCo.row = null; renderHostCohost(); showToast('Co-caster removed'); }
+    catch(e) { showToast('⚠️ ' + e.message); }
+  });
+}
+
+// ── Invitee ──
+async function watchCohostInvites() {
+  if (!COCAST_ENABLED || !currentUser || _inviteChannel) return;
+  try {
+    _inviteChannel = sb.channel('invites-' + currentUser.id)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cast_cohosts', filter: `user_id=eq.${currentUser.id}` }, onMyInviteEvent)
+      .subscribe();
+    // Any invite from the last 10 minutes still waiting (e.g. the app was closed)
+    const token = await freshToken();
+    const since = new Date(Date.now() - 10 * 60e3).toISOString();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/cast_cohosts?user_id=eq.${currentUser.id}&status=eq.invited&created_at=gte.${encodeURIComponent(since)}&order=created_at.desc&limit=1&select=*`, { headers: restHeaders(token) });
+    const row = r.ok ? (await r.json())[0] : null;
+    if (row) showCohostInvite(row);
+  } catch(e) {}
+}
+function onMyInviteEvent(p) {
+  const r = p?.new; if (!r) return;
+  if (r.status === 'invited') showCohostInvite(r);
+  if (r.status === 'cancelled' && window._co.invite?.id === r.id && !window._isCoCasting) {
+    document.getElementById('coinvite-overlay').classList.remove('show');
+    showToast(`${r.host_name} cancelled the invite`);
+  }
+  if (r.status === 'removed' && window._isCoCasting && window._co.invite?.id === r.id) endCohostUI(`${r.host_name} ended your co-cast`);
+}
+async function openCohostInviteById(id) {
+  if (!currentUser) { showToast('Log in to join the co-cast'); return; }
+  try {
+    const token = await freshToken();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/cast_cohosts?id=eq.${id}&select=*`, { headers: restHeaders(token) });
+    const row = r.ok ? (await r.json())[0] : null;
+    if (row?.status === 'invited') showCohostInvite(row); else showToast('That invite is no longer open');
+  } catch(e) {}
+}
+async function showCohostInvite(row) {
+  if (window._isBroadcasting || window._isCoCasting) return;
+  window._co.invite = row;
+  document.getElementById('coinvite-title').textContent = `${row.host_name.toUpperCase()} WANTS YOU ON THE CALL`;
+  const sub = document.getElementById('coinvite-sub');
+  sub.textContent = `Co-cast ${row.game || 'their live cast'} with ${row.host_name}. Your mic will be live to everyone listening. 🎧 Headphones on!`;
+  document.getElementById('coinvite-join').disabled = false;
+  document.getElementById('coinvite-overlay').classList.add('show');
+  try {   // payouts reminder, like going live yourself
+    const d = await payoutsRequest('status');
+    if (d.state !== 'active') sub.textContent += ' Tips sent to you go to UltCast until you set up payouts (Profile → Payment & Payouts).';
+  } catch(e) {}
+}
+async function declineCohostInvite() {
+  const row = window._co.invite;
+  document.getElementById('coinvite-overlay').classList.remove('show');
+  if (row) cohostApi({ action: 'decline', inviteId: row.id }).catch(() => {});
+}
+async function acceptCohostInvite() {
+  const row = window._co.invite; if (!row) return;
+  const btn = document.getElementById('coinvite-join'); btn.disabled = true; btn.textContent = 'Joining…';
+  try {
+    const d = await cohostApi({ action: 'accept', inviteId: row.id });
+    if (window._listeningRoom) await stopListeningQuietly();   // can't listen and co-cast at once
+    document.getElementById('coinvite-overlay').classList.remove('show');
+    window._co = { ...window._co, room: d.room_name, castId: d.cast_id, hostName: row.host_name, game: row.game, startedAt: Date.now(), track: null, muted: false };
+    window._isCoCasting = true;
+    document.getElementById('ccGame').textContent = row.game || 'Live cast';
+    document.getElementById('ccWith').textContent = `with ${row.host_name}`;
+    showScreen('cohost-screen');
+    await connectAsCohost(d.room_name);
+    openChat(d.cast_id, 'cohost');
+  } catch(e) {
+    showToast('⚠️ ' + e.message);
+    btn.disabled = false; btn.textContent = '🎙️ Join as co-caster';
+  }
+}
+
+async function connectAsCohost(roomName) {
+  const token = await getBroadcasterToken(roomName);
+  if (!token) { endCohostUI('⚠️ Could not join the audio. Please try again.'); return; }
+  const { Room, RoomEvent, createLocalAudioTrack } = LivekitClient;
+  if (lkRoom) { try { await lkRoom.disconnect(); } catch(e) {} }
+  lkRoom = new Room();
+  const count = () => { try { document.getElementById('ccListeners').textContent = countLiveListeners(lkRoom, false); } catch(e) {} };
+  lkRoom.on(RoomEvent.Connected, async () => {
+    try {
+      const t = await createLocalAudioTrack({ echoCancellation: true, noiseSuppression: true, autoGainControl: true });
+      await lkRoom.localParticipant.publishTrack(t);
+      window._co.track = t;
+      showToast("🎙️ You're live as co-caster!");
+    } catch(e) { showToast('⚠️ Mic error: ' + e.message); }
+    count();
+  });
+  lkRoom.on(RoomEvent.TrackSubscribed, (track) => { if (track.kind === 'audio') { const el = track.attach(); el.autoplay = true; document.body.appendChild(el); } });
+  lkRoom.on(RoomEvent.TrackUnsubscribed, (track) => { try { track.detach().forEach(el => el.remove()); } catch(e) {} });
+  lkRoom.on(RoomEvent.ParticipantConnected, count);
+  lkRoom.on(RoomEvent.ParticipantDisconnected, count);
+  lkRoom.on(RoomEvent.Disconnected, () => { if (window._isCoCasting) endCohostUI('📻 The co-cast has ended'); });
+  clearInterval(window._co.timer);
+  window._co.timer = setInterval(() => {
+    const s = Math.floor((Date.now() - window._co.startedAt) / 1000);
+    document.getElementById('ccTime').textContent = fmtDuration(s);
+    count();
+  }, 1000);
+  await lkRoom.connect(LK_URL, token);
+}
+
+function toggleCohostMute() {
+  const t = window._co.track; if (!t) return;
+  window._co.muted = !window._co.muted;
+  try { t.mediaStreamTrack.enabled = !window._co.muted; } catch(e) {}
+  document.getElementById('ccMuteBtn').classList.toggle('muted', window._co.muted);
+}
+
+function leaveCohost() {
+  openConfirm('LEAVE THE CO-CAST?', `${window._co.hostName || 'The host'} will carry on without you.`, 'Leave', async () => {
+    const id = window._co.invite?.id;
+    endCohostUI('👋 You left the co-cast');
+    if (id) cohostApi({ action: 'leave', inviteId: id }).catch(() => {});
+  });
+}
+
+function endCohostUI(message) {
+  if (!window._isCoCasting) return;
+  window._isCoCasting = false;
+  clearInterval(window._co.timer);
+  try { window._co.track && window._co.track.stop(); } catch(e) {}
+  const room = lkRoom; lkRoom = null;
+  if (room) { try { room.disconnect(); } catch(e) {} }
+  try { closeChat(); closeCasterChat(); } catch(e) {}
+  window._co = { invite: null, room: null, castId: null, hostName: '', game: '', startedAt: null, track: null, muted: false, timer: null };
+  document.getElementById('ccMuteBtn').classList.remove('muted');
+  switchMain('home');
+  if (message) showToast(message);
+}
+
+// ════════════════════════════════════════════════
 // CALL-INS
 // Listeners join a queue; the caster brings one caller on air at a time (max 5 min).
 // The server unmutes/mutes the caller in the live audio. Paid call-ins: the card is only
@@ -3379,6 +3749,7 @@ async function openCalls(castId, mode) {
     } catch(e) {}
   }
   refreshCallButton();
+  try { refreshCohostLine(); } catch(e) {}
   if (!currentUser) return;   // guests: just the button (which asks them to sign up)
   try {
     const token = await freshToken();
@@ -4628,6 +4999,7 @@ const FAQ = [
   { id: 'tip', icon: '💰', title: 'Tipping', items: [
     { q: 'How do I tip a caster?', a: "Tap the orange <strong>TIP</strong> button on the player. Pick <strong>$2, $5, $10 or $20</strong>, or type your own amount (<strong>$2 to $500</strong>). You'll pay securely with Stripe by card, Apple Pay or Google Pay. You don't need an account to tip." },
     { q: 'How much of my tip does the caster get?', a: "Casters who have set up payouts get <strong>80% of every tip</strong>, paid straight to their bank by Stripe. UltCast keeps 20%, which also covers card fees." },
+    { q: 'Who gets my tip when two people are casting?', a: "You choose. During a co-cast the tip pop-up shows both casters; tap the one you want to tip. If one of them hasn't set up payouts yet, they're greyed out so your tip reaches someone who can receive it." },
     { q: 'Can I send a message with my tip?', a: "Yes. If you're logged in, add a message in the tip pop-up (up to 150 characters). Once your payment goes through it appears <strong>highlighted in chat</strong> and is <strong>pinned to the top</strong>: $2 for 1 minute, $5 for 2, $10 for 5, and $20+ for 10 minutes. The caster gets an alert too. It's a request, not a guarantee: casters don't have to do what you ask. Paid messages follow the normal chat rules." },
     { q: 'What happens after I tip?', a: "You'll come straight back to UltCast with one tap to jump back into the cast you were listening to. Stripe emails you a receipt." },
     { q: 'I tipped by mistake. Can I get a refund?', a: "Email <a href=\"mailto:support@ultcast.live\" style=\"color:var(--accent)\">support@ultcast.live</a> with the date and amount and we'll sort it out." },
@@ -4640,6 +5012,7 @@ const FAQ = [
     { q: 'Can I use the app while I\'m live?', a: "Yes. Tap <strong>Browse app</strong> on your live screen. A red <strong>You're LIVE</strong> bar shows your time and listener count, with a mic button to mute yourself. Tap the bar to go back to your live screen. A few things (like opening another cast or logging out) wait until you've ended your cast so you can't end it by accident." },
     { q: 'Can I see how my cast went?', a: "Yes. When you tap <strong>End Broadcast</strong> you'll get a summary: time live, peak listeners, new followers and tips earned during the cast. Tap <strong>Share your stats</strong> to post it." },
     { q: 'How do call-ins work for casters?', a: "When you set up your cast, choose <strong>Paid call-ins?</strong> No (free) or Yes (pick a price). Once you're live, tap <strong>📞</strong> on your live screen and <strong>Open call-ins</strong>. Listeners join a queue; tap <strong>On air</strong> to bring someone on, and <strong>Drop caller</strong> to end it anytime. One caller at a time, up to 5 minutes. Paid call-ins only charge the caller after 30 seconds on air, and you get 80%. Wear headphones to avoid echo." },
+    { q: 'Can I co-cast with someone?', a: "Yes. When you're live, tap <strong>👥</strong> on your live screen and invite one person (search by name, or pick from people you follow). They get a notification and join from their own phone, then both your voices go out live. Listeners see <strong>Alice &amp; Bob</strong> and can choose who to tip. You can remove your co-caster at any time, and only the host runs call-ins. Both of you should wear headphones." },
     { q: 'Can I cast with my screen locked?', a: "Not yet. Phones pause the microphone for websites in the background, so <strong>keep UltCast open with the screen on</strong> while you're live. This is coming with the UltCast app." },
     { q: 'How long can a cast be?', a: "Up to 4 hours. Casts end automatically after that, and you can start a new one any time." },
   ]},
@@ -4949,7 +5322,7 @@ async function maybeOfferAlerts(casterName) {
 // Opened from a "X is live" notification: one tap to listen
 // (phones need a tap before playing sound on a freshly opened page)
 function showListenPrompt(room) {
-  if (window._isBroadcasting) { showToast("🎙️ You're live. End your cast to listen to others."); return; }
+  if (window._isBroadcasting || window._isCoCasting) { showToast("🎙️ You're live. End your cast to listen to others."); return; }
   if (window._listeningRoom === room) { openPlayerFromMini(); return; }
   window._tipReturnCast = null;
   document.getElementById('tipreturn-emoji').textContent = '🔴';
@@ -5022,14 +5395,14 @@ function casterBarToggleMute() {
 
 // Friendly stop for anything that would end a live cast by leaving the page
 function blockedWhileLive(what) {
-  if (!window._isBroadcasting) return false;
+  if (!window._isBroadcasting && !window._isCoCasting) return false;
   showToast('🎙️ You\'re live. End your cast first to ' + what + '.');
   return true;
 }
 
 // Safety net: warn before the page closes/navigates away while live (e.g. phone back gesture)
 window.addEventListener('beforeunload', (e) => {
-  if (window._isBroadcasting) { e.preventDefault(); e.returnValue = ''; return ''; }
+  if (window._isBroadcasting || window._isCoCasting) { e.preventDefault(); e.returnValue = ''; return ''; }
 });
 
 // ════════════════════════════════════════════════
@@ -5171,6 +5544,7 @@ async function loadMySocial() {
   }
   window._mySocial = s;
   try { await loadMyReminders(); } catch(e) {}
+  try { watchCohostInvites(); } catch(e) {}
   updateFollowingCount();
   rerenderCastLists();
   if (document.getElementById('player-screen')?.classList.contains('active')) refreshPlayerFollow();
@@ -5719,8 +6093,8 @@ async function sendTip() {
       headers,
       body: JSON.stringify({
         amount: amountCents,
-        casterName: currentCaster,
-        casterId: window._currentCastRow?.caster_id || null,
+        casterName: window._tipTarget?.name || currentCaster,
+        casterId: window._tipTarget?.id || window._currentCastRow?.caster_id || null,
         listenerId: currentUser?.id || null,
         castId: window._currentCastRow?.id || null,
         message: currentUser ? (document.getElementById('tipMessage')?.value || '').trim().slice(0, 150) : '',
@@ -5913,6 +6287,7 @@ async function goLive() {
       markScheduledLive(roomName, home, away);   // tells people who tapped "Remind me"
       window._myCastOpen = false;
       window._myCastPrice = callinPriceChosen();
+      hostWatchCohost(castId);
       openChat(castId, 'caster');
     }
   } catch(e) {
@@ -6071,6 +6446,7 @@ function toggleMute() {
 async function endBroadcast() {
   window._endingBroadcast = true;
   try { casterCloseAllCalls(); closeCalls(); closeCallSheet(); } catch(e) {}
+  try { hostCohostCleanup(); } catch(e) {}
   try { closeChat(); closeCasterChat(); } catch(e) {}
   window._isBroadcasting = false;
   if (window._casterBarTick) { clearInterval(window._casterBarTick); window._casterBarTick = null; }
