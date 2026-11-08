@@ -3,7 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>UltCast</title>
+<title>UltCast · Live sport, called by fans</title>
+<meta name="description" content="Listen free to fans calling the game live. Chat, tip, call in, or go live yourself and get paid.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="UltCast">
+<meta property="og:title" content="UltCast · Live sport, called by fans">
+<meta property="og:description" content="Listen free to fans calling the game live. Chat, tip, call in, or go live yourself and get paid.">
+<meta property="og:url" content="https://ultcast.live/app">
+<meta property="og:image" content="https://ultcast.live/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="UltCast: live sport, called by fans">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="UltCast · Live sport, called by fans">
+<meta name="twitter:description" content="Listen free to fans calling the game live. Chat, tip, call in, or go live yourself.">
+<meta name="twitter:image" content="https://ultcast.live/og-image.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-8 -4 100 100'><rect x='-8' y='-4' width='100' height='100' rx='22' fill='%230F0E0D'/><path d='M71.4 42.6A19 19 0 1 0 71.4 69.4' fill='none' stroke='%23FF6B1A' stroke-width='12'/><circle cx='58' cy='56' r='6' fill='%23FF6B1A'/><path d='M14 10V36A17 17 0 0 0 48 36V10' fill='none' stroke='%230F0E0D' stroke-width='18'/><path d='M14 10V36A17 17 0 0 0 48 36V10' fill='none' stroke='%23FF6B1A' stroke-width='12'/><path d='M25 27V37M31 22V42M37 27V37' fill='none' stroke='%23FF6B1A' stroke-width='4' stroke-linecap='round'/></svg>">
 <meta name="theme-color" content="#0F0E0D">
 <link rel="manifest" href="/manifest.json">
@@ -799,6 +813,19 @@ body.mini-on .scroll { padding-bottom:150px; }
 .cq-toggle { width:100%; padding:14px; border-radius:12px; border:none; font-family:var(--font-body); font-size:15px; font-weight:800; cursor:pointer; margin-bottom:6px; }
 .cq-toggle.open { background:var(--live-red); color:#fff; }
 .cq-toggle.closed { background:var(--accent); color:var(--bg); }
+.wl-overlay { position:fixed; inset:0; z-index:400; background:rgba(0,0,0,0.78); display:none; align-items:center; justify-content:center; padding:20px; }
+.wl-overlay.show { display:flex; }
+.wl-card { width:100%; max-width:380px; background:var(--surface); border:1px solid rgba(255,107,26,0.45); border-radius:22px; padding:26px 22px 20px; text-align:center; position:relative; box-shadow:0 24px 70px rgba(0,0,0,0.6); }
+.wl-skip { position:absolute; top:14px; right:16px; background:none; border:none; color:var(--muted); font-family:var(--font-body); font-size:13px; font-weight:700; cursor:pointer; }
+.wl-icon { font-size:54px; line-height:1; margin:8px 0 14px; }
+.wl-title { font-family:var(--font-title); font-size:30px; letter-spacing:1.5px; color:var(--cream); line-height:1.05; margin-bottom:10px; }
+.wl-text { font-size:15px; color:var(--muted2); line-height:1.55; min-height:70px; }
+.wl-dots { display:flex; justify-content:center; gap:7px; margin:18px 0 16px; }
+.wl-dot { width:8px; height:8px; border-radius:50%; background:var(--line); }
+.wl-dot.on { background:var(--accent); width:22px; border-radius:4px; }
+.wl-row { display:flex; gap:8px; }
+.wl-row button { flex:1; }
+.ib-how { background:none; border:none; color:var(--accent); font-family:var(--font-body); font-size:11px; font-weight:800; cursor:pointer; padding:2px 0 0; text-decoration:underline; display:block; }
 .mini-player.hidden { transform:translateX(-50%) translateY(100px); opacity:0; pointer-events:none; }
 .mini-wave { display:flex; align-items:center; gap:2px; }
 .mini-bar { width:2px; background:var(--accent); border-radius:2px; animation:barAnim 1s ease-in-out infinite; }
@@ -947,6 +974,7 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="faq-head">
       <div class="faq-title">HELP &amp; FAQ</div>
       <div class="faq-sub">Everything UltCast can do, and how to do it.</div>
+      <button class="faq-try" style="margin-top:12px" onclick="openWelcome()">▶ Show me around</button>
     </div>
     <div class="faq-search">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -992,6 +1020,22 @@ body.mini-on .scroll { padding-bottom:150px; }
     <div class="tip-sheet-title" id="castnotice-title">YOU CAN'T GO LIVE</div>
     <div class="tip-modal-sub" id="castnotice-sub"></div>
     <button class="btn-primary-full" onclick="closeCastNotice()">OK</button>
+  </div>
+</div>
+
+<!-- ═══ WELCOME (first visit) ═══ -->
+<div class="wl-overlay" id="welcome-overlay">
+  <div class="wl-card">
+    <button class="wl-skip" onclick="closeWelcome()">Skip</button>
+    <div class="wl-icon" id="wl-icon">🎙️</div>
+    <div class="wl-title" id="wl-title"></div>
+    <div class="wl-text" id="wl-text"></div>
+    <div class="wl-dots" id="wl-dots"></div>
+    <div id="wl-extra"></div>
+    <div class="wl-row">
+      <button class="btn-ghost-full" id="wl-back" style="margin-top:0" onclick="welcomeStep(-1)">Back</button>
+      <button class="btn-primary-full" id="wl-next" onclick="welcomeStep(1)">Next</button>
+    </div>
   </div>
 </div>
 
@@ -1294,7 +1338,7 @@ body.mini-on .scroll { padding-bottom:150px; }
   <div class="scroll">
     <div class="install-banner" id="install-banner">
       <img src="/apple-touch-icon.png" alt="">
-      <div class="install-banner-text"><strong>Get the UltCast app</strong>Add it to your Home Screen for one-tap access and live alerts.</div>
+      <div class="install-banner-text"><strong>Get the UltCast app</strong>Add it to your Home Screen for one-tap access and live alerts.<button class="ib-how" onclick="openWelcome()">New here? See how it works</button></div>
       <button class="ib-add" onclick="openInstall()">Add</button>
       <button class="ib-x" onclick="dismissInstallBanner()" aria-label="Dismiss">✕</button>
     </div>
@@ -1728,6 +1772,36 @@ const SUPABASE_URL = 'https://xkkeupfaxcccmwcyebcc.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhra2V1cGZheGNjY213Y3llYmNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjk1NTcsImV4cCI6MjA4OTYwNTU1N30.TJM2llMp3S6g7W2KrzyASZmQAvsvJacaL6T4M_LvXVc';
 const LK_URL = 'wss://ultcast-aosd8tbv.livekit.cloud';
 const TOKEN_SERVER = 'https://ultcast-token-server.vercel.app';
+const APP_VERSION = '2026-11-08';
+
+// ════════════════════════════════════════════════
+// ERROR ALERTS: if something breaks for a real user, you get an email.
+// At most 3 reports per visit; harmless/network errors are ignored.
+// ════════════════════════════════════════════════
+const _errSeen = new Set();
+function reportAppError(message, where) {
+  try {
+    message = String(message || '').slice(0, 300);
+    where = String(where || '').slice(0, 200);
+    if (!message || _errSeen.size >= 3 || _errSeen.has(message)) return;
+    if (/^Script error\.?$|ResizeObserver loop|extension:\/\/|Non-Error promise rejection|AbortError|aborted|NotAllowedError|play\(\) request|interrupted by|Load failed|Failed to fetch|NetworkError|network error|TimeoutError|timed out/i.test(message + ' ' + where)) return;
+    _errSeen.add(message);
+    fetch(`${TOKEN_SERVER}/api/error-alert`, {
+      method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message, where, page: location.pathname,
+        screen: document.querySelector('.screen.active')?.id || '',
+        version: APP_VERSION, ua: navigator.userAgent.slice(0, 200),
+        loggedIn: typeof currentUser !== 'undefined' && !!currentUser,
+      }),
+    }).catch(() => {});
+  } catch (e) {}
+}
+window.addEventListener('error', (e) => {
+  if (e.filename && !/ultcast\.live|localhost|\/app/.test(e.filename)) return;   // only our own code
+  reportAppError(e.message, `line ${e.lineno}:${e.colno}`);
+});
+window.addEventListener('unhandledrejection', (e) => reportAppError(e.reason?.message || String(e.reason || ''), 'promise'));
 const STRIPE_PK = 'pk_test_51RQgtZA9vzAf5buv7uVRdcdPBjjwfTGazqOzD0715Bh7znvZMwI6TReb4stUtMRa02EuPigTlrXtf1qf3snQbOTH00EvdU18Te';
 
 // Tip amounts in AUD cents
@@ -3394,6 +3468,53 @@ async function enableSound() {
   if (results.includes('blocked')) { showToast('⚠️ Still blocked. Check the volume and your browser sound settings.'); return; }
   hideSoundPrompt();
   showToast('🔊 Sound on');
+}
+
+// ════════════════════════════════════════════════
+// WELCOME: a short "how it works" on someone's first visit (replay from Help & FAQ)
+// ════════════════════════════════════════════════
+const WELCOME = [
+  { icon: '🎙️', title: 'LIVE SPORT, CALLED BY FANS', text: 'Real fans calling the game live, in their own words. Pick a cast, put the TV on mute and listen free.' },
+  { icon: '💬', title: 'CHAT, TIP & CALL IN', text: 'Chat with other fans, send a tip with a shout-out that gets pinned, or call in and have your say on air.' },
+  { icon: '💸', title: 'GO LIVE & GET PAID', text: 'Call a game yourself in a few taps. Your followers get an alert when you go live, and you keep 80% of every tip.' },
+  { icon: '📲', title: 'MAKE IT AN APP', text: 'Add UltCast to your Home Screen for one-tap access, lock-screen listening and live alerts. No app store needed.' },
+];
+let _wlStep = 0;
+// Decided as soon as the page opens (the app tidies these out of the address bar shortly after)
+const _arrivedViaLink = (() => { try { const q = new URLSearchParams(location.search); return ['join', 'caster', 'upcoming', 'listen', 'tip', 'payouts', 'cohost', 'callin'].some(k => q.has(k)); } catch(e) { return false; } })();
+function openWelcome() {
+  _wlStep = 0; renderWelcome();
+  document.getElementById('welcome-overlay').classList.add('show');
+}
+function closeWelcome() {
+  document.getElementById('welcome-overlay').classList.remove('show');
+  try { localStorage.setItem('uc_welcome_seen', '1'); } catch(e) {}
+}
+function welcomeStep(d) {
+  _wlStep += d;
+  if (_wlStep >= WELCOME.length) { closeWelcome(); return; }
+  _wlStep = Math.max(0, _wlStep); renderWelcome();
+}
+function renderWelcome() {
+  const s = WELCOME[_wlStep], last = _wlStep === WELCOME.length - 1;
+  document.getElementById('wl-icon').textContent = s.icon;
+  document.getElementById('wl-title').textContent = s.title;
+  document.getElementById('wl-text').textContent = s.text;
+  document.getElementById('wl-dots').innerHTML = WELCOME.map((_, i) => `<div class="wl-dot${i === _wlStep ? ' on' : ''}"></div>`).join('');
+  document.getElementById('wl-back').style.visibility = _wlStep ? 'visible' : 'hidden';
+  document.getElementById('wl-next').textContent = last ? "Let's go" : 'Next';
+  const canInstall = last && !isStandalone();
+  document.getElementById('wl-extra').innerHTML = canInstall
+    ? '<button class="btn-ghost-full" style="margin:0 0 10px;color:var(--accent);border-color:rgba(255,107,26,0.5);font-weight:800" onclick="closeWelcome();openInstall()">📲 Add to Home Screen</button>' : '';
+}
+// Show once, on a plain first visit (not when someone opened a shared link to a cast, profile, etc.)
+function maybeShowWelcome() {
+  try {
+    if (localStorage.getItem('uc_welcome_seen') === '1') return;
+    if (_arrivedViaLink) return;
+    if (window._isBroadcasting || window._listeningRoom) return;
+  } catch(e) { return; }
+  openWelcome();
 }
 
 // ════════════════════════════════════════════════
@@ -5123,6 +5244,7 @@ if (PUSH_ENABLED && 'serviceWorker' in navigator) {
 }
 
 // Android/Chrome: capture the install prompt so our button can show it
+window.addEventListener('load', () => { setTimeout(() => { try { maybeShowWelcome(); } catch(e) {} }, 700); });
 window.addEventListener('load', () => { try { refreshInstallUI(); } catch(e) {} try { renderCastTags(); setupBrowseLanguages(); } catch(e) {} setTimeout(() => { try { fetchUpcoming(); } catch(e) {} }, 600); setInterval(() => { try { fetchUpcoming(); } catch(e) {} }, 5 * 60 * 1000); });
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); _installPrompt = e; refreshInstallUI(); });
 window.addEventListener('appinstalled', () => { _installPrompt = null; refreshInstallUI(); showToast('✅ UltCast added to your Home Screen'); });
