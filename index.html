@@ -7,7 +7,15 @@
 (function(){try{
   var p=new URLSearchParams(location.search), fresh=false;
   try{var r=JSON.parse(localStorage.getItem('uc_tip_return')||'null');fresh=!!(r&&Date.now()-r.ts<3600000);}catch(e){}
-  if(p.get('tip')||(fresh&&/stripe\.com/.test(document.referrer||''))){location.replace('/app'+location.search);}
+  if(p.get('tip')||(fresh&&/stripe\.com/.test(document.referrer||''))){location.replace('/app'+location.search);return;}
+  /* Returning users (they've used the app on this device) skip this page and go straight into the app.
+     Not when: the address has extra bits (e.g. ?about or #signup), or they tapped a link here from inside the app. */
+  if(location.search||location.hash) return;
+  if(/ultcast\.live\/app/.test(document.referrer||'')) return;
+  var used=false;
+  for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i)||'';
+    if(k==='uc_welcome_seen'||k==='uc_guest'||(k.indexOf('sb-')===0&&k.indexOf('auth-token')>0)){used=true;break;}}
+  if(used) location.replace('/app');
 }catch(e){}})();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -641,7 +649,7 @@ footer { padding: 44px 24px; background: var(--surface); border-top: 1px solid v
     <a href="#why" class="nav-link">Why Choose Us</a>
     <a href="#signup" class="nav-link">Sign Up</a>
   </div>
-  <a href="https://ultcast.live/app" class="nav-cta">Try Beta →</a>
+  <a href="https://ultcast.live/app" class="nav-cta">Open the App →</a>
 </nav>
 
 <!-- ════ BLOCK 1: HERO ════ -->
@@ -659,7 +667,7 @@ footer { padding: 44px 24px; background: var(--surface); border-top: 1px solid v
       </div>
     </div>
     <div class="hero-right">
-      <div class="pill"><span class="pill-dot"></span>Beta Available Now</div>
+      <div class="pill"><span class="pill-dot"></span>The App Is Live · Free to Use</div>
       <h1 class="hero-title">
         FINALLY.<br>
         YOUR SPORT.<br>
@@ -667,8 +675,8 @@ footer { padding: 44px 24px; background: var(--surface); border-top: 1px solid v
       </h1>
       <p class="hero-desc">Keep the pictures. Change the voices. UltCast is the live listen-along app for sport: fans go live with their own take on the game, and you tune in while you watch. Any sport, any style, free and bet-free. <strong style="color:var(--cream)">UltCast: Your sport, your voice, your choice.</strong></p>
       <div class="hero-actions">
-        <a href="#signup" class="btn-primary">Get Early Access</a>
-        <a href="https://ultcast.live/app" class="btn-secondary">Try the Beta →</a>
+        <a href="https://ultcast.live/app" class="btn-primary">Open the App →</a>
+        <a href="#signup" class="btn-secondary">Stay in the Loop</a>
       </div>
     </div>
   </div>
@@ -1049,17 +1057,17 @@ footer { padding: 44px 24px; background: var(--surface); border-top: 1px solid v
       <div class="section-label" style="justify-content:center">Stay in the Loop</div>
       <svg class="uc-logo signup-logo" viewBox="0 0 3481 700" role="img" aria-label="UltCast"><use href="#uc-wordmark"/></svg>
       <h2 class="section-title" style="text-align:center;white-space:nowrap">You heard it first.</h2>
-      <p style="font-size:17px;color:rgba(228,222,212,0.72);margin:16px auto 24px;text-align:center;max-width:520px;line-height:1.7;white-space:nowrap">Sign up to hear about the app launch, early access, and creator opportunities.</p>
+      <p style="font-size:17px;color:rgba(228,222,212,0.72);margin:16px auto 24px;text-align:center;max-width:520px;line-height:1.7">Leave your details for UltCast news, new features and Founding Caster opportunities. Questions or ideas? Tell us below.</p>
 
       <div class="signup-creator-callout" style="margin-bottom:16px">
         <div class="signup-creator-callout-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         </div>
         <div style="flex:1">
-          <h4 style="color:var(--cream)">Beta is Live Now</h4>
-          <p>Try it in your browser — no download needed. Or sign up below for early access.</p>
+          <h4 style="color:var(--cream)">The App Is Live</h4>
+          <p>Open it in your browser, no download needed. Add it to your Home Screen for one-tap access and live alerts.</p>
         </div>
-        <a href="https://ultcast.live/app" class="btn-slim-primary" style="flex-shrink:0;white-space:nowrap">Try the Beta →</a>
+        <a href="https://ultcast.live/app" class="btn-slim-primary" style="flex-shrink:0;white-space:nowrap">Open the App →</a>
       </div>
 
       <div class="signup-creator-callout">
@@ -1081,7 +1089,7 @@ footer { padding: 44px 24px; background: var(--surface); border-top: 1px solid v
         </label>
         <label class="role-opt">
           <input type="radio" name="role" value="caster">
-          <div class="role-opt-badge">50% OFF — 12 MONTHS</div>
+          <div class="role-opt-badge">FOUNDING CASTERS</div>
           <div class="role-opt-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div>
           <div class="role-opt-title">I'm a Creator</div>
           <div class="role-opt-desc">I want to go live and build an audience</div>
@@ -1098,9 +1106,9 @@ footer { padding: 44px 24px; background: var(--surface); border-top: 1px solid v
         <input class="form-field" id="form-name" type="text" placeholder="Your name" required />
         <input class="form-field" id="form-email" type="email" placeholder="Your email address" required />
         <textarea class="form-field" id="form-message" placeholder="Anything you want to tell us? Your sport, team, questions, thoughts — all welcome." rows="3"></textarea>
-        <button type="submit" class="form-submit" id="form-btn">Count Me In →</button>
+        <button type="submit" class="form-submit" id="form-btn">Keep Me Posted →</button>
         <p class="form-legal">By signing up you agree to our <a href="https://ultcast.live/terms.html">Terms &amp; Privacy Policy</a>. We'll only contact you about UltCast.</p>
-        <div class="form-success" id="form-success">You're in. We'll be in touch when it's time. Keep an ear out.</div>
+        <div class="form-success" id="form-success">Thanks, you're on the list! In the meantime, the app is live: <a href="https://ultcast.live/app" style="color:var(--accent);font-weight:700">open UltCast →</a></div>
       </form>
     </div>
   </div>
@@ -1111,7 +1119,7 @@ footer { padding: 44px 24px; background: var(--surface); border-top: 1px solid v
   <div class="footer-inner">
     <svg class="uc-logo footer-logo" viewBox="0 0 3481 700" role="img" aria-label="UltCast"><use href="#uc-wordmark"/></svg>
     <div class="footer-links">
-      <a href="https://ultcast.live/app" class="footer-link">Beta App</a>
+      <a href="https://ultcast.live/app" class="footer-link">Open the App</a>
       <a href="https://ultcast.live/terms.html" class="footer-link">Terms &amp; Privacy</a>
     </div>
     <div class="footer-copy">© 2026 UltCast · Melbourne, Australia<br><span style="opacity:0.8">Independent and unofficial. Not affiliated with any league, club or broadcaster.</span></div>
